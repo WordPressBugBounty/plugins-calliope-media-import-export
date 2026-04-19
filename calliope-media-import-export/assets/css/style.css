@@ -1,0 +1,520 @@
+﻿/*
+ * Plugin Name: Export/Import Media - Custom Styles
+ * Version: 1.6.4
+ */
+
+:root {
+    --eim-font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* --- GENERAL STYLES --- */
+body.wp-admin.media_page_export-import-media {
+    background-color: #F8F9FB;
+    font-family: var(--eim-font-stack);
+}
+
+.wrap {
+    padding: 20px;
+    max-width: 1200px; /* Limit width on very large screens */
+}
+
+.eim-admin-columns {
+    display: block;
+}
+
+.eim-admin-main {
+    min-width: 0;
+}
+
+.wrap h1, .wrap h2, .wrap h3 {
+    font-family: var(--eim-font-stack);
+    font-weight: 600;
+    color: #4C528B;
+}
+
+.wrap h2 {
+    font-size: 1.5em;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+.wrap h3 {
+    font-size: 1.2em;
+}
+
+/* --- CARDS (CONTAINERS) --- */
+.wrap .eim-card {
+    background-color: #FFFFFF;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+    padding: 30px;
+    margin-bottom: 30px;
+    border: none;
+}
+
+.wrap .eim-card form {
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* --- GENERAL BUTTONS --- */
+.eim-card .button {
+    border: none !important;
+    border-radius: 25px !important;
+    padding: 10px 25px !important;
+    font-size: 1em !important;
+    line-height: 1.5 !important;
+    height: auto !important;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-shadow: none !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    font-weight: 600;
+}
+
+.eim-card .button:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+/* Primary buttons (fuchsia pink) */
+#eim-start-button.button-primary,
+#eim_export_csv {
+    background-color: #FF4081 !important;
+    color: #FFFFFF !important;
+}
+
+#eim-start-button.button-primary:hover,
+#eim_export_csv:hover {
+    background-color: #E03570 !important;
+    transform: translateY(-2px);
+}
+
+/* Secondary buttons (gray - Stop and Download) */
+#eim-stop-button.button, 
+#eim-download-log.button {
+    background-color: #95a5a6 !important;
+    color: #FFFFFF !important;
+}
+
+#eim-stop-button.button:hover,
+#eim-download-log.button:hover {
+    background-color: #7f8c8d !important;
+}
+
+/* Disabled state */
+.eim-card .button[disabled],
+.eim-card .button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* --- INPUTS AND SELECTS --- */
+#batch_size, #eim_attachment_filter, input[type="date"] {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 8px 12px;
+    margin-top: 5px;
+    height: auto;
+    font-size: 14px;
+    color: #555;
+}
+
+/* --- ENHANCED DRAG AND DROP AREA --- */
+.eim-drop-zone {
+    border: 2px dashed #34D3F5;
+    border-radius: 8px;
+    padding: 30px 20px;
+    text-align: center;
+    background-color: #f9fbfc;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+    position: relative;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.eim-drop-zone:hover, 
+.eim-drop-zone.dragover {
+    background-color: #e6f7ff;
+    border-color: #FF4081;
+}
+
+/* State 1: Default icon and text (cloud) */
+#eim-drop-content-default {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#eim-drop-content-default svg {
+    width: 48px;
+    height: 48px;
+    color: #34D3F5;
+    margin-bottom: 10px;
+    pointer-events: none; /* Let the click pass through to the container */
+}
+
+#eim-drop-content-default p {
+    margin: 0;
+    font-size: 1.1em;
+    color: #555;
+    pointer-events: none;
+}
+
+/* State 2: Selected file (green card) */
+.eim-file-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    background: #e8f5e9;
+    padding: 12px 25px;
+    border-radius: 50px;
+    border: 1px solid #27ae60;
+    animation: fadeIn 0.4s ease-in-out;
+    box-shadow: 0 2px 8px rgba(39, 174, 96, 0.2);
+}
+
+/* Smooth entry animation */
+@keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(10px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+#eim-file-name-display {
+    font-weight: 600;
+    color: #27ae60;
+    font-size: 1.1em;
+    /* Prevent very long filenames from breaking the layout */
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* "X" button to remove the file */
+#eim-remove-file {
+    background: #ff7675;
+    color: white;
+    width: 24px;
+    height: 24px;
+    line-height: 23px; /* Visual vertical centering */
+    text-align: center;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    margin-left: 10px;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+#eim-remove-file:hover {
+    background: #d63031;
+    transform: scale(1.1);
+}
+
+/* Hide the original file input while keeping it in the DOM */
+#eim_csv {
+    display: none;
+}
+
+/* --- TOP BANNER --- */
+.eim-main-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(90deg, #4C528B 0%, #34D3F5 100%);
+    color: #FFFFFF;
+    padding: 20px 30px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.eim-banner-content {
+    display: flex;
+    align-items: center;
+}
+
+.eim-banner-logo svg {
+    width: 48px;
+    height: 48px;
+    color: #FFFFFF;
+    margin-right: 20px;
+}
+
+.eim-banner-text h3 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.4em;
+    color: white !important;
+}
+
+.eim-banner-text p {
+    margin: 0;
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+.eim-banner-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.eim-banner-actions .eim-banner-link {
+    color: #FFFFFF;
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity 0.3s ease;
+}
+
+.eim-banner-actions .eim-banner-link:hover {
+    opacity: 0.8;
+}
+
+/* --- PROGRESS AND LOGS --- */
+#eimp-progress-bar {
+    background-color: #34D3F5 !important;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.eim-warning-message {
+    background-color: #fffbe6;
+    border: 1px solid #ffe58f;
+    border-radius: 4px;
+    padding: 15px;
+    margin-top: 20px;
+    text-align: center;
+    font-weight: 600;
+    color: #d46b08;
+}
+
+#eimp-log {
+    scrollbar-width: thin;
+    scrollbar-color: #ccc #fafafa;
+}
+
+#eimp-log::-webkit-scrollbar {
+    width: 8px;
+}
+#eimp-log::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
+}
+
+.eim-inline-options {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.eim-option-row {
+    margin: 15px 0;
+}
+
+.eim-option-row.is-locked {
+    opacity: 0.8;
+}
+
+.eim-option-help {
+    margin-left: 22px;
+    color: #666;
+    display: inline-block;
+    line-height: 1.5;
+}
+
+#eim-preview-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.eim-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+}
+
+.eim-preview-stat {
+    background: #f8f9fb;
+    border: 1px solid #e5e7ef;
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+.eim-preview-stat-label {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.eim-preview-stat-value {
+    color: #2d325f;
+    font-size: 16px;
+}
+
+.eim-preview-section h4 {
+    margin: 0 0 10px;
+    color: #2d325f;
+}
+
+.eim-preview-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.eim-preview-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #eef6ff;
+    color: #175ea8;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.eim-preview-warning-box {
+    background: #fff9e6;
+    border: 1px solid #f0d98a;
+    border-radius: 10px;
+    padding: 16px;
+}
+
+.eim-preview-warning-list {
+    margin: 0;
+    padding-left: 18px;
+    color: #8a5a00;
+}
+
+.eim-preview-table th,
+.eim-preview-table td {
+    vertical-align: top;
+    word-break: break-word;
+}
+
+#eim-import-result-summary {
+    margin-top: 16px;
+}
+
+.eim-import-summary {
+    background: #f8f9fb;
+    border: 1px solid #e5e7ef;
+    border-radius: 10px;
+    padding: 16px;
+}
+
+.eim-import-summary h4 {
+    margin: 0 0 12px;
+    color: #2d325f;
+}
+
+.eim-summary-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.eim-summary-chip {
+    min-width: 120px;
+    border-radius: 999px;
+    padding: 10px 14px;
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 1px solid transparent;
+}
+
+.eim-summary-chip-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.eim-summary-chip-value {
+    font-size: 18px;
+}
+
+.eim-summary-chip-processed {
+    background: #eef6ff;
+    border-color: #cbe3ff;
+    color: #175ea8;
+}
+
+.eim-summary-chip-imported {
+    background: #edf9f0;
+    border-color: #cdeed6;
+    color: #1d7d44;
+}
+
+.eim-summary-chip-skipped {
+    background: #fff5e9;
+    border-color: #f6d8b3;
+    color: #b86200;
+}
+
+.eim-summary-chip-errors {
+    background: #fff0f0;
+    border-color: #f3c2c2;
+    color: #b42318;
+}
+
+.eim-preview-empty {
+    margin: 0;
+    color: #666;
+}
+
+/* --- FOOTER (REVIEWS) --- */
+.eim-footer-review {
+    text-align: center;
+    padding: 20px;
+    background-color: #f0f0f1;
+    border-radius: 8px;
+    margin-top: 25px;
+    font-size: 1.1em;
+    color: #3c434a;
+}
+
+.eim-footer-review a {
+    text-decoration: none;
+    color: #2271b1;
+    font-weight: 600;
+}
+
+.eim-footer-review svg {
+    vertical-align: middle;
+    margin-left: 2px;
+}
+
+@media (max-width: 782px) {
+    .eim-main-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .eim-banner-content {
+        align-items: flex-start;
+    }
+
+    .eim-banner-actions {
+        gap: 12px;
+    }
+}
+

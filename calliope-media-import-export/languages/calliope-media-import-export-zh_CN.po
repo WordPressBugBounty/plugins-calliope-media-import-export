@@ -1,0 +1,649 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Calliope Media Import Export 1.6.0\n"
+"POT-Creation-Date: 2026-04-07 15:53+0000\n"
+"PO-Revision-Date: 2026-04-07 15:53+0000\n"
+"Last-Translator: Codex\n"
+"Language-Team: Chinese (Simplified)\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Codex\n"
+"X-Domain: calliope-media-import-export\n"
+
+#: includes/class-importer.php:1427
+msgid " Example rows: %s."
+msgstr "示例行：%s。"
+
+#: includes/class-importer.php:1431
+msgid "%d row is missing both Absolute URL and Relative Path and will fail unless the CSV is corrected."
+msgid_plural "%d rows are missing both Absolute URL and Relative Path and will fail unless the CSV is corrected."
+msgstr[0] "%d 行同时缺少 Absolute URL 和 Relative Path，如不修正 CSV 将导入失败。"
+
+#: admin/class-admin.php:331
+msgid "1. Export Media Library"
+msgstr "1.导出媒体库"
+
+#: includes/class-config.php:23
+msgid "10 (Safe)"
+msgstr "10（安全）"
+
+#: includes/class-config.php:26
+msgid "100 (Fast)"
+msgstr "100（快速）"
+
+#: admin/class-admin.php:369
+msgid "2. Import from CSV"
+msgstr "2.从CSV导入"
+
+#: includes/class-config.php:27
+msgid "500 (Turbo)"
+msgstr "500（涡轮）"
+
+#: admin/class-admin.php:260
+msgid "Absolute URL"
+msgstr "Absolute URL"
+
+#: includes/class-importer.php:339
+msgid "Absolute URL is missing. Provide a URL or enable Local Import Mode for Relative Path imports."
+msgstr "缺少 Absolute URL。请提供 URL，或为使用 Relative Path 的导入启用本地导入模式。"
+
+#: admin/class-admin.php:428
+msgid "Addon Connected"
+msgstr "插件已连接"
+
+#: admin/class-admin.php:428
+msgid "Addon Not Active"
+msgstr "插件未激活"
+
+#: admin/class-admin.php:285
+msgid "Addon Ready"
+msgstr "插件就绪"
+
+#: includes/class-config.php:60
+#: includes/class-config.php:66
+msgid "All Media"
+msgstr "所有媒体"
+
+#: admin/class-admin.php:263
+msgid "Alt Text"
+msgstr "Alt Text"
+
+#: includes/class-importer.php:94
+msgid "Another import request is already processing this file. Please wait a moment and try again."
+msgstr "另一个导入请求已在处理该文件。请稍等片刻，然后重试。"
+
+#: includes/class-config.php:69
+msgid "Attached to Pages"
+msgstr "附加到页面"
+
+#: includes/class-config.php:68
+msgid "Attached to Posts"
+msgstr "附于帖子"
+
+#: includes/class-config.php:71
+msgid "Attached to Products (WooCommerce)"
+msgstr "附加到 Pro 管道 (WooCommerce)"
+
+#: includes/class-config.php:62
+msgid "Audio"
+msgstr "音频"
+
+#: admin/class-admin.php:233
+msgid "Batch failed:"
+msgstr "批量失败："
+
+#: admin/class-admin.php:239
+msgid "Batch summary"
+msgstr "批次汇总"
+
+#: admin/class-admin.php:245
+msgid "Columns detected"
+msgstr "检测到的列"
+
+#: includes/class-importer.php:1245
+msgid "Comma (,)"
+msgstr "逗号 (,)"
+
+#: includes/class-importer.php:948
+msgid "Could not create the target upload folder."
+msgstr "无法创建目标上传文件夹。"
+
+#: includes/class-importer.php:1486
+msgid "Could not create the temporary import folder."
+msgstr "无法创建临时导入文件夹。"
+
+#: includes/class-importer.php:116
+msgid "Could not open the temporary CSV file."
+msgstr "无法打开临时 CSV 文件。"
+
+#: includes/class-importer.php:1113
+#: includes/class-importer.php:1182
+msgid "Could not open the uploaded CSV file."
+msgstr "无法打开上传的 CSV 文件。"
+
+#: includes/class-importer.php:1461
+msgid "Could not prepare the temporary CSV file."
+msgstr "无法准备临时 CSV 文件。"
+
+#: includes/class-importer.php:121
+msgid "Could not read the CSV headers."
+msgstr "无法读取 CSV 标头。"
+
+#: includes/class-importer.php:1103
+msgid "Could not read the uploaded CSV file."
+msgstr "无法读取上传的 CSV 文件。"
+
+#: includes/class-importer.php:1474
+msgid "Could not store temporary import metadata."
+msgstr "无法存储临时导入元数据。"
+
+#: admin/class-admin.php:241
+#: admin/class-admin.php:482
+msgid "CSV Preview"
+msgstr "CSV 预览"
+
+#: admin/class-admin.php:338
+msgid "Date Range (Optional):"
+msgstr "日期范围（可选）："
+
+#: admin/class-admin.php:246
+msgid "Delimiter"
+msgstr "分隔符"
+
+#: admin/class-admin.php:293
+#: admin/class-admin.php:438
+msgid "Documentation"
+msgstr "文档"
+
+#: includes/class-config.php:63
+msgid "Documents (PDF, ZIP, etc.)"
+msgstr "文档（PDF、ZIP 等）"
+
+#: includes/class-importer.php:377
+msgid "Download error: %s"
+msgstr "下载错误：%s"
+
+#: admin/class-admin.php:505
+msgid "Download Log (.txt)"
+msgstr "下载日志 (.txt)"
+
+#: admin/class-admin.php:374
+msgid "Download sample CSV"
+msgstr "下载示例 CSV"
+
+#: admin/class-admin.php:382
+msgid "Drag and drop a CSV file here or click to upload"
+msgstr "将 CSV 文件拖放到此处或单击上传"
+
+#: includes/class-importer.php:287
+#: includes/class-importer.php:402
+#: includes/class-importer.php:493
+msgid "Duplicate detected (ID %d)"
+msgstr "检测到重复项（ID %d）"
+
+#: includes/class-importer.php:37
+msgid "Error uploading file."
+msgstr "上传文件时出错。"
+
+#: admin/class-admin.php:269
+msgid "Errors"
+msgstr "错误"
+
+#: admin/class-admin.php:243
+msgid "Error"
+msgstr "错误"
+
+#: admin/class-admin.php:360
+msgid "Export to CSV"
+msgstr "导出到 CSV"
+
+#: admin/class-admin.php:42
+#: admin/class-admin.php:43
+msgid "Export/Import Media"
+msgstr "Export/Import Media"
+
+#: admin/class-admin.php:227
+msgid "File ready. Total media rows:"
+msgstr "文件准备好。媒体总行数："
+
+#: admin/class-admin.php:352
+msgid "Filter by Attachment:"
+msgstr "按附件过滤："
+
+#: admin/class-admin.php:283
+msgid "Free"
+msgstr "免费"
+
+#: admin/class-admin.php:426
+msgid "Free Core"
+msgstr "免费核心"
+
+#: admin/class-admin.php:332
+msgid "Generate a CSV file with the information of all media files in your media library."
+msgstr "使用媒体库中所有媒体文件的信息生成 CSV 文件。"
+
+#: includes/class-config.php:39
+msgid "Honor Relative Path (Keep folders)"
+msgstr "使用 Relative Path（保留文件夹）"
+
+#: admin/class-admin.php:527
+msgid "If you like our plugin, a %1$s%3$s%2$s rating will help us a lot, thanks in advance!"
+msgstr "如果你喜欢我们的插件，给出 %1$s%3$s%2$s 评分将对我们非常有帮助。提前感谢！"
+
+#: includes/class-config.php:59
+msgid "Images"
+msgstr "图片"
+
+#: admin/class-admin.php:236
+msgid "Import completed."
+msgstr "导入完成。"
+
+#: admin/class-admin.php:492
+msgid "Import Progress:"
+msgstr "导入Progress："
+
+#: admin/class-admin.php:237
+msgid "Import stopped by user."
+msgstr "导入被用户停止。"
+
+#: admin/class-admin.php:265
+msgid "Import Summary"
+msgstr "导入摘要"
+
+#: admin/class-admin.php:241
+msgid "Info"
+msgstr "信息"
+
+#: admin/class-admin.php:267
+msgid "Imported"
+msgstr "已导入"
+
+#: includes/class-importer.php:457
+#: includes/class-importer.php:541
+msgid "Imported successfully (ID %d)"
+msgstr "导入成功（ID %d）"
+
+#: admin/class-admin.php:108
+#: includes/class-importer.php:999
+msgid "Insufficient permissions."
+msgstr "权限不足。"
+
+#: includes/class-importer.php:1125
+#: includes/class-importer.php:126
+msgid "Invalid CSV. Missing \"Absolute URL\" or \"Relative Path\" column."
+msgstr "CSV 无效。缺少“Absolute URL”或“Relative Path”列。"
+
+#: includes/class-importer.php:472
+msgid "Invalid local path."
+msgstr "本地路径无效。"
+
+#: admin/class-admin.php:232
+msgid "Invalid response from server."
+msgstr "来自服务器的无效响应。"
+
+#: includes/class-importer.php:938
+msgid "Invalid target folder."
+msgstr "目标文件夹无效。"
+
+#: includes/class-importer.php:1537
+msgid "Invalid temporary file name."
+msgstr "临时文件名无效。"
+
+#: includes/class-config.php:40
+msgid "Keep the folder structure from \"Relative Path\" when importing, and reuse files already present in uploads when the same path exists."
+msgstr "导入时保留“Relative Path”的文件夹结构，并在存在相同路径时重用上传中已存在的文件。"
+
+#: admin/class-admin.php:498
+msgid "Keep this tab open while the current import is running."
+msgstr "当前导入运行时保持此选项卡打开。"
+
+#: includes/class-importer.php:468
+msgid "Local file not found."
+msgstr "未找到本地文件。"
+
+#: includes/class-importer.php:1646
+msgid "Local file type is not allowed."
+msgstr "不允许本地文件类型。"
+
+#: includes/class-importer.php:1650
+msgid "Local file type is not supported by this plugin."
+msgstr "此插件不支持本地文件类型。"
+
+#: includes/class-config.php:32
+msgid "Local Import Mode"
+msgstr "本地导入模式"
+
+#: includes/class-importer.php:314
+msgid "Local Import Mode requires a valid \"Relative Path\" value."
+msgstr "本地导入模式需要有效的“Relative Path”值。"
+
+#: admin/class-admin.php:256
+msgid "Local path"
+msgstr "本地路径"
+
+#: admin/class-admin.php:240
+msgid "Log is empty. Nothing to download."
+msgstr "日志为空。没什么可下载的。"
+
+#: includes/class-importer.php:301
+msgid "Matched existing attachment (ID %d)"
+msgstr "匹配的现有附件（ID %d）"
+
+#: includes/class-importer.php:503
+msgid "Media"
+msgstr "媒体"
+
+#: admin/class-admin.php:244
+msgid "Media rows"
+msgstr "媒体行"
+
+#: admin/class-admin.php:282
+msgid "Media Transfer Plugin"
+msgstr "Media Transfer Plugin"
+
+#: admin/class-admin.php:345
+msgid "Media Type:"
+msgstr "媒体类型："
+
+#: admin/class-admin.php:257
+msgid "Mixed"
+msgstr "混合"
+
+#: admin/class-admin.php:235
+msgid "Network error. Import stopped after repeated failures."
+msgstr "网络错误。多次失败后导入停止。"
+
+#: admin/class-admin.php:234
+msgid "Network error. Retrying..."
+msgstr "网络错误。正在重试..."
+
+#: includes/class-importer.php:32
+msgid "No file uploaded."
+msgstr "没有上传文件。"
+
+#: admin/class-admin.php:264
+msgid "Not provided"
+msgstr "未提供"
+
+#: includes/class-importer.php:1442
+msgid "Only source columns were detected. Media metadata fields will not be updated from this CSV."
+msgstr "仅检测到源列。媒体元数据字段不会从此 CSV 更新。"
+
+#: includes/class-importer.php:1242
+msgid "Pipe (|)"
+msgstr "管道 (|)"
+
+#: admin/class-admin.php:223
+msgid "Please select a CSV file."
+msgstr "请选择 CSV 文件。"
+
+#: admin/class-admin.php:423
+msgid "Plugin Status"
+msgstr "插件状态"
+
+#: admin/class-admin.php:243
+msgid "Preview data is not available for this file."
+msgstr "此文件没有预览数据。"
+
+#: admin/class-admin.php:468
+msgid "Pro"
+msgstr "Pro"
+
+#: admin/class-admin.php:285
+msgid "Pro Active"
+msgstr "Pro 活动"
+
+#: admin/class-admin.php:266
+msgid "Processed"
+msgstr "已处理"
+
+#: admin/class-admin.php:246
+msgid "Done"
+msgstr "完成"
+
+#: admin/class-admin.php:238
+msgid "Processing media rows..."
+msgstr "Pro停止介质行..."
+
+#: admin/class-admin.php:530
+msgid "Rate 5 stars"
+msgstr "评分 5 星"
+
+#: admin/class-admin.php:247
+msgid "Recognized columns"
+msgstr "认可的专栏"
+
+#: admin/class-admin.php:261
+msgid "Relative Path"
+msgstr "Relative Path"
+
+#: admin/class-admin.php:255
+msgid "Remote URL"
+msgstr "远程网址"
+
+#: admin/class-admin.php:389
+msgid "Remove file"
+msgstr "删除文件"
+
+#: admin/class-admin.php:435
+msgid "Resources"
+msgstr "资源"
+
+#: admin/class-admin.php:242
+#: admin/class-admin.php:483
+msgid "Review the file before starting the import."
+msgstr "在开始导入之前检查文件。"
+
+#: admin/class-admin.php:259
+msgid "Row"
+msgstr "行"
+
+#: includes/class-importer.php:272
+msgid "Row is missing both \"Absolute URL\" and \"Relative Path\"."
+msgstr "该行同时缺少 \"Absolute URL\" 和 \"Relative Path\"。"
+
+#: admin/class-admin.php:253
+msgid "Rows missing source"
+msgstr "缺少来源的行"
+
+#: admin/class-admin.php:398
+msgid "Rows per batch:"
+msgstr "每批次的行数："
+
+#: admin/class-admin.php:250
+msgid "Rows with Absolute URL"
+msgstr "具有 Absolute URL 的行"
+
+#: admin/class-admin.php:252
+msgid "Rows with both"
+msgstr "两者都有的行"
+
+#: admin/class-admin.php:251
+msgid "Rows with Relative Path"
+msgstr "具有 Relative Path 的行"
+
+#: admin/class-admin.php:248
+msgid "Sample rows"
+msgstr "样本行"
+
+#: includes/class-importer.php:1238
+msgid "Semicolon (;)"
+msgstr "分号 (;)"
+
+#: admin/class-admin.php:229
+msgid "Server communication error."
+msgstr "服务器通讯错误。"
+
+#: admin/class-admin.php:116
+msgid "Settings"
+msgstr "设置"
+
+#: includes/class-config.php:46
+msgid "Skip Thumbnail Generation"
+msgstr "跳过缩略图生成"
+
+#: admin/class-admin.php:268
+msgid "Skipped"
+msgstr "跳过"
+
+#: admin/class-admin.php:242
+msgid "Warning"
+msgstr "警告"
+
+#: includes/class-config.php:47
+msgid "Speed up imports by skipping thumbnail generation. Turn this on if you plan to regenerate thumbnails later."
+msgstr "通过跳过缩略图生成来加快导入速度。如果您打算稍后重新生成缩略图，请打开此选项。"
+
+#: admin/class-admin.php:413
+msgid "Start Import"
+msgstr "开始导入"
+
+#: admin/class-admin.php:414
+msgid "Stop Process"
+msgstr "停止 Process"
+
+#: admin/class-admin.php:231
+msgid "Stopping the process..."
+msgstr "停止进程..."
+
+#: admin/class-admin.php:254
+msgid "Suggested source mode"
+msgstr "建议的源模式"
+
+#: admin/class-admin.php:444
+msgid "Support development"
+msgstr "支持发展"
+
+#: admin/class-admin.php:441
+msgid "Support forum"
+msgstr "支持论坛"
+
+#: admin/class-admin.php:298
+msgid "Support me on Ko-fi"
+msgstr "在 Ko-fi 上支持我"
+
+#: includes/class-importer.php:1040
+msgid "System"
+msgstr "系统"
+
+#: includes/class-importer.php:1240
+msgid "Tab"
+msgstr "选项卡"
+
+#: includes/class-importer.php:90
+msgid "Temporary file not found. Please upload the CSV again."
+msgstr "未找到临时文件。请再次上传CSV。"
+
+#: includes/class-importer.php:1578
+#: includes/class-importer.php:1583
+msgid "Temporary import metadata is invalid. Please upload the CSV again."
+msgstr "临时导入元数据无效。请再次上传CSV。"
+
+#: includes/class-importer.php:1560
+msgid "Temporary import metadata not found. Please upload the CSV again."
+msgstr "找不到临时导入元数据。请再次上传CSV。"
+
+#: includes/class-importer.php:348
+msgid "The \"Absolute URL\" value is not valid."
+msgstr "“Absolute URL”值无效。"
+
+#: includes/class-importer.php:1162
+msgid "The CSV contains no data rows."
+msgstr "CSV 不包含数据行。"
+
+#: admin/class-admin.php:228
+msgid "The CSV file is empty."
+msgstr "CSV 文件为空。"
+
+#: includes/class-importer.php:1119
+#: includes/class-importer.php:1197
+msgid "The CSV is empty."
+msgstr "CSV 为空。"
+
+#: admin/class-admin.php:431
+msgid "The free core is ready for future extensions through hooks, feature flags, and admin slots."
+msgstr "免费核心已准备好通过挂钩、功能标志和管理插槽进行未来扩展。"
+
+#: includes/class-importer.php:1490
+msgid "The temporary import folder is not writable."
+msgstr "临时导入文件夹不可写。"
+
+#: includes/class-importer.php:1421
+msgid "This CSV relies on Relative Path. Use Local Import Mode or make sure the referenced files already exist in uploads."
+msgstr "此 CSV 依赖于 Relative Path。使用本地导入模式或确保引用的文件已存在于上传中。"
+
+#: includes/class-importer.php:1407
+msgid "This row did not pass import validation."
+msgstr "该行未通过导入验证。"
+
+#: admin/class-admin.php:262
+msgid "Title"
+msgstr "标题"
+
+#: admin/class-admin.php:340
+msgid "to"
+msgstr "到"
+
+#: includes/class-config.php:67
+msgid "Unattached (Not used in posts)"
+msgstr "未附加（帖子中未使用）"
+
+#: admin/class-admin.php:258
+msgid "Unknown"
+msgstr "未知"
+
+#: admin/class-admin.php:370
+msgid "Upload a media CSV. The plugin will validate it first, show a preview, and then import it in batches."
+msgstr "上传媒体 CSV。插件会先验证文件、显示预览，然后分批导入。"
+
+#: includes/class-config.php:33
+msgid "Use the \"Relative Path\" column to locate files that already exist in this site's uploads folder. No remote download is attempted."
+msgstr "使用“Relative Path”列查找此网站上传文件夹中已存在的文件。不尝试远程下载。"
+
+#: admin/class-admin.php:224
+msgid "Validating file..."
+msgstr "正在验证文件..."
+
+#: admin/class-admin.php:225
+msgid "Validation failed:"
+msgstr "验证失败："
+
+#: admin/class-admin.php:226
+msgid "Validation successful."
+msgstr "验证成功。"
+
+#: admin/class-admin.php:424
+msgid "Version %s"
+msgstr "版本 %s"
+
+#: includes/class-config.php:61
+msgid "Videos"
+msgstr "视频"
+
+#: admin/class-admin.php:249
+msgid "Warnings"
+msgstr "警告"
+
+#: admin/class-admin.php:317
+msgid "You are using Media Transfer Plugin! If you find it useful, please consider <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">leaving a positive review</a>. It really helps!"
+msgstr "你正在使用 Media Transfer Plugin！如果它对你有帮助，欢迎考虑<a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">留下好评</a>，这会给我们很大帮助。"
+
+#: admin/class-admin.php:230
+msgid "You do not have permission to run this import."
+msgstr "您没有运行此导入的权限。"
+
+#: admin/class-admin.php:123
+msgid "You do not have sufficient permissions to access this page."
+msgstr "您没有足够的权限访问此页面。"
+
+#: admin/class-admin.php:157
+#: includes/class-exporter.php:69
+msgid "You do not have sufficient permissions."
+msgstr "您没有足够的权限。"
+
+#: admin/class-admin.php:288
+msgid "Your complete solution to import and export the media library."
+msgstr "您导入和导出媒体库的完整解决方案。"
