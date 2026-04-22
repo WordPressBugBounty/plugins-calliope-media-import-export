@@ -1,0 +1,14 @@
+Export/Import Media 1.6.15 - repository prep notes
+
+Applied in this package:
+- Added 'Requires at least' and 'Requires PHP' to the main plugin header.
+- Removed manual load_plugin_textdomain() call so the package aligns better with current WordPress.org expectations.
+- Replaced dynamic text-domain constant usage inside translation calls with the literal slug 'calliope-media-import-export'.
+- Added missing translators comments for placeholder strings.
+- Hardened/annotated nonce-related request handling for Plugin Check and sanitized uploaded temp path / selected update fields.
+- Escaped the repeated star SVG output in the footer review block.
+- Normalized line endings and repackaged the plugin with a root folder named 'calliope-media-import-export'.
+
+Still to prepare manually before SVN submission:
+- Put icons / banner / screenshots in the SVN /assets directory (not inside trunk).
+- Re-run Plugin Check and the readme validator against this rebuilt package.

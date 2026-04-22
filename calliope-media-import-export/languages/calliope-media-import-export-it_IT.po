@@ -1,31 +1,26 @@
+# Translations for Export/Import Media.
+# Copyright (C) 2026 Maira Foresto
+# This file is distributed under the same license as the Export/Import Media package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Calliope Media Import Export 1.6.0\n"
-"POT-Creation-Date: 2026-04-07 15:53+0000\n"
-"PO-Revision-Date: 2026-04-07 15:53+0000\n"
-"Last-Translator: Codex\n"
-"Language-Team: Italian\n"
+"Project-Id-Version: calliope-media-import-export 1.6.9\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\n"
+"POT-Creation-Date: 2026-04-14 21:08+0000\n"
+"PO-Revision-Date: 2026-04-19 00:00+0000\n"
+"Last-Translator: Maira Foresto\n"
 "Language: it_IT\n"
+"Language-Team: Calliope\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: Babel 2.18.0\n"
 "X-Generator: Codex\n"
-"X-Domain: calliope-media-import-export\n"
 
-#: includes/class-importer.php:1427
+#: includes/class-importer.php:2248
+#, python-format
 msgid " Example rows: %s."
 msgstr "Righe di esempio: %s."
-
-#: includes/class-importer.php:1431
-msgid "%d row is missing both Absolute URL and Relative Path and will fail unless the CSV is corrected."
-msgid_plural "%d rows are missing both Absolute URL and Relative Path and will fail unless the CSV is corrected."
-msgstr[0] "%d riga non contiene né Absolute URL né Relative Path e fallirà se il CSV non viene corretto."
-msgstr[1] "%d righe non contengono né Absolute URL né Relative Path e falliranno se il CSV non viene corretto."
-
-#: admin/class-admin.php:331
-msgid "1. Export Media Library"
-msgstr "1. Esporta libreria multimediale"
 
 #: includes/class-config.php:23
 msgid "10 (Safe)"
@@ -35,44 +30,51 @@ msgstr "10 (Sicuro)"
 msgid "100 (Fast)"
 msgstr "100 (Veloce)"
 
-#: admin/class-admin.php:369
-msgid "2. Import from CSV"
-msgstr "2. Importa da CSV"
-
 #: includes/class-config.php:27
 msgid "500 (Turbo)"
-msgstr "500 (Turbo)"
+msgstr "500 (turbo)"
 
-#: admin/class-admin.php:260
+#: admin/class-admin.php:823
+msgid "A %1$s%3$s%2$s review helps the plugin grow and keeps improvements coming."
+msgstr "Una recensione %1$s%3$s%2$s aiuta il plugin a crescere e a far arrivare altri miglioramenti."
+
+#: admin/class-admin.php:426
+msgid "A clean CSV workflow for exporting, previewing, and importing media while helping you avoid duplicate attachments."
+msgstr "Un flusso CSV pulito per esportare, visualizzare in anteprima e importare media aiutandoti a evitare allegati duplicati."
+
+#: admin/class-admin.php:176 admin/class-admin.php:344 includes/class-exporter.php:21 includes/class-importer.php:2189
 msgid "Absolute URL"
-msgstr "Absolute URL"
+msgstr "URL assoluto"
 
-#: includes/class-importer.php:339
+#: includes/class-importer.php:612
 msgid "Absolute URL is missing. Provide a URL or enable Local Import Mode for Relative Path imports."
 msgstr "Manca Absolute URL. Fornisci un URL oppure abilita la modalità di importazione locale per le importazioni con Relative Path."
 
-#: admin/class-admin.php:428
-msgid "Addon Connected"
-msgstr "Componente aggiuntivo connesso"
+#: admin/class-admin.php:579
+msgid "Advanced Export Workflows"
+msgstr "Flussi di esportazione avanzati"
 
-#: admin/class-admin.php:428
-msgid "Addon Not Active"
-msgstr "Componente aggiuntivo non attivo"
+#: admin/class-admin.php:646
+msgid "Advanced Import Workflows"
+msgstr "Flussi di importazione avanzati"
 
-#: admin/class-admin.php:285
-msgid "Addon Ready"
-msgstr "Componente aggiuntivo pronto"
+#: admin/class-admin.php:729
+msgid "Advanced workflows for teams managing larger or messier media libraries"
+msgstr "Flussi avanzati per team che gestiscono librerie multimediali più grandi o più disordinate."
 
-#: includes/class-config.php:60
-#: includes/class-config.php:66
+#: includes/class-config.php:60 includes/class-config.php:66
 msgid "All Media"
 msgstr "Tutti i media"
 
-#: admin/class-admin.php:263
-msgid "Alt Text"
-msgstr "Alt Text"
+#: admin/class-admin.php:728
+msgid "Also available in Pro"
+msgstr "Disponibile anche in Pro"
 
-#: includes/class-importer.php:94
+#: admin/class-admin.php:176 admin/class-admin.php:347 includes/class-exporter.php:33 includes/class-importer.php:2201
+msgid "Alt Text"
+msgstr "Testo alternativo"
+
+#: includes/class-importer.php:114
 msgid "Another import request is already processing this file. Please wait a moment and try again."
 msgstr "Un'altra richiesta di importazione sta già elaborando questo file. Attendi un attimo e riprova."
 
@@ -92,70 +94,111 @@ msgstr "Allegato a Prodotti (WooCommerce)"
 msgid "Audio"
 msgstr "Audio"
 
-#: admin/class-admin.php:233
+#: admin/class-admin.php:311
 msgid "Batch failed:"
 msgstr "Lotto non riuscito:"
 
-#: admin/class-admin.php:239
+#: admin/class-admin.php:433
+msgid "Batch processing"
+msgstr "Elaborazione in batch"
+
+#: admin/class-admin.php:317
 msgid "Batch summary"
 msgstr "Riepilogo del lotto"
 
-#: admin/class-admin.php:245
-msgid "Columns detected"
-msgstr "Colonne rilevate"
+#: admin/class-admin.php:508
+msgid "Best for standard one-off imports into the media library."
+msgstr "Ideale per importazioni standard una tantum nella libreria media."
 
-#: includes/class-importer.php:1245
-msgid "Comma (,)"
-msgstr "Virgola (,)"
+#: admin/class-admin.php:289 admin/class-admin.php:583 admin/class-admin.php:650
+msgid "Buy Pro Version"
+msgstr "Acquista la versione Pro"
 
-#: includes/class-importer.php:948
-msgid "Could not create the target upload folder."
-msgstr "Impossibile creare la cartella di caricamento di destinazione."
+#: admin/class-admin.php:613
+msgid "CSV (comma-separated)"
+msgstr "CSV (separati da virgole)"
 
-#: includes/class-importer.php:1486
-msgid "Could not create the temporary import folder."
-msgstr "Impossibile creare la cartella di importazione temporanea."
-
-#: includes/class-importer.php:116
-msgid "Could not open the temporary CSV file."
-msgstr "Impossibile aprire il file temporaneo CSV."
-
-#: includes/class-importer.php:1113
-#: includes/class-importer.php:1182
-msgid "Could not open the uploaded CSV file."
-msgstr "Impossibile aprire il file CSV caricato."
-
-#: includes/class-importer.php:1461
-msgid "Could not prepare the temporary CSV file."
-msgstr "Impossibile preparare il file temporaneo CSV."
-
-#: includes/class-importer.php:121
-msgid "Could not read the CSV headers."
-msgstr "Impossibile leggere le intestazioni CSV."
-
-#: includes/class-importer.php:1103
-msgid "Could not read the uploaded CSV file."
-msgstr "Impossibile leggere il file CSV caricato."
-
-#: includes/class-importer.php:1474
-msgid "Could not store temporary import metadata."
-msgstr "Impossibile archiviare i metadati di importazione temporanea."
-
-#: admin/class-admin.php:241
-#: admin/class-admin.php:482
+#: admin/class-admin.php:325 admin/class-admin.php:776
 msgid "CSV Preview"
 msgstr "CSV Anteprima"
 
-#: admin/class-admin.php:338
+#: admin/class-admin.php:620
+msgid "CSV only"
+msgstr "Solo CSV"
+
+#: admin/class-admin.php:176 includes/class-exporter.php:37 includes/class-importer.php:2205
+msgid "Caption"
+msgstr "Didascalia"
+
+#: admin/class-admin.php:329
+msgid "Columns detected"
+msgstr "Colonne rilevate"
+
+#: includes/class-importer.php:2066
+msgid "Comma (,)"
+msgstr "Virgola (,)"
+
+#: admin/class-admin.php:432
+msgid "Core metadata columns"
+msgstr "Colonne principali dei metadati"
+
+#: includes/class-exporter.php:233
+msgid "Could not create the export file."
+msgstr "Impossibile creare il file di esportazione."
+
+#: includes/class-importer.php:1641
+msgid "Could not create the target upload folder."
+msgstr "Impossibile creare la cartella di caricamento di destinazione."
+
+#: includes/class-importer.php:2307
+msgid "Could not create the temporary import folder."
+msgstr "Impossibile creare la cartella di importazione temporanea."
+
+#: includes/class-importer.php:264
+msgid "Could not open the import file."
+msgstr "Impossibile aprire il file di importazione."
+
+#: includes/class-importer.php:136
+msgid "Could not open the temporary CSV file."
+msgstr "Impossibile aprire il file temporaneo CSV."
+
+#: includes/class-importer.php:1907 includes/class-importer.php:1989
+msgid "Could not open the uploaded CSV file."
+msgstr "Impossibile aprire il file CSV caricato."
+
+#: includes/class-importer.php:2282
+msgid "Could not prepare the temporary CSV file."
+msgstr "Impossibile preparare il file temporaneo CSV."
+
+#: includes/class-importer.php:141 includes/class-importer.php:281
+msgid "Could not read the CSV headers."
+msgstr "Impossibile leggere le intestazioni CSV."
+
+#: includes/class-importer.php:1892
+msgid "Could not read the uploaded CSV file."
+msgstr "Impossibile leggere il file CSV caricato."
+
+#: includes/class-importer.php:2295
+msgid "Could not store temporary import metadata."
+msgstr "Impossibile archiviare i metadati di importazione temporanea."
+
+#: includes/class-exporter.php:240
+msgid "Could not write the export file."
+msgstr "Impossibile scrivere il file di esportazione."
+
+#: admin/class-admin.php:470
 msgid "Date Range (Optional):"
 msgstr "Intervallo di date (facoltativo):"
 
-#: admin/class-admin.php:246
+#: admin/class-admin.php:330
 msgid "Delimiter"
 msgstr "Delimitatore"
 
-#: admin/class-admin.php:293
-#: admin/class-admin.php:438
+#: admin/class-admin.php:176 includes/class-exporter.php:41 includes/class-importer.php:2209
+msgid "Description"
+msgstr "Descrizione"
+
+#: admin/class-admin.php:439
 msgid "Documentation"
 msgstr "Documentazione"
 
@@ -163,322 +206,544 @@ msgstr "Documentazione"
 msgid "Documents (PDF, ZIP, etc.)"
 msgstr "Documenti (PDF, ZIP, ecc.)"
 
-#: includes/class-importer.php:377
-msgid "Download error: %s"
-msgstr "Errore di download: %s"
+#: admin/class-admin.php:324
+msgid "Done"
+msgstr "Completato"
 
-#: admin/class-admin.php:505
+#: admin/class-admin.php:799
 msgid "Download Log (.txt)"
 msgstr "Scarica registro (.txt)"
 
-#: admin/class-admin.php:374
+#: includes/class-importer.php:675
+#, python-format
+msgid "Download error: %s"
+msgstr "Errore di download: %s"
+
+#: admin/class-admin.php:515
 msgid "Download sample CSV"
 msgstr "Scarica l'esempio CSV"
 
-#: admin/class-admin.php:382
+#: admin/class-admin.php:532
 msgid "Drag and drop a CSV file here or click to upload"
 msgstr "Trascina e rilascia un file CSV qui o fai clic per caricare"
 
-#: includes/class-importer.php:287
-#: includes/class-importer.php:402
-#: includes/class-importer.php:493
+#: includes/class-importer.php:1253
+#, python-format
+msgid "Dry run: duplicate detected (ID %d) and it would be skipped."
+msgstr "Esecuzione di prova: rilevato duplicato (ID %d) che verrebbe ignorato."
+
+#: includes/class-importer.php:1194
+#, python-format
+msgid "Dry run: existing media (ID %d) would have its file replaced."
+msgstr "Prova: il file del supporto esistente (ID %d) verrebbe sostituito."
+
+#: includes/class-importer.php:1145
+#, python-format
+msgid "Dry run: existing media (ID %d) would have its metadata updated."
+msgstr "Prova: i metadati dei media esistenti (ID %d) verrebbero aggiornati."
+
+#: includes/class-importer.php:1144
+#, python-format
+msgid "Dry run: existing media (ID %d) would have its selected fields updated."
+msgstr "Esecuzione di prova: i campi selezionati verranno aggiornati per i media esistenti (ID %d)."
+
+#: includes/class-importer.php:586
+msgid "Dry run: local file is ready to import."
+msgstr "Prova di funzionamento: il file locale è pronto per l'importazione."
+
+#: includes/class-importer.php:662
+msgid "Dry run: media appears ready to import."
+msgstr "Esecuzione di prova: il supporto sembra pronto per l'importazione."
+
+#: includes/class-importer.php:635
+msgid "Dry run: media would reuse the existing file from uploads."
+msgstr "Prova: i media riutilizzerebbero il file esistente dai caricamenti."
+
+#: includes/class-importer.php:1256
+#, python-format
 msgid "Duplicate detected (ID %d)"
 msgstr "Rilevato duplicato (ID %d)"
+
+#: admin/class-admin.php:431
+msgid "Duplicate-safe free workflow"
+msgstr "Flusso gratuito sicuro contro i duplicati"
+
+#: admin/class-admin.php:819
+msgid "Enjoying Export/Import Media?"
+msgstr "Ti piace Export/Import Media?"
+
+#: admin/class-admin.php:321
+msgid "Error"
+msgstr "Errore"
 
 #: includes/class-importer.php:37
 msgid "Error uploading file."
 msgstr "Errore durante il caricamento del file."
 
-#: admin/class-admin.php:269
+#: admin/class-admin.php:353
 msgid "Errors"
 msgstr "Errori"
 
-#: admin/class-admin.php:243
-msgid "Error"
-msgstr "Errore"
+#: admin/class-admin.php:509
+msgid "Existing matches are skipped in free instead of being updated in place."
+msgstr "Nella versione gratuita le corrispondenze esistenti vengono saltate invece di essere aggiornate sul posto."
 
-#: admin/class-admin.php:360
+#: admin/class-admin.php:695
+msgid "Explore Pro"
+msgstr "Scopri Pro"
+
+#: admin/class-admin.php:457
+msgid "Export Media Library"
+msgstr "Esporta la libreria media"
+
+#: admin/class-admin.php:245
+msgid "Export Presets"
+msgstr "Preset di esportazione"
+
+#: admin/class-admin.php:241
+msgid "Export Profiles"
+msgstr "Esporta profili"
+
+#: includes/class-exporter.php:223
+msgid "Export file path is required."
+msgstr "Il percorso del file di esportazione è obbligatorio."
+
+#: admin/class-admin.php:604
+msgid "Export preset"
+msgstr "Preset di esportazione"
+
+#: admin/class-admin.php:598
+msgid "Export profile name"
+msgstr "Nome del profilo di esportazione"
+
+#: admin/class-admin.php:492
 msgid "Export to CSV"
 msgstr "Esporta in CSV"
 
-#: admin/class-admin.php:42
-#: admin/class-admin.php:43
+#: admin/class-admin.php:48 admin/class-admin.php:49 admin/class-admin.php:425
 msgid "Export/Import Media"
 msgstr "Export/Import Media"
 
-#: admin/class-admin.php:227
+#: admin/class-admin.php:277
+msgid "Export/Import Media Pro"
+msgstr "Esporta/Importa Media Pro"
+
+#: admin/class-admin.php:176 includes/class-exporter.php:29
+msgid "File"
+msgstr "Archivio"
+
+#: admin/class-admin.php:305
 msgid "File ready. Total media rows:"
 msgstr "File pronto. Righe multimediali totali:"
 
-#: admin/class-admin.php:352
+#: includes/class-importer.php:472
+msgid "Filename matching is ambiguous because multiple existing media items share this filename. Add Relative Path or Attachment ID to target a single attachment."
+msgstr "La corrispondenza dei nomi file è ambigua perché più elementi multimediali esistenti condividono questo nome file. Aggiungi percorso relativo o ID allegato per indirizzare un singolo allegato."
+
+#: admin/class-admin.php:484
 msgid "Filter by Attachment:"
 msgstr "Filtra per allegato:"
 
-#: admin/class-admin.php:283
-msgid "Free"
-msgstr "Gratuito"
+#: admin/class-admin.php:463
+msgid "Filter by date, media type, or attachment context before exporting."
+msgstr "Filtra per data, tipo di media o contesto dell’allegato prima di esportare."
 
-#: admin/class-admin.php:426
-msgid "Free Core"
-msgstr "Nucleo libero"
+#: admin/class-admin.php:663
+msgid "Find existing attachments by Attachment ID, Source URL, Relative Path, or Filename before deciding whether to skip, update, or replace them."
+msgstr "Trova gli allegati esistenti per ID allegato, URL sorgente, percorso relativo o nome file prima di decidere se saltarli, aggiornarli o sostituirli."
 
-#: admin/class-admin.php:332
-msgid "Generate a CSV file with the information of all media files in your media library."
-msgstr "Genera un file CSV con le informazioni di tutti i file multimediali nel tuo catalogo multimediale."
+#: admin/class-admin.php:611
+msgid "Format"
+msgstr "Formato"
+
+#: admin/class-admin.php:580
+msgid "Free covers quick CSV exports. Pro adds saved export profiles, richer packages, and optional background runs for repeatable migrations and larger media libraries."
+msgstr "La versione gratuita copre esportazioni CSV rapide. Pro aggiunge profili di esportazione salvati, pacchetti più ricchi ed esecuzioni opzionali in background per migrazioni ripetibili e librerie media più grandi."
+
+#: admin/class-admin.php:647
+msgid "Free handles one-off CSV imports with preview and duplicate prevention. Pro adds saved workflows for matching existing attachments, refreshing trusted metadata, replacing files, and reusing advanced rules later."
+msgstr "La versione gratuita gestisce importazioni CSV una tantum con anteprima e prevenzione dei duplicati. Pro aggiunge flussi salvati per abbinare allegati esistenti, aggiornare metadati affidabili, sostituire file e riutilizzare in seguito regole avanzate."
+
+#: admin/class-admin.php:419
+msgid "Free plugin"
+msgstr "Plugin gratuito"
+
+#: admin/class-admin.php:429
+msgid "Free plugin highlights"
+msgstr "Punti forti del plugin gratuito"
+
+#: admin/class-admin.php:458
+msgid "Generate a clean CSV with media URLs, relative paths, and core fields like alt text, title, caption, and description."
+msgstr "Genera un CSV pulito con URL dei media, percorsi relativi e campi principali come testo alternativo, titolo, didascalia e descrizione."
+
+#: admin/class-admin.php:243
+msgid "History"
+msgstr "Storia"
 
 #: includes/class-config.php:39
 msgid "Honor Relative Path (Keep folders)"
 msgstr "Usa Relative Path (mantieni le cartelle)"
 
-#: admin/class-admin.php:527
-msgid "If you like our plugin, a %1$s%3$s%2$s rating will help us a lot, thanks in advance!"
-msgstr "Se ti piace il nostro plugin, una valutazione di %1$s%3$s%2$s ci aiuterà molto. Grazie in anticipo!"
+#: admin/class-admin.php:176 includes/class-exporter.php:17 includes/class-importer.php:2185
+msgid "ID"
+msgstr "ID"
 
 #: includes/class-config.php:59
 msgid "Images"
 msgstr "Immagini"
 
-#: admin/class-admin.php:236
-msgid "Import completed."
-msgstr "Importazione completata."
+#: admin/class-admin.php:242
+msgid "Import Profiles"
+msgstr "Importa profili"
 
-#: admin/class-admin.php:492
+#: admin/class-admin.php:786
 msgid "Import Progress:"
 msgstr "Importa Progress:"
 
-#: admin/class-admin.php:237
-msgid "Import stopped by user."
-msgstr "Importazione interrotta dall'utente."
-
-#: admin/class-admin.php:265
+#: admin/class-admin.php:349
 msgid "Import Summary"
 msgstr "Riepilogo dell'importazione"
 
-#: admin/class-admin.php:241
-msgid "Info"
-msgstr "Info"
+#: admin/class-admin.php:314
+msgid "Import completed."
+msgstr "Importazione completata."
 
-#: admin/class-admin.php:267
+#: includes/class-importer.php:254
+msgid "Import file not found."
+msgstr "File di importazione non trovato."
+
+#: admin/class-admin.php:503
+msgid "Import from CSV"
+msgstr "Importa da CSV"
+
+#: admin/class-admin.php:315
+msgid "Import stopped by user."
+msgstr "Importazione interrotta dall'utente."
+
+#: admin/class-admin.php:323 admin/class-admin.php:351
 msgid "Imported"
 msgstr "Importato"
 
-#: includes/class-importer.php:457
-#: includes/class-importer.php:541
+#: includes/class-importer.php:763 includes/class-importer.php:867
+#, python-format
 msgid "Imported successfully (ID %d)"
 msgstr "Importato correttamente (ID %d)"
 
-#: admin/class-admin.php:108
-#: includes/class-importer.php:999
+#: admin/class-admin.php:319
+msgid "Info"
+msgstr "Informazioni"
+
+#: includes/class-importer.php:1692
 msgid "Insufficient permissions."
 msgstr "Autorizzazioni insufficienti."
 
-#: includes/class-importer.php:1125
-#: includes/class-importer.php:126
+#: includes/class-importer.php:146 includes/class-importer.php:286 includes/class-importer.php:1919
 msgid "Invalid CSV. Missing \"Absolute URL\" or \"Relative Path\" column."
-msgstr "Non valido CSV. Colonna \"Absolute URL\" o \"Relative Path\" mancante."
+msgstr "CSV non valido. Manca la colonna \"Absolute URL\" o \"Relative Path\"."
 
-#: includes/class-importer.php:472
+#: includes/class-importer.php:778
 msgid "Invalid local path."
 msgstr "Percorso locale non valido."
 
-#: admin/class-admin.php:232
+#: admin/class-admin.php:310
 msgid "Invalid response from server."
 msgstr "Risposta non valida dal server."
 
-#: includes/class-importer.php:938
+#: includes/class-importer.php:1631
 msgid "Invalid target folder."
 msgstr "Cartella di destinazione non valida."
 
-#: includes/class-importer.php:1537
+#: includes/class-importer.php:2358
 msgid "Invalid temporary file name."
 msgstr "Nome file temporaneo non valido."
 
 #: includes/class-config.php:40
 msgid "Keep the folder structure from \"Relative Path\" when importing, and reuse files already present in uploads when the same path exists."
-msgstr "Mantieni la struttura delle cartelle da \"Relative Path\" durante l'importazione e riutilizza i file già presenti nei caricamenti quando esiste lo stesso percorso."
+msgstr "Mantieni la struttura delle cartelle di \"Relative Path\" durante l’importazione e riutilizza i file già presenti in uploads quando esiste lo stesso percorso."
 
-#: admin/class-admin.php:498
+#: admin/class-admin.php:792
 msgid "Keep this tab open while the current import is running."
 msgstr "Tieni aperta questa scheda mentre è in esecuzione l'importazione corrente."
-
-#: includes/class-importer.php:468
-msgid "Local file not found."
-msgstr "File locale non trovato."
-
-#: includes/class-importer.php:1646
-msgid "Local file type is not allowed."
-msgstr "Il tipo di file locale non è consentito."
-
-#: includes/class-importer.php:1650
-msgid "Local file type is not supported by this plugin."
-msgstr "Il tipo di file locale non è supportato da questo plugin."
 
 #: includes/class-config.php:32
 msgid "Local Import Mode"
 msgstr "Modalità di importazione locale"
 
-#: includes/class-importer.php:314
+#: includes/class-importer.php:555
 msgid "Local Import Mode requires a valid \"Relative Path\" value."
 msgstr "La modalità di importazione locale richiede un valore \"Relative Path\" valido."
 
-#: admin/class-admin.php:256
+#: includes/class-importer.php:568 includes/class-importer.php:774
+msgid "Local file not found."
+msgstr "File locale non trovato."
+
+#: includes/class-importer.php:2467
+msgid "Local file type is not allowed."
+msgstr "Il tipo di file locale non è consentito."
+
+#: includes/class-importer.php:2471
+msgid "Local file type is not supported by this plugin."
+msgstr "Il tipo di file locale non è supportato da questo plugin."
+
+#: admin/class-admin.php:340
 msgid "Local path"
 msgstr "Percorso locale"
 
-#: admin/class-admin.php:240
+#: admin/class-admin.php:318
 msgid "Log is empty. Nothing to download."
 msgstr "Il registro è vuoto. Niente da scaricare."
 
-#: includes/class-importer.php:301
+#: admin/class-admin.php:627
+msgid "Manage Export Profiles"
+msgstr "Gestisci i profili di esportazione"
+
+#: admin/class-admin.php:674
+msgid "Manage Import Profiles"
+msgstr "Gestisci i profili di importazione"
+
+#: admin/class-admin.php:629
+msgid "Manage Presets"
+msgstr "Gestisci preset"
+
+#: admin/class-admin.php:709
+msgid "Match existing attachments and refresh trusted fields like alt text, title, caption, and description."
+msgstr "Abbina gli allegati esistenti e aggiorna campi affidabili come testo alternativo, titolo, didascalia e descrizione."
+
+#: admin/class-admin.php:662
+msgid "Match existing media + refresh metadata"
+msgstr "Abbina media esistenti + aggiorna metadati"
+
+#: includes/class-importer.php:1255
+#, python-format
 msgid "Matched existing attachment (ID %d)"
 msgstr "Allegato esistente corrispondente (ID %d)"
 
-#: includes/class-importer.php:503
+#: includes/class-importer.php:828
 msgid "Media"
 msgstr "Media"
 
-#: admin/class-admin.php:244
-msgid "Media rows"
-msgstr "Righe multimediali"
-
-#: admin/class-admin.php:282
-msgid "Media Transfer Plugin"
-msgstr "Media Transfer Plugin"
-
-#: admin/class-admin.php:345
+#: admin/class-admin.php:477
 msgid "Media Type:"
 msgstr "Tipo di supporto:"
 
-#: admin/class-admin.php:257
+#: admin/class-admin.php:328
+msgid "Media rows"
+msgstr "Righe multimediali"
+
+#: admin/class-admin.php:606
+msgid "Migration Export"
+msgstr "Esportazione della migrazione"
+
+#: admin/class-admin.php:341
 msgid "Mixed"
 msgstr "Misto"
 
-#: admin/class-admin.php:235
+#: admin/class-admin.php:446
+msgid "Need controlled updates for media that already exists in the library? That workflow lives in Pro."
+msgstr "Hai bisogno di aggiornamenti controllati per media già presenti nella libreria? Questo flusso è disponibile in Pro."
+
+#: admin/class-admin.php:313
 msgid "Network error. Import stopped after repeated failures."
 msgstr "Errore di rete. L'importazione è stata interrotta dopo ripetuti errori."
 
-#: admin/class-admin.php:234
+#: admin/class-admin.php:312
 msgid "Network error. Retrying..."
 msgstr "Errore di rete. Nuovo tentativo..."
+
+#: includes/class-importer.php:540
+msgid "No existing media matched the selected criteria, and the row does not include source data for a new import."
+msgstr "Nessun supporto esistente corrisponde ai criteri selezionati e la riga non include dati di origine per una nuova importazione."
 
 #: includes/class-importer.php:32
 msgid "No file uploaded."
 msgstr "Nessun file caricato."
 
-#: admin/class-admin.php:264
+#: admin/class-admin.php:348
 msgid "Not provided"
 msgstr "Non fornito"
 
-#: includes/class-importer.php:1442
+#: includes/class-importer.php:2263
 msgid "Only source columns were detected. Media metadata fields will not be updated from this CSV."
 msgstr "Sono state rilevate solo le colonne di origine. I campi dei metadati multimediali non verranno aggiornati da questo CSV."
 
-#: includes/class-importer.php:1242
+#: admin/class-admin.php:618
+msgid "Package"
+msgstr "Pacchetto"
+
+#: includes/class-importer.php:2063
 msgid "Pipe (|)"
 msgstr "Tubo (|)"
 
-#: admin/class-admin.php:223
+#: admin/class-admin.php:301
 msgid "Please select a CSV file."
 msgstr "Seleziona un file CSV."
 
-#: admin/class-admin.php:423
-msgid "Plugin Status"
-msgstr "Stato del plug-in"
+#: admin/class-admin.php:430
+msgid "Preview before import"
+msgstr "Anteprima prima dell’importazione"
 
-#: admin/class-admin.php:243
+#: admin/class-admin.php:327
 msgid "Preview data is not available for this file."
 msgstr "I dati di anteprima non sono disponibili per questo file."
 
-#: admin/class-admin.php:468
+#: admin/class-admin.php:284 admin/class-admin.php:578 admin/class-admin.php:645 admin/class-admin.php:738
 msgid "Pro"
 msgstr "Pro"
 
-#: admin/class-admin.php:285
-msgid "Pro Active"
-msgstr "Pro Attivo"
+#: admin/class-admin.php:690
+msgid "Pro add-on"
+msgstr "Add-on Pro"
 
-#: admin/class-admin.php:266
+#: admin/class-admin.php:350
 msgid "Processed"
 msgstr "Elaborato"
 
-#: admin/class-admin.php:246
-msgid "Done"
-msgstr "Completato"
-
-#: admin/class-admin.php:238
+#: admin/class-admin.php:316
 msgid "Processing media rows..."
 msgstr "Processing righe multimediali..."
 
-#: admin/class-admin.php:530
+#: admin/class-admin.php:826
 msgid "Rate 5 stars"
 msgstr "Vota 5 stelle"
 
-#: admin/class-admin.php:247
+#: admin/class-admin.php:331
 msgid "Recognized columns"
 msgstr "Colonne riconosciute"
 
-#: admin/class-admin.php:261
+#: admin/class-admin.php:668
+msgid "Refresh only the fields you trust, or replace an outdated file while keeping the attachment record intact."
+msgstr "Aggiorna solo i campi di cui ti fidi, oppure sostituisci un file obsoleto mantenendo intatto il record dell’allegato."
+
+#: admin/class-admin.php:176 admin/class-admin.php:345 includes/class-exporter.php:25 includes/class-importer.php:2193
 msgid "Relative Path"
 msgstr "Relative Path"
 
-#: admin/class-admin.php:255
+#: admin/class-admin.php:339
 msgid "Remote URL"
 msgstr "URL remoto"
 
-#: admin/class-admin.php:389
+#: admin/class-admin.php:716
+msgid "Remote or server-side CSV sources"
+msgstr "Origini CSV remote o lato server"
+
+#: admin/class-admin.php:539
 msgid "Remove file"
 msgstr "Rimuovi file"
 
-#: admin/class-admin.php:435
-msgid "Resources"
-msgstr "Risorse"
+#: admin/class-admin.php:720
+msgid "Replace files safely and review history"
+msgstr "Sostituisci i file in sicurezza e consulta la cronologia"
 
-#: admin/class-admin.php:242
-#: admin/class-admin.php:483
+#: admin/class-admin.php:721
+msgid "Replace outdated media more carefully and keep a record of what happened during heavier runs."
+msgstr "Sostituisci i media obsoleti con maggiore cautela e conserva un registro di ciò che è accaduto durante esecuzioni più pesanti."
+
+#: includes/class-importer.php:1234
+#, python-format
+msgid "Replaced the file for existing media (ID %d)"
+msgstr "Sostituito il file per il supporto esistente (ID %d)"
+
+#: admin/class-admin.php:657
+msgid "Reusable import profiles"
+msgstr "Profili di importazione riutilizzabili"
+
+#: admin/class-admin.php:713
+msgid "Reuse export and import setups without rebuilding the same workflow every time."
+msgstr "Riutilizza le configurazioni di esportazione e importazione senza ricostruire ogni volta lo stesso flusso."
+
+#: admin/class-admin.php:326 admin/class-admin.php:777
 msgid "Review the file before starting the import."
 msgstr "Esaminare il file prima di avviare l'importazione."
 
-#: admin/class-admin.php:259
+#: admin/class-admin.php:343
 msgid "Row"
 msgstr "Fila"
 
-#: includes/class-importer.php:272
-msgid "Row is missing both \"Absolute URL\" and \"Relative Path\"."
-msgstr "La riga non contiene né \"Absolute URL\" né \"Relative Path\"."
+#: includes/class-importer.php:448
+msgid "Row is missing Absolute URL and Relative Path, and it does not provide a usable Attachment ID or Filename match."
+msgstr "Alla riga mancano l'URL assoluto e il percorso relativo e non fornisce un ID allegato utilizzabile o una corrispondenza del nome file."
 
-#: admin/class-admin.php:253
+#: admin/class-admin.php:337
 msgid "Rows missing source"
 msgstr "Righe senza origine"
 
-#: admin/class-admin.php:398
+#: admin/class-admin.php:548
 msgid "Rows per batch:"
 msgstr "Righe per batch:"
 
-#: admin/class-admin.php:250
+#: admin/class-admin.php:334
 msgid "Rows with Absolute URL"
 msgstr "Righe con Absolute URL"
 
-#: admin/class-admin.php:252
-msgid "Rows with both"
-msgstr "Righe con entrambi"
-
-#: admin/class-admin.php:251
+#: admin/class-admin.php:335
 msgid "Rows with Relative Path"
 msgstr "Righe con Relative Path"
 
-#: admin/class-admin.php:248
+#: admin/class-admin.php:336
+msgid "Rows with both"
+msgstr "Righe con entrambi"
+
+#: admin/class-admin.php:626
+msgid "Run Background Export"
+msgstr "Esegui esportazione in background"
+
+#: admin/class-admin.php:673
+msgid "Run Background Import"
+msgstr "Esegui importazione in background"
+
+#: admin/class-admin.php:717
+msgid "Run workflows from trusted CSV sources without manually uploading a file every time."
+msgstr "Esegui flussi da origini CSV affidabili senza dover caricare manualmente un file ogni volta."
+
+#: admin/class-admin.php:332
 msgid "Sample rows"
 msgstr "Righe di esempio"
 
-#: includes/class-importer.php:1238
+#: admin/class-admin.php:597
+msgid "Save current export setup as profile"
+msgstr "Salva la configurazione di esportazione corrente come profilo"
+
+#: admin/class-admin.php:658
+msgid "Save repeatable remote CSV, server-file, mapping, and background import settings for future runs."
+msgstr "Salva impostazioni riutilizzabili di CSV remoto, file server, mappatura e importazione in background per esecuzioni future."
+
+#: admin/class-admin.php:590
+msgid "Saved export profile"
+msgstr "Profilo di esportazione salvato"
+
+#: admin/class-admin.php:712
+msgid "Saved profiles"
+msgstr "Profili salvati"
+
+#: admin/class-admin.php:244
+msgid "Scheduled Jobs"
+msgstr "Lavori pianificati"
+
+#: admin/class-admin.php:523
+msgid "See Pro"
+msgstr "Vedi Pro"
+
+#: admin/class-admin.php:732
+msgid "See Pro details"
+msgstr "Vedi dettagli Pro"
+
+#: admin/class-admin.php:592
+msgid "Select an export profile"
+msgstr "Seleziona un profilo di esportazione"
+
+#: admin/class-admin.php:667
+msgid "Selective metadata refresh + file replacement"
+msgstr "Aggiornamento selettivo dei metadati + sostituzione file"
+
+#: includes/class-importer.php:2059
 msgid "Semicolon (;)"
 msgstr "Punto e virgola (;)"
 
-#: admin/class-admin.php:229
+#: admin/class-admin.php:307
 msgid "Server communication error."
 msgstr "Errore di comunicazione del server."
 
-#: admin/class-admin.php:116
+#: admin/class-admin.php:122
 msgid "Settings"
 msgstr "Impostazioni"
 
@@ -486,165 +751,225 @@ msgstr "Impostazioni"
 msgid "Skip Thumbnail Generation"
 msgstr "Salta la generazione delle miniature"
 
-#: admin/class-admin.php:268
+#: admin/class-admin.php:322 admin/class-admin.php:352
 msgid "Skipped"
 msgstr "Saltato"
-
-#: admin/class-admin.php:242
-msgid "Warning"
-msgstr "Avviso"
 
 #: includes/class-config.php:47
 msgid "Speed up imports by skipping thumbnail generation. Turn this on if you plan to regenerate thumbnails later."
 msgstr "Velocizza le importazioni saltando la generazione delle miniature. Attiva questa opzione se prevedi di rigenerare le miniature in un secondo momento."
 
-#: admin/class-admin.php:413
+#: admin/class-admin.php:563
 msgid "Start Import"
 msgstr "Avvia l'importazione"
 
-#: admin/class-admin.php:414
+#: admin/class-admin.php:456
+msgid "Step 1"
+msgstr "Passo 1"
+
+#: admin/class-admin.php:502
+msgid "Step 2"
+msgstr "Passo 2"
+
+#: admin/class-admin.php:564
 msgid "Stop Process"
 msgstr "Interrompi Process"
 
-#: admin/class-admin.php:231
+#: admin/class-admin.php:309
 msgid "Stopping the process..."
 msgstr "Interruzione del processo..."
 
-#: admin/class-admin.php:254
+#: admin/class-admin.php:338
 msgid "Suggested source mode"
 msgstr "Modalità sorgente suggerita"
 
-#: admin/class-admin.php:444
-msgid "Support development"
-msgstr "Sostenere lo sviluppo"
-
-#: admin/class-admin.php:441
+#: admin/class-admin.php:442
 msgid "Support forum"
 msgstr "Forum di supporto"
 
-#: admin/class-admin.php:298
-msgid "Support me on Ko-fi"
-msgstr "Supportami su Ko-fi"
-
-#: includes/class-importer.php:1040
+#: includes/class-importer.php:1815
 msgid "System"
 msgstr "Sistema"
 
-#: includes/class-importer.php:1240
+#: includes/class-importer.php:2061
 msgid "Tab"
-msgstr "Tab"
+msgstr "Tabulazione"
 
-#: includes/class-importer.php:90
+#: includes/class-importer.php:110
 msgid "Temporary file not found. Please upload the CSV again."
 msgstr "File temporaneo non trovato. Carica nuovamente CSV."
 
-#: includes/class-importer.php:1578
-#: includes/class-importer.php:1583
+#: includes/class-importer.php:2399 includes/class-importer.php:2404
 msgid "Temporary import metadata is invalid. Please upload the CSV again."
 msgstr "I metadati dell'importazione temporanea non sono validi. Carica nuovamente CSV."
 
-#: includes/class-importer.php:1560
+#: includes/class-importer.php:2381
 msgid "Temporary import metadata not found. Please upload the CSV again."
 msgstr "Metadati di importazione temporanea non trovati. Carica nuovamente CSV."
 
-#: includes/class-importer.php:348
-msgid "The \"Absolute URL\" value is not valid."
-msgstr "Il valore \"Absolute URL\" non è valido."
+#: admin/class-admin.php:522
+msgid "That controlled update workflow is available in Export/Import Media Pro."
+msgstr "Questo flusso di aggiornamento controllato è disponibile in Export/Import Media Pro."
 
-#: includes/class-importer.php:1162
+#: includes/class-importer.php:621
+msgid "The \"Absolute URL\" value is not valid."
+msgstr "Il valore di \"Absolute URL\" non è valido."
+
+#: includes/class-importer.php:1956
 msgid "The CSV contains no data rows."
 msgstr "CSV non contiene righe di dati."
 
-#: admin/class-admin.php:228
+#: admin/class-admin.php:306
 msgid "The CSV file is empty."
 msgstr "Il file CSV è vuoto."
 
-#: includes/class-importer.php:1119
-#: includes/class-importer.php:1197
+#: includes/class-importer.php:1913 includes/class-importer.php:2004
 msgid "The CSV is empty."
 msgstr "CSV è vuoto."
 
-#: admin/class-admin.php:431
-msgid "The free core is ready for future extensions through hooks, feature flags, and admin slots."
-msgstr "Il core gratuito è pronto per future estensioni tramite hook, flag di funzionalità e slot di amministrazione."
+#: includes/class-importer.php:1318
+msgid "The current attachment file could not be found."
+msgstr "Impossibile trovare il file allegato corrente."
 
-#: includes/class-importer.php:1490
+#: admin/class-admin.php:287
+msgid "The free plugin stays focused on straightforward CSV export/import with preview and duplicate prevention. Pro adds reusable profiles, background workflows, and controlled rules for matching and updating existing media."
+msgstr "Il plugin gratuito resta focalizzato su esportazione/importazione CSV semplice con anteprima e prevenzione dei duplicati. Pro aggiunge profili riutilizzabili, flussi in background e regole controllate per abbinare e aggiornare media esistenti."
+
+#: admin/class-admin.php:692
+msgid "The free plugin stays intentionally focused on clean one-off CSV import and export. Pro adds controlled matching against existing attachments, selective metadata refreshes, safer replace-file workflows, and reusable setups for larger libraries."
+msgstr "Il plugin gratuito resta volutamente focalizzato su importazioni ed esportazioni CSV pulite e occasionali. Pro aggiunge abbinamento controllato con allegati esistenti, aggiornamenti selettivi dei metadati, flussi più sicuri per la sostituzione dei file e configurazioni riutilizzabili per librerie più grandi."
+
+#: admin/class-admin.php:730
+msgid "The free version stays clean on purpose. Pro adds a few stronger tools when you need controlled updates, repeatable workflows, and more operational confidence."
+msgstr "La versione gratuita resta semplice di proposito. Pro aggiunge alcuni strumenti più potenti quando hai bisogno di aggiornamenti controllati, flussi ripetibili e maggiore sicurezza operativa."
+
+#: includes/class-importer.php:1356
+msgid "The replacement file could not be copied into uploads."
+msgstr "Impossibile copiare il file sostitutivo nei caricamenti."
+
+#: includes/class-importer.php:1313
+msgid "The replacement source file is missing."
+msgstr "Manca il file di origine sostitutivo."
+
+#: includes/class-importer.php:1979
+msgid "The selected file is a ZIP archive. The simple import tool expects a plain CSV file, not a ZIP or export bundle."
+msgstr "Il file selezionato è un archivio ZIP. Lo strumento di importazione semplice si aspetta un file CSV semplice, non un ZIP né un pacchetto di esportazione."
+
+#: includes/class-importer.php:1341
+msgid "The target uploads directory is not valid."
+msgstr "La directory di caricamento di destinazione non è valida."
+
+#: includes/class-importer.php:2311
 msgid "The temporary import folder is not writable."
 msgstr "La cartella di importazione temporanea non è scrivibile."
 
-#: includes/class-importer.php:1421
+#: includes/class-importer.php:2242
 msgid "This CSV relies on Relative Path. Use Local Import Mode or make sure the referenced files already exist in uploads."
 msgstr "Questo CSV si basa su Relative Path. Utilizza la modalità di importazione locale o assicurati che i file di riferimento siano già presenti nei caricamenti."
 
-#: includes/class-importer.php:1407
+#: includes/class-importer.php:539
+msgid "This import action requires Absolute URL or Relative Path when no existing media match is found."
+msgstr "Questa azione di importazione richiede l'URL assoluto o il percorso relativo quando non viene trovata alcuna corrispondenza multimediale esistente."
+
+#: admin/class-admin.php:286
+msgid "This premium workspace is available in Export/Import Media Pro."
+msgstr "Questa area di lavoro premium è disponibile in Export/Import Media Pro."
+
+#: includes/class-importer.php:2228
 msgid "This row did not pass import validation."
 msgstr "Questa riga non ha superato la convalida dell'importazione."
 
-#: admin/class-admin.php:262
+#: admin/class-admin.php:176 admin/class-admin.php:346 includes/class-exporter.php:45 includes/class-importer.php:2197
 msgid "Title"
 msgstr "Titolo"
-
-#: admin/class-admin.php:340
-msgid "to"
-msgstr "a"
 
 #: includes/class-config.php:67
 msgid "Unattached (Not used in posts)"
 msgstr "Non collegato (non utilizzato nei post)"
 
-#: admin/class-admin.php:258
+#: admin/class-admin.php:342
 msgid "Unknown"
 msgstr "Sconosciuto"
 
-#: admin/class-admin.php:370
-msgid "Upload a media CSV. The plugin will validate it first, show a preview, and then import it in batches."
-msgstr "Carica un CSV di media. Il plugin lo convaliderà prima, mostrerà un'anteprima e poi lo importerà in batch."
+#: admin/class-admin.php:708
+msgid "Update existing media metadata"
+msgstr "Aggiorna i metadati dei media esistenti"
+
+#: includes/class-importer.php:1177
+#, python-format
+msgid "Updated metadata for existing media (ID %d)"
+msgstr "Metadati aggiornati per i media esistenti (ID %d)"
+
+#: includes/class-importer.php:1176
+#, python-format
+msgid "Updated selected fields for existing media (ID %d)"
+msgstr "Campi selezionati aggiornati per i media esistenti (ID %d)"
+
+#: admin/class-admin.php:691
+msgid "Upgrade when you need to work with existing media, not just import new rows."
+msgstr "Passa a Pro quando hai bisogno di lavorare con media esistenti, non solo di importare nuove righe."
+
+#: admin/class-admin.php:504
+msgid "Upload a CSV, validate it first, review the preview, and import media in batches while the free workflow skips existing matches it detects."
+msgstr "Carica un CSV, validalo prima, controlla l’anteprima e importa i media in batch mentre il flusso gratuito salta le corrispondenze esistenti che rileva."
 
 #: includes/class-config.php:33
 msgid "Use the \"Relative Path\" column to locate files that already exist in this site's uploads folder. No remote download is attempted."
-msgstr "Utilizza la colonna \"Relative Path\" per individuare i file già esistenti nella cartella dei caricamenti di questo sito. Non viene tentato alcun download remoto."
+msgstr "Usa la colonna \"Relative Path\" per individuare file che esistono già nella cartella uploads di questo sito. Non viene tentato alcun download remoto."
 
-#: admin/class-admin.php:224
+#: admin/class-admin.php:462
+msgid "Useful for migrations, audits, and content cleanup."
+msgstr "Utile per migrazioni, audit e pulizia dei contenuti."
+
+#: admin/class-admin.php:302
 msgid "Validating file..."
 msgstr "Convalida file..."
 
-#: admin/class-admin.php:225
+#: admin/class-admin.php:303
 msgid "Validation failed:"
 msgstr "Convalida non riuscita:"
 
-#: admin/class-admin.php:226
+#: admin/class-admin.php:304
 msgid "Validation successful."
 msgstr "Convalida riuscita."
-
-#: admin/class-admin.php:424
-msgid "Version %s"
-msgstr "Versione %s"
 
 #: includes/class-config.php:61
 msgid "Videos"
 msgstr "Video"
 
-#: admin/class-admin.php:249
+#: admin/class-admin.php:628 admin/class-admin.php:675
+msgid "View Background Runs"
+msgstr "Visualizza esecuzioni in background"
+
+#: admin/class-admin.php:630 admin/class-admin.php:676
+msgid "View History"
+msgstr "Visualizza cronologia"
+
+#: admin/class-admin.php:521
+msgid "Want to refresh alt text, title, caption, or description on media that already exists?"
+msgstr "Vuoi aggiornare testo alternativo, titolo, didascalia o descrizione di media già esistenti?"
+
+#: admin/class-admin.php:320
+msgid "Warning"
+msgstr "Avviso"
+
+#: admin/class-admin.php:333
 msgid "Warnings"
 msgstr "Avvertenze"
 
-#: admin/class-admin.php:317
-msgid "You are using Media Transfer Plugin! If you find it useful, please consider <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">leaving a positive review</a>. It really helps!"
-msgstr "Stai usando Media Transfer Plugin! Se ti è utile, considera di <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">lasciare una recensione positiva</a>. Aiuta davvero molto."
-
-#: admin/class-admin.php:230
+#: admin/class-admin.php:308
 msgid "You do not have permission to run this import."
 msgstr "Non hai l'autorizzazione per eseguire questa importazione."
 
-#: admin/class-admin.php:123
+#: admin/class-admin.php:129 admin/class-admin.php:271
 msgid "You do not have sufficient permissions to access this page."
 msgstr "Non disponi di permessi sufficienti per accedere a questa pagina."
 
-#: admin/class-admin.php:157
-#: includes/class-exporter.php:69
+#: admin/class-admin.php:164 includes/class-exporter.php:95
 msgid "You do not have sufficient permissions."
 msgstr "Non disponi di autorizzazioni sufficienti."
 
-#: admin/class-admin.php:288
-msgid "Your complete solution to import and export the media library."
-msgstr "La tua soluzione completa per importare ed esportare la libreria multimediale."
+#: admin/class-admin.php:472
+msgid "to"
+msgstr "a"
+

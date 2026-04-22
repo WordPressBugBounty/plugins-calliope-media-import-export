@@ -397,6 +397,12 @@ jQuery(document).ready(function($) {
                     `${t('file_ready')} ${totalRows}`
                 );
 
+                $(document).trigger('eim:validationSuccess', [{
+                    file: currentFile,
+                    totalRows: totalRows,
+                    preview: response.data.preview || null
+                }]);
+
                 isValidating = false;
                 startButton.prop('disabled', false);
 
@@ -414,6 +420,12 @@ jQuery(document).ready(function($) {
                         error || status || t('server_error')
                     )
                 );
+                $(document).trigger('eim:validationFailed', [{
+                    error: extractAjaxError(
+                        xhr && xhr.responseJSON ? xhr.responseJSON : null,
+                        error || status || t('server_error')
+                    )
+                }]);
                 resetStateOnError();
             });
     }
@@ -431,6 +443,20 @@ jQuery(document).ready(function($) {
         startButton.hide().prop('disabled', false);
         stopButton.show().prop('disabled', false);
         downloadLogBtn.hide();
+
+        const selectedUpdateFields = $('input[name="selected_update_fields[]"]:checked').map(function() {
+            return String($(this).val() || '');
+        }).get();
+
+        $(document).trigger('eim:importStart', [{
+            file: currentFile,
+            totalRows: totalRows,
+            batchSize: parseInt($('#batch_size').val(), 10) || parseInt(config.default_batch || 25, 10) || 25,
+            dryRun: $('#eim_dry_run').is(':checked'),
+            duplicateStrategy: $('#eim_duplicate_strategy').length ? $('#eim_duplicate_strategy').val() : 'skip',
+            matchStrategy: $('#eim_match_strategy').length ? $('#eim_match_strategy').val() : 'auto',
+            selectedUpdateFields: selectedUpdateFields
+        }]);
 
         processBatch();
     }
@@ -462,7 +488,13 @@ jQuery(document).ready(function($) {
                 batch_size: batchSize,
                 local_import: $('#eim_local_import').is(':checked'),
                 skip_thumbnails: $('#eim_skip_thumbnails').is(':checked'),
-                honor_relative_path: $('#eim_honor_relative_path').is(':checked')
+                honor_relative_path: $('#eim_honor_relative_path').is(':checked'),
+                dry_run: $('#eim_dry_run').is(':checked'),
+                duplicate_strategy: $('#eim_duplicate_strategy').length ? $('#eim_duplicate_strategy').val() : 'skip',
+                match_strategy: $('#eim_match_strategy').length ? $('#eim_match_strategy').val() : 'auto',
+                selected_update_fields: $('input[name="selected_update_fields[]"]:checked').map(function() {
+                    return String($(this).val() || '');
+                }).get()
             },
             dataType: 'json'
         })
@@ -522,6 +554,13 @@ jQuery(document).ready(function($) {
                 mergeSummary(importSummary, safeBatchSummary);
                 renderImportSummary();
 
+                $(document).trigger('eim:batchProcessed', [{
+                    results: items,
+                    summary: safeBatchSummary,
+                    meta: batchMeta,
+                    aggregateSummary: $.extend({}, importSummary)
+                }]);
+
                 if (safeBatchSummary.processed > 0) {
                     logMessage(t('batch_summary'), 'INFO', formatSummaryLine(safeBatchSummary));
                 }
@@ -575,6 +614,13 @@ jQuery(document).ready(function($) {
             logMessage(t('summary_title'), 'FIN', formatSummaryLine(importSummary));
             renderImportSummary();
         }
+
+        $(document).trigger(isError ? 'eim:importFailed' : 'eim:importFinished', [{
+            file: currentFile,
+            totalRows: totalRows,
+            summary: $.extend({}, importSummary),
+            stopped: !!isImportStopped
+        }]);
 
         currentFile = '';
         isValidating = false;
