@@ -2,7 +2,7 @@
 /*
 Plugin Name: Export/Import Media
 Description: CSV export/import for your media library with preview, batch processing, duplicate prevention, and core metadata columns.
-Version: 1.6.15
+Version: 1.7
 Requires at least: 5.6
 Requires PHP: 7.4
 Author: CalliopeWP
@@ -28,7 +28,7 @@ if ( ! defined( 'EIM_FILE' ) ) {
 }
 
 if ( ! defined( 'EIM_VERSION' ) ) {
-    define( 'EIM_VERSION', '1.6.15' );
+    define( 'EIM_VERSION', '1.7' );
 }
 
 if ( ! defined( 'EIM_PUBLIC_SLUG' ) ) {
@@ -56,6 +56,7 @@ if ( ! defined( 'EIM_BASENAME' ) ) {
 }
 
 require_once EIM_PATH . 'includes/class-config.php';
+require_once EIM_PATH . 'includes/class-eim-service-registry.php';
 
 if ( ! function_exists( 'eim_get_setting' ) ) {
     /**
@@ -160,17 +161,13 @@ if ( ! function_exists( 'eim_get_service' ) ) {
      * @return mixed|null
      */
     function eim_get_service( $service = null ) {
-        $services = isset( $GLOBALS['eim_services'] ) && is_array( $GLOBALS['eim_services'] )
-            ? $GLOBALS['eim_services']
-            : [];
+        $services = EIM_Service_Registry::all();
 
         if ( null === $service || '' === $service ) {
             return $services;
         }
 
-        $service = sanitize_key( (string) $service );
-
-        return isset( $services[ $service ] ) ? $services[ $service ] : null;
+        return EIM_Service_Registry::get( $service );
     }
 }
 
@@ -214,7 +211,7 @@ if ( ! function_exists( 'eim_init_plugin' ) ) {
             $services['exporter'] = new EIM_Exporter();
         }
 
-        $GLOBALS['eim_services'] = $services;
+        EIM_Service_Registry::set_services( $services );
 
         do_action( 'eim_plugin_ready', $services );
     }

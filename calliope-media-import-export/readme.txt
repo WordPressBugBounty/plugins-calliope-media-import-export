@@ -3,7 +3,7 @@ Contributors: mairaforesto
 Tags: import, export, media, images, seo
 Requires at least: 5.6
 Tested up to: 6.9
-Stable tag: 1.6.15
+Stable tag: 1.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,10 @@ Export/Import Media Pro adds saved workflows, remote or server-side CSV sources,
 Yes. You can filter by date range, media type, and attachment context such as unattached files or media attached to posts, pages, and WooCommerce products.
 
 == Changelog ==
+
+= 1.7 =
+* Internal: Replaced the global service map with an internal service registry to keep bootstrapped plugin services more controlled and maintainable.
+* Compatibility: Kept `eim_get_service()` working as the compatibility layer for importer, exporter, admin, and add-on access patterns.
 
 = 1.6.15 =
 * Fixed broken Spanish MO encoding so accented text renders correctly again in the admin.
@@ -157,4 +161,3 @@ Yes. You can filter by date range, media type, and attachment context such as un
 
 = 1.0 =
 * Initial release.
-
