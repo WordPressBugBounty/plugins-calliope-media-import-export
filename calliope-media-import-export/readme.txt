@@ -3,7 +3,7 @@ Contributors: mairaforesto
 Tags: import, export, media, images, seo
 Requires at least: 5.6
 Tested up to: 6.9
-Stable tag: 1.7.1
+Stable tag: 1.7.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,21 @@ Export/Import Media Pro adds saved workflows, remote or server-side CSV sources,
 Yes. You can filter by date range, media type, and attachment context such as unattached files or media attached to posts, pages, and WooCommerce products.
 
 == Changelog ==
+
+= 1.7.9 =
+* Fixed export media type filtering so selecting Videos, Audio, Documents, or Images uses explicit MIME type lists instead of falling back to images.
+* Export filenames now include the selected media type for easier verification.
+
+= 1.7.6 =
+* Fix: Adjusted the footer review star styles so inline SVG stars are not clipped by admin line-height or inherited image rules.
+
+= 1.7.5 =
+* Fix: Made large AJAX imports safer on shared hosting by capping oversized batches, using a host-aware soft time limit, and preventing long stale locks after failed requests.
+* Improvement: Import retries now wait for active batches instead of immediately failing against the import lock, and reduce the runtime batch size after server/network failures.
+
+= 1.7.2 =
+* Fix: The downloadable sample CSV now uses stable canonical column headers and points to a bundled sample image so it can validate and run more reliably on translated admin sites.
+* Fix: CSV validation now recognizes translated column headers for URL, relative path, title, alt text, caption, and description when users import files created from localized exports.
 
 = 1.7.1 =
 * Fix: CSV validation no longer fails because the importer now closes file handles correctly instead of re-entering its own close helper.

@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class EIM_Importer {
 
-    const MAX_BATCH_SIZE = 500;
+    const MAX_BATCH_SIZE = 100;
     const TEMP_FILE_TTL  = DAY_IN_SECONDS;
     const LOCK_TTL       = 90;
 
@@ -61,17 +61,12 @@ class EIM_Importer {
     public function process_batch() {
         $this->ensure_ajax_permissions();
 
-        if ( function_exists( 'set_time_limit' ) ) {
-            // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- Allow larger AJAX batches when the environment permits it.
-            @set_time_limit( 0 );
-        }
-
-        $start_time      = time();
-        $time_limit      = 20;
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- AJAX request is verified in ensure_ajax_permissions().
         $file_name       = isset( $_POST['file'] ) ? sanitize_file_name( wp_unslash( $_POST['file'] ) ) : '';
         $start_row       = $this->get_request_absint( 'start_row' );
         $batch_size      = $this->get_bounded_batch_size();
+        $time_limit      = $this->get_batch_time_limit( $batch_size );
+        $start_time      = time();
         $local_import    = $this->get_request_bool( 'local_import' );
         $skip_thumbnails = $this->get_request_bool( 'skip_thumbnails' );
         $honor_rel_path  = $this->get_request_bool( 'honor_relative_path', true );
@@ -86,6 +81,7 @@ class EIM_Importer {
         $total_rows      = 0;
         $is_finished     = false;
         $reached_eof     = false;
+        $time_limited    = false;
         $request_context = $this->normalize_import_request_context(
             [
                 'start_row'           => $start_row,
@@ -103,6 +99,8 @@ class EIM_Importer {
         );
 
         $batch_size      = $request_context['batch_size'];
+        $time_limit      = $this->get_batch_time_limit( $batch_size );
+        $this->extend_server_time_limit( $time_limit );
         $local_import    = $request_context['local_import'];
         $skip_thumbnails = $request_context['skip_thumbnails'];
         $honor_rel_path  = $request_context['honor_relative_path'];
@@ -116,7 +114,7 @@ class EIM_Importer {
             $this->send_batch_error( __( 'Temporary file not found. Please upload the CSV again.', 'calliope-media-import-export' ), 404 );
         }
 
-        if ( ! $this->acquire_temp_lock( $lock_key ) ) {
+        if ( ! $this->acquire_temp_lock( $lock_key, $this->get_lock_ttl( $time_limit ) ) ) {
             $this->send_batch_error( __( 'Another import request is already processing this file. Please wait a moment and try again.', 'calliope-media-import-export' ), 409 );
         }
 
@@ -175,7 +173,8 @@ class EIM_Importer {
                 $current_row = $start_row;
 
                 while ( $processed_batch < $batch_size ) {
-                    if ( ( time() - $start_time ) >= $time_limit ) {
+                    if ( $time_limit > 0 && ( time() - $start_time ) >= $time_limit ) {
+                        $time_limited = true;
                         break;
                     }
 
@@ -236,8 +235,11 @@ class EIM_Importer {
                     'start_row'       => $start_row,
                     'next_row'        => $next_row,
                     'processed_rows'  => $processed_batch,
+                    'batch_size'      => $batch_size,
                     'total_rows'      => $total_rows,
                     'is_finished'     => $is_finished,
+                    'time_limited'    => $time_limited,
+                    'time_limit'      => $time_limit,
                     'local_import'    => $local_import,
                     'skip_thumbnails' => $skip_thumbnails,
                     'honor_rel_path'  => $honor_rel_path,
@@ -405,8 +407,9 @@ class EIM_Importer {
         $description = isset( $row['description'] ) ? wp_kses_post( (string) $row['description'] ) : '';
         $custom_meta = $this->decode_custom_meta_json( isset( $row['custom_meta_json'] ) ? $row['custom_meta_json'] : '' );
 
-        $filename        = isset( $row['file'] ) ? sanitize_file_name( (string) $row['file'] ) : '';
+        $filename        = isset( $row['file'] ) ? (string) $row['file'] : '';
         $filename        = $filename ? $filename : $this->derive_filename( $url, $rel_path );
+        $filename        = $this->normalize_import_filename( $filename, $url, $rel_path );
         $url             = apply_filters( 'eim_pre_import_url', $url, $row );
         $request_context = is_array( $request_context ) ? $request_context : [];
         $dry_run         = ! empty( $request_context['dry_run'] );
@@ -685,7 +688,7 @@ class EIM_Importer {
         }
 
         $filename   = apply_filters( 'eim_import_filename', $filename, $row );
-        $filename   = sanitize_file_name( (string) $filename );
+        $filename   = $this->normalize_import_filename( $filename, $url, $rel_path );
         $file_array = [
             'name'     => $filename ? $filename : 'media-file',
             'tmp_name' => $tmp_file,
@@ -792,6 +795,7 @@ class EIM_Importer {
         }
 
         $final_filename = $filename ? $filename : $validated['filename'];
+        $final_filename = $this->normalize_import_filename( $final_filename, $url, $rel_path );
         $fingerprint    = $this->get_file_fingerprint( $file_path );
         $custom_meta    = $this->decode_custom_meta_json( isset( $row['custom_meta_json'] ) ? $row['custom_meta_json'] : '' );
         $existing_id    = $this->find_existing_attachment_id(
@@ -1607,6 +1611,81 @@ class EIM_Importer {
         return sha1( $size . '|' . $first_md5 . '|' . $last_md5 );
     }
 
+    private function normalize_import_filename( $filename, $url = '', $rel_path = '' ) {
+        $filename = is_string( $filename ) ? trim( $filename ) : '';
+
+        if ( '' === $filename ) {
+            $filename = $this->derive_filename( (string) $url, (string) $rel_path );
+        }
+
+        $filename = wp_basename( strtok( (string) $filename, '?#' ) );
+        $filename = remove_accents( $filename );
+        $filename = sanitize_file_name( $filename );
+
+        $clean = preg_replace( '/[^A-Za-z0-9._-]+/', '-', $filename );
+        if ( is_string( $clean ) && '' !== $clean ) {
+            $filename = $clean;
+        }
+
+        $filename = preg_replace( '/\.{2,}/', '.', $filename );
+        $filename = preg_replace( '/[-_]{2,}/', '-', $filename );
+        $filename = preg_replace( '/[-_]+\./', '.', $filename );
+        $filename = preg_replace( '/\.[-_]+/', '.', $filename );
+        $filename = trim( (string) $filename, ".-_ \t\n\r\0\x0B" );
+
+        if ( '' === $filename ) {
+            $filename = 'media-file';
+        }
+
+        $max_length = (int) apply_filters( 'eim_import_max_filename_length', 120 );
+        $max_length = max( 60, min( 180, $max_length ) );
+
+        return $this->truncate_filename_preserving_extension( $filename, $max_length );
+    }
+
+    private function truncate_filename_preserving_extension( $filename, $max_length ) {
+        $filename   = (string) $filename;
+        $max_length = max( 60, (int) $max_length );
+
+        if ( strlen( $filename ) <= $max_length ) {
+            return $filename;
+        }
+
+        $info = pathinfo( $filename );
+        $ext  = '';
+        if ( ! empty( $info['extension'] ) ) {
+            $ext = '.' . strtolower( preg_replace( '/[^A-Za-z0-9]+/', '', (string) $info['extension'] ) );
+        }
+
+        $base = isset( $info['filename'] ) && '' !== $info['filename'] ? (string) $info['filename'] : 'media-file';
+        $hash = substr( sha1( $filename ), 0, 8 );
+        $room = $max_length - strlen( $ext ) - strlen( $hash ) - 1;
+        $room = max( 20, $room );
+        $base = $this->truncate_string_bytes( $base, $room );
+        $base = trim( (string) $base, '.-_' );
+
+        if ( '' === $base ) {
+            $base = 'media-file';
+        }
+
+        return $base . '-' . $hash . $ext;
+    }
+
+    private function truncate_string_bytes( $string, $max_bytes ) {
+        $string    = (string) $string;
+        $max_bytes = max( 1, (int) $max_bytes );
+
+        if ( strlen( $string ) <= $max_bytes ) {
+            return $string;
+        }
+
+        if ( function_exists( 'mb_strcut' ) ) {
+            return mb_strcut( $string, 0, $max_bytes, 'UTF-8' );
+        }
+
+        return substr( $string, 0, $max_bytes );
+    }
+
     private function sanitize_relative_path( $rel_path ) {
         $rel_path = (string) $rel_path;
         $rel_path = str_replace( '\\', '/', $rel_path );
@@ -1666,6 +1745,10 @@ class EIM_Importer {
     private function media_handle_sideload_with_subdir( $file_array, $subdir = '' ) {
         $subdir = trim( (string) $subdir );
 
+        if ( isset( $file_array['name'] ) ) {
+            $file_array['name'] = $this->normalize_import_filename( $file_array['name'] );
+        }
+
         if ( '' === $subdir ) {
             return media_handle_sideload( $file_array, 0 );
         }
@@ -1708,6 +1791,9 @@ class EIM_Importer {
         foreach ( $headers as $index => $header ) {
             foreach ( $definitions as $key => $options ) {
                 $aliases = isset( $options['aliases'] ) ? (array) $options['aliases'] : [];
+                if ( isset( $options['label'] ) ) {
+                    $aliases[] = (string) $options['label'];
+                }
                 $aliases = array_map( 'strtolower', array_map( 'trim', $aliases ) );
 
                 if ( in_array( $header, $aliases, true ) ) {
@@ -1873,6 +1959,73 @@ class EIM_Importer {
         }
 
         return min( self::MAX_BATCH_SIZE, max( 1, $batch_size ) );
+    }
+
+    private function get_batch_time_limit( $batch_size ) {
+        $batch_size = absint( $batch_size );
+
+        if ( $batch_size >= 100 ) {
+            $time_limit = 35;
+        } elseif ( $batch_size >= 50 ) {
+            $time_limit = 25;
+        } elseif ( $batch_size >= 25 ) {
+            $time_limit = 18;
+        } else {
+            $time_limit = 12;
+        }
+
+        $server_limit = $this->get_server_execution_limit();
+        if ( $server_limit > 0 ) {
+            $safe_limit = max( 8, $server_limit - 8 );
+            $time_limit = min( $time_limit, $safe_limit );
+        } else {
+            $time_limit = min( $time_limit, 35 );
+        }
+
+        /**
+         * Filters the soft time limit, in seconds, for a single AJAX import batch.
+         *
+         * Return 0 to disable the plugin's soft limit and let PHP/server limits decide.
+         *
+         * @param int $time_limit Soft time limit in seconds.
+         * @param int $batch_size Requested rows per batch.
+         */
+        return max( 0, absint( apply_filters( 'eim_import_batch_time_limit', $time_limit, $batch_size ) ) );
+    }
+
+    private function get_server_execution_limit() {
+        $limit = ini_get( 'max_execution_time' );
+        if ( false === $limit || '' === $limit ) {
+            return 0;
+        }
+
+        $limit = absint( $limit );
+        return $limit > 0 ? $limit : 0;
+    }
+
+    private function extend_server_time_limit( $time_limit ) {
+        if ( ! function_exists( 'set_time_limit' ) ) {
+            return;
+        }
+
+        $time_limit = absint( $time_limit );
+        if ( $time_limit <= 0 ) {
+            return;
+        }
+
+        $target_limit = min( 60, max( 20, $time_limit + 10 ) );
+
+        // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- Import batches need a little extra time when the host allows it.
+        @set_time_limit( $target_limit );
+    }
+
+    private function get_lock_ttl( $time_limit ) {
+        $time_limit = absint( $time_limit );
+        if ( $time_limit <= 0 ) {
+            return self::LOCK_TTL;
+        }
+
+        return max( self::LOCK_TTL, $time_limit + 45 );
     }
 
     private function send_batch_error( $message, $status_code = 400 ) {
@@ -2251,31 +2404,31 @@ class EIM_Importer {
     private function get_import_header_definitions() {
         $definitions = [
             'id'          => [
-                'aliases' => [ 'id', 'attachment id', 'media id' ],
+                'aliases' => [ 'id', 'attachment id', 'media id', 'id del adjunto', 'id do anexo', 'id allegato', 'id de la pièce jointe' ],
                 'label'   => __( 'ID', 'calliope-media-import-export' ),
             ],
             'url'         => [
-                'aliases' => [ 'absolute url', 'url' ],
+                'aliases' => [ 'absolute url', 'url', 'absolute_url', 'source url', 'source_url', 'url absoluta', 'url absoluto', 'url absolue', 'url assoluto', '绝对 url' ],
                 'label'   => __( 'Absolute URL', 'calliope-media-import-export' ),
             ],
             'rel_path'    => [
-                'aliases' => [ 'relative path', 'path' ],
+                'aliases' => [ 'relative path', 'relative_path', 'path', 'ruta relativa', 'caminho relativo', 'percorso relativo', 'chemin relatif', '相对路径' ],
                 'label'   => __( 'Relative Path', 'calliope-media-import-export' ),
             ],
             'title'       => [
-                'aliases' => [ 'title', 'post_title' ],
+                'aliases' => [ 'title', 'post_title', 'título', 'titulo', 'titre', 'titolo', '标题' ],
                 'label'   => __( 'Title', 'calliope-media-import-export' ),
             ],
             'alt'         => [
-                'aliases' => [ 'alt text', 'alt' ],
+                'aliases' => [ 'alt text', 'alt', 'alternative text', 'texto alternativo', 'texto alt', 'texte alternatif', 'testo alternativo', '替代文本' ],
                 'label'   => __( 'Alt Text', 'calliope-media-import-export' ),
             ],
             'caption'     => [
-                'aliases' => [ 'caption', 'post_excerpt' ],
+                'aliases' => [ 'caption', 'post_excerpt', 'subtítulo', 'subtitulo', 'legenda', 'légende', 'didascalia' ],
                 'label'   => __( 'Caption', 'calliope-media-import-export' ),
             ],
             'description' => [
-                'aliases' => [ 'description', 'post_content' ],
+                'aliases' => [ 'description', 'post_content', 'descripción', 'descripcion', 'descrição', 'descricao', 'descrizione', '描述' ],
                 'label'   => __( 'Description', 'calliope-media-import-export' ),
             ],
         ];
@@ -2514,12 +2667,28 @@ class EIM_Importer {
         return 'eim_import_lock_' . md5( (string) $file_name );
     }
 
-    private function acquire_temp_lock( $lock_key ) {
-        if ( get_transient( $lock_key ) ) {
-            return false;
+    private function acquire_temp_lock( $lock_key, $ttl = null ) {
+        $ttl      = null === $ttl ? self::LOCK_TTL : max( 30, absint( $ttl ) );
+        $existing = get_transient( $lock_key );
+
+        if ( $existing ) {
+            $started_at = is_array( $existing ) && isset( $existing['started_at'] ) ? absint( $existing['started_at'] ) : absint( $existing );
+            $age        = $started_at > 0 ? time() - $started_at : 0;
+
+            if ( $started_at > 0 && $age > $ttl ) {
+                delete_transient( $lock_key );
+            } else {
+                return false;
+            }
         }
 
-        return set_transient( $lock_key, time(), self::LOCK_TTL );
+        return set_transient(
+            $lock_key,
+            [
+                'started_at' => time(),
+            ],
+            $ttl
+        );
     }
 
     private function release_temp_lock( $lock_key ) {

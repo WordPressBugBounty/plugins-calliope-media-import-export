@@ -29,9 +29,12 @@ jQuery(document).ready(function($) {
     let isValidating = false;
     let autoStartAfterValidation = false;
     let batchRetryCount = 0;
+    let lockRetryCount = 0;
+    let runtimeBatchSize = 0;
     let importSummary = createEmptySummary();
 
-    const maxBatchRetries = 2;
+    const maxBatchRetries = 5;
+    const maxLockRetries = 12;
 
     function t(key) {
         if (i18n && Object.prototype.hasOwnProperty.call(i18n, key) && String(i18n[key] || '') !== '') {
@@ -52,6 +55,60 @@ jQuery(document).ready(function($) {
             skipped: 0,
             errors: 0
         };
+    }
+
+
+    function getSelectedBatchSize() {
+        return parseInt($('#batch_size').val(), 10) || parseInt(config.default_batch || 25, 10) || 25;
+    }
+
+    function getRuntimeBatchSize() {
+        const selectedBatchSize = getSelectedBatchSize();
+
+        if (!runtimeBatchSize || runtimeBatchSize > selectedBatchSize) {
+            runtimeBatchSize = selectedBatchSize;
+        }
+
+        return Math.max(1, runtimeBatchSize);
+    }
+
+    function reduceRuntimeBatchSize() {
+        const currentBatchSize = getRuntimeBatchSize();
+        let nextBatchSize = currentBatchSize;
+
+        if (currentBatchSize > 100) {
+            nextBatchSize = 100;
+        } else if (currentBatchSize > 50) {
+            nextBatchSize = 50;
+        } else if (currentBatchSize > 25) {
+            nextBatchSize = 25;
+        } else if (currentBatchSize > 10) {
+            nextBatchSize = 10;
+        }
+
+        if (nextBatchSize < currentBatchSize) {
+            runtimeBatchSize = nextBatchSize;
+        }
+    }
+
+    function isBusyLockResponse(xhr) {
+        if (!(xhr && parseInt(xhr.status, 10) === 409)) {
+            return false;
+        }
+
+        return extractAjaxError(xhr, '').toLowerCase().indexOf('another import request') !== -1;
+    }
+
+    function getRetryDelay(xhr) {
+        if (isBusyLockResponse(xhr)) {
+            return 10000;
+        }
+
+        if (xhr && parseInt(xhr.status, 10) >= 500) {
+            return 15000;
+        }
+
+        return 8000;
     }
 
     function setFileSelectedUI(filename) {
@@ -449,6 +506,8 @@ jQuery(document).ready(function($) {
         isImportStopped = false;
         currentRow = 0;
         batchRetryCount = 0;
+        lockRetryCount = 0;
+        runtimeBatchSize = getSelectedBatchSize();
         importSummary = createEmptySummary();
 
         showProgressUI();
@@ -466,7 +525,7 @@ jQuery(document).ready(function($) {
         $(document).trigger('eim:importStart', [{
             file: currentFile,
             totalRows: totalRows,
-            batchSize: parseInt($('#batch_size').val(), 10) || parseInt(config.default_batch || 25, 10) || 25,
+            batchSize: getRuntimeBatchSize(),
             dryRun: $('#eim_dry_run').is(':checked'),
             duplicateStrategy: $('#eim_duplicate_strategy').length ? $('#eim_duplicate_strategy').val() : 'skip',
             matchStrategy: $('#eim_match_strategy').length ? $('#eim_match_strategy').val() : 'auto',
@@ -482,7 +541,7 @@ jQuery(document).ready(function($) {
             return;
         }
 
-        const batchSize = parseInt($('#batch_size').val(), 10) || parseInt(config.default_batch || 25, 10) || 25;
+        const batchSize = getRuntimeBatchSize();
         const startLabel = currentRow + 1;
         const endLabel = totalRows ? Math.min(totalRows, currentRow + batchSize) : currentRow + batchSize;
 
@@ -525,6 +584,7 @@ jQuery(document).ready(function($) {
                 }
 
                 batchRetryCount = 0;
+                lockRetryCount = 0;
                 processResultsSequentially(
                     response.data.results || [],
                     response.data.summary || createEmptySummary(),
@@ -533,6 +593,24 @@ jQuery(document).ready(function($) {
             })
             .fail(function(xhr, status, error) {
                 const fallback = error || status || t('server_error');
+                const ajaxError = extractAjaxError(xhr || null, fallback);
+
+                if (isBusyLockResponse(xhr)) {
+                    lockRetryCount++;
+
+                    if (lockRetryCount <= maxLockRetries) {
+                        logMessage(
+                            t('network_retrying'),
+                            'WARN',
+                            `${ajaxError} (${lockRetryCount}/${maxLockRetries})`
+                        );
+                        setTimeout(processBatch, getRetryDelay(xhr));
+                        return;
+                    }
+                } else {
+                    lockRetryCount = 0;
+                    reduceRuntimeBatchSize();
+                }
 
                 if (batchRetryCount < maxBatchRetries) {
                     batchRetryCount++;
@@ -541,14 +619,14 @@ jQuery(document).ready(function($) {
                         'WARN',
                         `${fallback} (${batchRetryCount}/${maxBatchRetries})`
                     );
-                    setTimeout(processBatch, 3000);
+                    setTimeout(processBatch, getRetryDelay(xhr));
                     return;
                 }
 
                 logMessage(
                     t('network_stopped'),
                     'ERROR',
-                    extractAjaxError(xhr || null, fallback)
+                    ajaxError
                 );
                 finishImport(true);
             });
@@ -587,7 +665,8 @@ jQuery(document).ready(function($) {
                     logMessage(t('process_stopped'), 'FIN');
                     finishImport(false);
                 } else {
-                    setTimeout(processBatch, 500);
+                    const nextBatchDelay = parseInt(batchMeta.batch_size || 0, 10) >= 100 ? 50 : 500;
+                    setTimeout(processBatch, nextBatchDelay);
                 }
                 return;
             }
@@ -608,7 +687,8 @@ jQuery(document).ready(function($) {
 
             displayedRows++;
             updateProgress(((rowBase + displayedRows) / Math.max(totalRows, 1)) * 100);
-            setTimeout(next, 5);
+            const rowLogDelay = parseInt(batchMeta.batch_size || 0, 10) >= 100 ? 0 : 5;
+            setTimeout(next, rowLogDelay);
         }
 
         next();

@@ -50,6 +50,33 @@ class EIM_Exporter {
         return apply_filters( 'eim_export_column_definitions', $definitions );
     }
 
+    public static function get_canonical_csv_column_labels() {
+        return [
+            'id'          => 'ID',
+            'url'         => 'Absolute URL',
+            'rel_path'    => 'Relative Path',
+            'file'        => 'File',
+            'alt'         => 'Alt Text',
+            'caption'     => 'Caption',
+            'description' => 'Description',
+            'title'       => 'Title',
+        ];
+    }
+
+    public static function get_canonical_csv_headers( $column_keys = null ) {
+        $labels      = self::get_canonical_csv_column_labels();
+        $column_keys  = is_array( $column_keys ) && ! empty( $column_keys ) ? $column_keys : array_keys( $labels );
+        $headers      = [];
+
+        foreach ( $column_keys as $key ) {
+            if ( isset( $labels[ $key ] ) ) {
+                $headers[] = $labels[ $key ];
+            }
+        }
+
+        return $headers;
+    }
+
     public function get_column_definitions( $context = [] ) {
         $context     = is_array( $context ) ? $context : [];
         $definitions = self::get_csv_column_definitions();
@@ -64,12 +91,7 @@ class EIM_Exporter {
             return $exporter->get_column_headers( [], $column_keys );
         }
 
-        $headers = [];
-        foreach ( self::get_csv_column_definitions() as $definition ) {
-            if ( is_array( $definition ) && isset( $definition['label'] ) ) {
-                $headers[] = (string) $definition['label'];
-            }
-        }
+        $headers = self::get_canonical_csv_headers( $column_keys );
 
         return apply_filters( 'eim_export_headers', $headers, null, null, [] );
     }
@@ -79,8 +101,12 @@ class EIM_Exporter {
         $definitions  = $this->get_column_definitions( $context );
         $headers      = [];
 
+        $canonical_labels = self::get_canonical_csv_column_labels();
+
         foreach ( $column_keys as $key ) {
-            if ( isset( $definitions[ $key ] ) && is_array( $definitions[ $key ] ) && isset( $definitions[ $key ]['label'] ) ) {
+            if ( isset( $canonical_labels[ $key ] ) ) {
+                $headers[] = $canonical_labels[ $key ];
+            } elseif ( isset( $definitions[ $key ] ) && is_array( $definitions[ $key ] ) && isset( $definitions[ $key ]['label'] ) ) {
                 $headers[] = (string) $definitions[ $key ]['label'];
             }
         }
@@ -102,6 +128,11 @@ class EIM_Exporter {
         ignore_user_abort( true );
         // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- Long exports may need additional execution time.
         @set_time_limit( 0 );
+        while ( ob_get_level() > 0 ) {
+            // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Clear previous output before streaming CSV headers.
+            @ob_end_clean();
+        }
+
         nocache_headers();
 
         header( 'Content-Type: text/csv; charset=UTF-8' );
@@ -119,37 +150,52 @@ class EIM_Exporter {
         $defaults = EIM_Config::get_export_defaults();
         $request  = is_array( $request ) ? $request : [];
 
+        /*
+         * Keep this method idempotent. Some code paths call it with raw form
+         * fields (eim_media_type), while others pass an already-normalized
+         * context (media_type). If we only read the form field names, selected
+         * filters such as video/audio/documents are lost during the second
+         * normalization pass and the export falls back to images.
+         */
         $context = [
-            'start_date'        => $this->get_request_string( $request, 'eim_start_date' ),
-            'end_date'          => $this->get_request_string( $request, 'eim_end_date' ),
-            'media_type'        => $this->get_request_string( $request, 'eim_media_type' ),
-            'attachment_filter' => $this->get_request_string( $request, 'eim_attachment_filter' ),
-            'template'          => $this->get_request_string( $request, 'eim_template' ),
-            'format'            => $this->get_request_string( $request, 'eim_export_format', 'csv' ),
-            'orderby'           => $this->get_request_string( $request, 'eim_orderby', 'date' ),
-            'order'             => strtoupper( $this->get_request_string( $request, 'eim_order', 'DESC' ) ),
-            'delta_since'       => $this->get_request_string( $request, 'eim_delta_since' ),
+            'start_date'        => $this->get_context_string( $request, 'eim_start_date', 'start_date' ),
+            'end_date'          => $this->get_context_string( $request, 'eim_end_date', 'end_date' ),
+            'media_type'        => $this->get_context_string( $request, 'eim_media_type', 'media_type' ),
+            'attachment_filter' => $this->get_context_string( $request, 'eim_attachment_filter', 'attachment_filter' ),
+            'template'          => $this->get_context_string( $request, 'eim_template', 'template' ),
+            'format'            => $this->get_context_string( $request, 'eim_export_format', 'format', 'csv' ),
+            'orderby'           => $this->get_context_string( $request, 'eim_orderby', 'orderby', 'date' ),
+            'order'             => strtoupper( $this->get_context_string( $request, 'eim_order', 'order', 'DESC' ) ),
+            'delta_since'       => $this->get_context_string( $request, 'eim_delta_since', 'delta_since' ),
             'column_keys'       => $this->normalize_column_keys_from_request( $request ),
-            'author_id'         => $this->get_request_absint( $request, 'eim_author_id' ),
-            'parent_post_type'  => $this->get_request_string( $request, 'eim_parent_post_type' ),
-            'mime_subtype'      => $this->get_request_string( $request, 'eim_mime_subtype' ),
-            'has_alt_text'      => $this->normalize_nullable_flag( $this->get_request_string( $request, 'eim_has_alt_text' ) ),
-            'has_title'         => $this->normalize_nullable_flag( $this->get_request_string( $request, 'eim_has_title' ) ),
-            'has_caption'       => $this->normalize_nullable_flag( $this->get_request_string( $request, 'eim_has_caption' ) ),
-            'has_description'   => $this->normalize_nullable_flag( $this->get_request_string( $request, 'eim_has_description' ) ),
-            'min_file_size'     => $this->get_request_absint( $request, 'eim_min_file_size' ),
-            'max_file_size'     => $this->get_request_absint( $request, 'eim_max_file_size' ),
-            'custom_meta_key'   => $this->get_request_string( $request, 'eim_custom_meta_key' ),
-            'custom_meta_value' => $this->get_request_string( $request, 'eim_custom_meta_value' ),
+            'author_id'         => $this->get_context_absint( $request, 'eim_author_id', 'author_id' ),
+            'parent_post_type'  => $this->get_context_string( $request, 'eim_parent_post_type', 'parent_post_type' ),
+            'mime_subtype'      => $this->get_context_string( $request, 'eim_mime_subtype', 'mime_subtype' ),
+            'has_alt_text'      => $this->normalize_nullable_flag( $this->get_context_string( $request, 'eim_has_alt_text', 'has_alt_text' ) ),
+            'has_title'         => $this->normalize_nullable_flag( $this->get_context_string( $request, 'eim_has_title', 'has_title' ) ),
+            'has_caption'       => $this->normalize_nullable_flag( $this->get_context_string( $request, 'eim_has_caption', 'has_caption' ) ),
+            'has_description'   => $this->normalize_nullable_flag( $this->get_context_string( $request, 'eim_has_description', 'has_description' ) ),
+            'min_file_size'     => $this->get_context_absint( $request, 'eim_min_file_size', 'min_file_size' ),
+            'max_file_size'     => $this->get_context_absint( $request, 'eim_max_file_size', 'max_file_size' ),
+            'custom_meta_key'   => $this->get_context_string( $request, 'eim_custom_meta_key', 'custom_meta_key' ),
+            'custom_meta_value' => $this->get_context_string( $request, 'eim_custom_meta_value', 'custom_meta_value' ),
         ];
+
+        if ( null === $context['column_keys'] && isset( $request['column_keys'] ) ) {
+            $context['column_keys'] = $this->normalize_column_keys_value( $request['column_keys'] );
+        }
 
         if ( '' === $context['media_type'] ) {
             $context['media_type'] = isset( $defaults['media_type'] ) ? (string) $defaults['media_type'] : 'image';
         }
 
+        $context['media_type'] = $this->normalize_media_type( $context['media_type'] );
+
         if ( '' === $context['attachment_filter'] ) {
             $context['attachment_filter'] = isset( $defaults['attachment_filter'] ) ? (string) $defaults['attachment_filter'] : 'all';
         }
+
+        $context['attachment_filter'] = $this->normalize_attachment_filter( $context['attachment_filter'] );
 
         if ( ! in_array( $context['order'], [ 'ASC', 'DESC' ], true ) ) {
             $context['order'] = 'DESC';
@@ -171,7 +217,9 @@ class EIM_Exporter {
         $query = new WP_Query( $args );
         $this->detach_parent_filters();
 
-        return ! empty( $query->posts ) ? array_map( 'absint', $query->posts ) : [];
+        $ids = ! empty( $query->posts ) ? array_map( 'absint', $query->posts ) : [];
+
+        return $this->filter_attachment_ids_after_query( $ids, $context );
     }
 
     public function get_attachments_for_export( $context = [] ) {
@@ -282,9 +330,9 @@ class EIM_Exporter {
             'order'          => isset( $context['order'] ) ? $context['order'] : 'DESC',
         ];
 
-        $mime_type = $this->get_post_mime_type_from_context( $context );
-        if ( '' !== $mime_type ) {
-            $args['post_mime_type'] = $mime_type;
+        $mime_types = $this->get_post_mime_types_from_context( $context );
+        if ( ! empty( $mime_types ) ) {
+            $args['post_mime_type'] = $mime_types;
         }
 
         $date_query = $this->build_date_query( $context );
@@ -303,20 +351,227 @@ class EIM_Exporter {
         return apply_filters( 'eim_export_query_args', $args, $context );
     }
 
-    public function get_post_mime_type_from_context( $context ) {
-        switch ( isset( $context['media_type'] ) ? $context['media_type'] : 'image' ) {
-            case 'all':
-                return '';
-            case 'video':
-                return 'video';
-            case 'audio':
-                return 'audio';
-            case 'application':
-                return 'application';
-            case 'image':
-            default:
-                return 'image';
+    private function filter_attachment_ids_after_query( $attachment_ids, $context ) {
+        $filtered = [];
+
+        foreach ( (array) $attachment_ids as $attachment_id ) {
+            $attachment_id = absint( $attachment_id );
+            if ( $attachment_id <= 0 ) {
+                continue;
+            }
+
+            if ( ! $this->attachment_matches_context( $attachment_id, $context ) ) {
+                continue;
+            }
+
+            $filtered[] = $attachment_id;
         }
+
+        return apply_filters( 'eim_export_filtered_attachment_ids', $filtered, $attachment_ids, $context );
+    }
+
+    private function attachment_matches_context( $attachment_id, $context ) {
+        $attachment = get_post( $attachment_id );
+        if ( ! $attachment instanceof WP_Post || 'attachment' !== $attachment->post_type ) {
+            return false;
+        }
+
+        if ( ! $this->attachment_matches_media_type( $attachment_id, $context ) ) {
+            return false;
+        }
+
+        if ( ! $this->attachment_matches_attachment_filter( $attachment, $context ) ) {
+            return false;
+        }
+
+        if ( ! $this->attachment_matches_date_filter( $attachment, $context ) ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private function attachment_matches_media_type( $attachment_id, $context ) {
+        $media_type = $this->normalize_media_type( isset( $context['media_type'] ) ? $context['media_type'] : 'image' );
+        if ( 'all' === $media_type ) {
+            return true;
+        }
+
+        $mime_type = (string) get_post_mime_type( $attachment_id );
+        if ( '' === $mime_type ) {
+            return false;
+        }
+
+        $allowed_mime_types = $this->get_allowed_mime_types_for_media_type( $media_type );
+        if ( in_array( $mime_type, $allowed_mime_types, true ) ) {
+            return true;
+        }
+
+        return 0 === strpos( $mime_type, $media_type . '/' );
+    }
+
+    private function attachment_matches_attachment_filter( $attachment, $context ) {
+        $filter = $this->normalize_attachment_filter( isset( $context['attachment_filter'] ) ? $context['attachment_filter'] : 'all' );
+
+        if ( 'all' === $filter ) {
+            return true;
+        }
+
+        if ( 'unattached' === $filter ) {
+            return empty( $attachment->post_parent );
+        }
+
+        if ( in_array( $filter, [ 'post', 'page', 'product' ], true ) ) {
+            if ( empty( $attachment->post_parent ) ) {
+                return false;
+            }
+
+            $parent = get_post( (int) $attachment->post_parent );
+            return $parent instanceof WP_Post && $filter === $parent->post_type;
+        }
+
+        return true;
+    }
+
+    private function attachment_matches_date_filter( $attachment, $context ) {
+        $timestamp = strtotime( (string) $attachment->post_date );
+        if ( false === $timestamp ) {
+            return true;
+        }
+
+        if ( ! empty( $context['start_date'] ) ) {
+            $start = strtotime( (string) $context['start_date'] . ' 00:00:00' );
+            if ( false !== $start && $timestamp < $start ) {
+                return false;
+            }
+        }
+
+        if ( ! empty( $context['end_date'] ) ) {
+            $end = strtotime( (string) $context['end_date'] . ' 23:59:59' );
+            if ( false !== $end && $timestamp > $end ) {
+                return false;
+            }
+        }
+
+        if ( ! empty( $context['delta_since'] ) ) {
+            $modified = strtotime( (string) $attachment->post_modified_gmt );
+            $delta    = strtotime( (string) $context['delta_since'] );
+            if ( false !== $modified && false !== $delta && $modified <= $delta ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function get_post_mime_type_from_context( $context ) {
+        $mime_types = $this->get_post_mime_types_from_context( $context );
+
+        if ( empty( $mime_types ) ) {
+            return '';
+        }
+
+        return count( $mime_types ) === 1 ? (string) reset( $mime_types ) : $mime_types;
+    }
+
+    public function get_post_mime_types_from_context( $context ) {
+        $media_type = $this->normalize_media_type( isset( $context['media_type'] ) ? $context['media_type'] : 'image' );
+
+        if ( 'all' === $media_type ) {
+            return [];
+        }
+
+        $mime_types = $this->get_allowed_mime_types_for_media_type( $media_type );
+
+        if ( empty( $mime_types ) ) {
+            $mime_types = [ $media_type ];
+        }
+
+        return apply_filters( 'eim_export_post_mime_types', $mime_types, $media_type, $context );
+    }
+
+    private function get_allowed_mime_types_for_media_type( $media_type ) {
+        $media_type = $this->normalize_media_type( $media_type );
+        $all_mimes  = wp_get_mime_types();
+        $matches    = [];
+
+        foreach ( $all_mimes as $extension_pattern => $mime_type ) {
+            $mime_type = (string) $mime_type;
+
+            if ( 0 === strpos( $mime_type, $media_type . '/' ) ) {
+                $matches[] = $mime_type;
+            }
+        }
+
+        $fallbacks = [
+            'image'       => [ 'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif', 'image/svg+xml' ],
+            'video'       => [ 'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/x-ms-wmv', 'video/mpeg', 'video/ogg', 'video/3gpp', 'video/3gpp2' ],
+            'audio'       => [ 'audio/mpeg', 'audio/aac', 'audio/x-realaudio', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/midi', 'audio/x-ms-wma' ],
+            'application' => [ 'application/pdf', 'application/zip', 'application/x-gzip', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ],
+        ];
+
+        if ( isset( $fallbacks[ $media_type ] ) ) {
+            $matches = array_merge( $matches, $fallbacks[ $media_type ] );
+        }
+
+        $matches = array_values( array_unique( array_filter( $matches ) ) );
+
+        return apply_filters( 'eim_export_allowed_mime_types_for_media_type', $matches, $media_type );
+    }
+
+    private function normalize_media_type( $media_type ) {
+        $media_type = is_scalar( $media_type ) ? sanitize_key( (string) $media_type ) : 'image';
+
+        $aliases = [
+            'images'       => 'image',
+            'imagenes'     => 'image',
+            'imagens'      => 'image',
+            'immagini'     => 'image',
+            'videos'       => 'video',
+            'video'        => 'video',
+            'audios'       => 'audio',
+            'documents'    => 'application',
+            'documentos'   => 'application',
+            'documenti'    => 'application',
+            'applications' => 'application',
+            'all-media'    => 'all',
+            'allmedia'     => 'all',
+            'todos'        => 'all',
+        ];
+
+        if ( isset( $aliases[ $media_type ] ) ) {
+            $media_type = $aliases[ $media_type ];
+        }
+
+        $allowed = [ 'image', 'all', 'video', 'audio', 'application' ];
+
+        return in_array( $media_type, $allowed, true ) ? $media_type : 'image';
+    }
+
+    private function normalize_attachment_filter( $attachment_filter ) {
+        $attachment_filter = is_scalar( $attachment_filter ) ? sanitize_key( (string) $attachment_filter ) : 'all';
+
+        $aliases = [
+            'attached'     => 'all',
+            'all-media'    => 'all',
+            'allmedia'     => 'all',
+            'todos'        => 'all',
+            'sin-adjuntar' => 'unattached',
+            'unattacheds'  => 'unattached',
+            'posts'        => 'post',
+            'pages'        => 'page',
+            'products'     => 'product',
+            'producto'     => 'product',
+            'productos'    => 'product',
+        ];
+
+        if ( isset( $aliases[ $attachment_filter ] ) ) {
+            $attachment_filter = $aliases[ $attachment_filter ];
+        }
+
+        $allowed = [ 'all', 'unattached', 'post', 'page', 'product' ];
+
+        return in_array( $attachment_filter, $allowed, true ) ? $attachment_filter : 'all';
     }
 
     public function build_date_query( $context ) {
@@ -362,7 +617,11 @@ class EIM_Exporter {
     }
 
     public function get_export_filename( $context ) {
-        $filename = 'media-export-' . gmdate( 'Y-m-d' ) . '.csv';
+        $context    = is_array( $context ) ? $context : [];
+        $media_type = $this->normalize_media_type( isset( $context['media_type'] ) ? $context['media_type'] : 'all' );
+        $suffix     = 'all' !== $media_type ? '-' . $media_type : '';
+        $filename   = 'media-export' . $suffix . '-' . gmdate( 'Y-m-d' ) . '.csv';
+
         return sanitize_file_name( (string) apply_filters( 'eim_export_filename', $filename, $context ) );
     }
 
@@ -459,31 +718,61 @@ class EIM_Exporter {
         return isset( $request[ $key ] ) ? absint( wp_unslash( $request[ $key ] ) ) : 0;
     }
 
-    private function normalize_column_keys_from_request( $request ) {
-        if ( isset( $request['eim_columns'] ) ) {
+    private function get_context_string( $request, $request_key, $context_key, $default = '' ) {
+        if ( isset( $request[ $request_key ] ) ) {
+            return $this->sanitize_scalar_text( wp_unslash( $request[ $request_key ] ) );
+        }
+
+        if ( isset( $request[ $context_key ] ) ) {
+            return $this->sanitize_scalar_text( $request[ $context_key ] );
+        }
+
+        return $default;
+    }
+
+    private function get_context_absint( $request, $request_key, $context_key ) {
+        if ( isset( $request[ $request_key ] ) ) {
+            return absint( wp_unslash( $request[ $request_key ] ) );
+        }
+
+        if ( isset( $request[ $context_key ] ) ) {
+            return absint( $request[ $context_key ] );
+        }
+
+        return 0;
+    }
+
+    private function sanitize_scalar_text( $value ) {
+        if ( is_array( $value ) || is_object( $value ) ) {
+            return '';
+        }
+
+        return sanitize_text_field( (string) $value );
+    }
+
+    private function normalize_column_keys_value( $value ) {
+        if ( is_array( $value ) ) {
+            return array_values( array_filter( array_map( 'sanitize_key', $value ) ) );
+        }
+
+        if ( is_string( $value ) && '' !== trim( $value ) ) {
             return array_values(
                 array_filter(
-                    array_map(
-                        'sanitize_key',
-                        (array) wp_unslash( $request['eim_columns'] )
-                    )
+                    array_map( 'sanitize_key', array_map( 'trim', explode( ',', $value ) ) )
                 )
             );
         }
 
-        if ( isset( $request['eim_column_keys'] ) ) {
-            $raw = wp_unslash( $request['eim_column_keys'] );
-            if ( is_array( $raw ) ) {
-                return array_values( array_filter( array_map( 'sanitize_key', $raw ) ) );
-            }
+        return null;
+    }
 
-            if ( is_string( $raw ) && '' !== trim( $raw ) ) {
-                return array_values(
-                    array_filter(
-                        array_map( 'sanitize_key', array_map( 'trim', explode( ',', $raw ) ) )
-                    )
-                );
-            }
+    private function normalize_column_keys_from_request( $request ) {
+        if ( isset( $request['eim_columns'] ) ) {
+            return $this->normalize_column_keys_value( wp_unslash( $request['eim_columns'] ) );
+        }
+
+        if ( isset( $request['eim_column_keys'] ) ) {
+            return $this->normalize_column_keys_value( wp_unslash( $request['eim_column_keys'] ) );
         }
 
         return null;

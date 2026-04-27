@@ -1,6 +1,6 @@
 /*
  * Plugin Name: Export/Import Media - Custom Styles
- * Version: 1.7
+ * Version: 1.7.6
  */
 
 :root {
@@ -811,6 +811,7 @@ input[type="date"] {
     justify-content: center;
     gap: 8px;
     text-align: center;
+    line-height: 1.7;
 }
 
 .eim-footer-review strong {
@@ -818,14 +819,25 @@ input[type="date"] {
 }
 
 .eim-footer-review a {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
     text-decoration: none;
     color: #2271b1;
     font-weight: 600;
+    line-height: 1;
+    vertical-align: middle;
 }
 
 .eim-footer-review svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    flex: 0 0 auto;
+    overflow: visible;
     vertical-align: middle;
-    margin-left: 2px;
+    margin: 0;
 }
 
 .eim-main-banner.is-pro-active {

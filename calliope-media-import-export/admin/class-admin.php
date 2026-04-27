@@ -176,6 +176,11 @@ class EIM_Admin {
             // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- Allow longer CSV downloads when the environment permits it.
             @set_time_limit( 0 );
         }
+        while ( ob_get_level() > 0 ) {
+            // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Clear previous output before streaming CSV headers.
+            @ob_end_clean();
+        }
+
         nocache_headers();
 
         header( 'Content-Type: text/csv; charset=UTF-8' );
@@ -183,16 +188,20 @@ class EIM_Admin {
 
         // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Streaming a CSV directly to the browser output.
         $output  = fopen( 'php://output', 'w' );
-        $headers = class_exists( 'EIM_Exporter' ) ? EIM_Exporter::get_csv_headers() : [ __( 'ID', 'calliope-media-import-export' ), __( 'Absolute URL', 'calliope-media-import-export' ), __( 'Relative Path', 'calliope-media-import-export' ), __( 'File', 'calliope-media-import-export' ), __( 'Alt Text', 'calliope-media-import-export' ), __( 'Caption', 'calliope-media-import-export' ), __( 'Description', 'calliope-media-import-export' ), __( 'Title', 'calliope-media-import-export' ) ];
+        $headers = class_exists( 'EIM_Exporter' ) && method_exists( 'EIM_Exporter', 'get_canonical_csv_headers' )
+            ? EIM_Exporter::get_canonical_csv_headers()
+            : [ 'ID', 'Absolute URL', 'Relative Path', 'File', 'Alt Text', 'Caption', 'Description', 'Title' ];
+
+        $sample_image_url = defined( 'EIM_URL' ) ? EIM_URL . 'assets/images/eim-sample.png' : '';
 
         fputcsv( $output, $headers );
         fputcsv(
             $output,
             [
                 '',
-                'https://example.com/wp-content/uploads/2025/08/sample.jpg',
-                '/2025/08/sample.jpg',
-                'sample.jpg',
+                $sample_image_url,
+                '',
+                'eim-sample.png',
                 'Sample alt text',
                 'Sample caption',
                 'Sample description',

@@ -23,8 +23,7 @@ class EIM_Config {
                     '10'  => __( '10 (Safe)', 'calliope-media-import-export' ),
                     '25'  => '25',
                     '50'  => '50',
-                    '100' => __( '100 (Fast)', 'calliope-media-import-export' ),
-                    '500' => __( '500 (Turbo)', 'calliope-media-import-export' ),
+                    '100' => __( '100 (Turbo)', 'calliope-media-import-export' ),
                 ],
                 'options'            => [
                     [
