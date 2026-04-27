@@ -3,7 +3,7 @@ Contributors: mairaforesto
 Tags: import, export, media, images, seo
 Requires at least: 5.6
 Tested up to: 6.9
-Stable tag: 1.7
+Stable tag: 1.7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,10 @@ Export/Import Media Pro adds saved workflows, remote or server-side CSV sources,
 Yes. You can filter by date range, media type, and attachment context such as unattached files or media attached to posts, pages, and WooCommerce products.
 
 == Changelog ==
+
+= 1.7.1 =
+* Fix: CSV validation no longer fails because the importer now closes file handles correctly instead of re-entering its own close helper.
+* Improvement: AJAX validation errors now surface a clearer server response when a host returns a non-JSON error.
 
 = 1.7 =
 * Internal: Replaced the global service map with an internal service registry to keep bootstrapped plugin services more controlled and maintainable.

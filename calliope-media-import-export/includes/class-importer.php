@@ -219,7 +219,7 @@ class EIM_Importer {
         }
 
         if ( is_resource( $handle ) ) {
-            $this->close_file_handle( $handle );
+            fclose( $handle );
         }
 
         $this->release_temp_lock( $lock_key );
@@ -2599,7 +2599,7 @@ class EIM_Importer {
     private function close_file_handle( $handle ) {
         if ( is_resource( $handle ) ) {
             // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing an already opened stream handle.
-            $this->close_file_handle( $handle );
+            fclose( $handle );
         }
     }
 

@@ -182,9 +182,24 @@ jQuery(document).ready(function($) {
             }
         }
 
-        return fallback;
-    }
+        if (response && response.responseJSON) {
+            return extractAjaxError(response.responseJSON, fallback);
+        }
 
+        if (response && response.responseText) {
+            const responseText = String(response.responseText).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+            if (responseText) {
+                return responseText.slice(0, 220);
+            }
+        }
+
+        if (response && response.status) {
+            const statusText = response.statusText ? ` ${response.statusText}` : '';
+            return `HTTP ${response.status}${statusText}`;
+        }
+
+        return fallback || t('server_error');
+    }
     function getModeLabel(mode) {
         switch (String(mode || '')) {
             case 'remote':
@@ -416,13 +431,13 @@ jQuery(document).ready(function($) {
                     t('validation_failed'),
                     'ERROR',
                     extractAjaxError(
-                        xhr && xhr.responseJSON ? xhr.responseJSON : null,
+                        xhr || null,
                         error || status || t('server_error')
                     )
                 );
                 $(document).trigger('eim:validationFailed', [{
                     error: extractAjaxError(
-                        xhr && xhr.responseJSON ? xhr.responseJSON : null,
+                        xhr || null,
                         error || status || t('server_error')
                     )
                 }]);
@@ -533,7 +548,7 @@ jQuery(document).ready(function($) {
                 logMessage(
                     t('network_stopped'),
                     'ERROR',
-                    extractAjaxError(xhr && xhr.responseJSON ? xhr.responseJSON : null, fallback)
+                    extractAjaxError(xhr || null, fallback)
                 );
                 finishImport(true);
             });
