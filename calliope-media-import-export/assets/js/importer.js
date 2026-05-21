@@ -115,7 +115,7 @@ jQuery(document).ready(function($) {
         dropContentDefault.hide();
         dropContentSuccess.css('display', 'flex').show();
         fileNameDisplay.text(filename);
-        dropZone.css('border-style', 'solid').css('border-color', '#27ae60');
+        dropZone.addClass('is-selected');
     }
 
     function resetPreviewUI() {
@@ -132,7 +132,7 @@ jQuery(document).ready(function($) {
         fileInput.val('');
         dropContentSuccess.hide();
         dropContentDefault.show();
-        dropZone.css('border-style', 'dashed').css('border-color', '#34D3F5');
+        dropZone.removeClass('dragover is-selected');
 
         currentFile = '';
         totalRows = 0;
@@ -152,6 +152,14 @@ jQuery(document).ready(function($) {
         resetImportSummaryUI();
 
         return false;
+    }
+
+    function setProgressState(state) {
+        progressBar.removeClass('is-info is-running is-error is-finished');
+
+        if (state) {
+            progressBar.addClass(`is-${state}`);
+        }
     }
 
     function showProgressUI() {
@@ -189,31 +197,32 @@ jQuery(document).ready(function($) {
             return;
         }
 
-        let statusColor = '#333';
+        let statusClass = 'eim-log-status';
         switch (status) {
             case 'SKIPPED':
-                statusColor = '#e67e22';
+                statusClass += ' eim-log-status-skipped';
                 break;
             case 'IMPORTED':
-                statusColor = '#27ae60';
+                statusClass += ' eim-log-status-imported';
                 break;
             case 'ERROR':
-                statusColor = '#c0392b';
+                statusClass += ' eim-log-status-error';
                 break;
             case 'INFO':
-                statusColor = '#2980b9';
+                statusClass += ' eim-log-status-info';
                 break;
             case 'WARN':
-                statusColor = '#b7791f';
+                statusClass += ' eim-log-status-warn';
                 break;
             case 'FIN':
-                statusColor = '#0073aa';
+            case 'FINISHED':
+                statusClass += ' eim-log-status-finished';
                 break;
         }
 
         const row = $('<div>');
         const labelText = getStatusLabel(status) || String(status || '');
-        const label = $('<strong>').css('color', statusColor).text(`${labelText}:`);
+        const label = $('<strong>').addClass(statusClass).text(`${labelText}:`);
 
         row.append(label);
         row.append(document.createTextNode(` ${String(message || '')}`));
@@ -426,7 +435,7 @@ jQuery(document).ready(function($) {
         logContainer.empty();
         downloadLogBtn.hide();
         updateProgress(0);
-        progressBar.css('background-color', '#2980b9');
+        setProgressState('info');
         startButton.prop('disabled', true);
         logMessage(t('validating'), 'INFO');
 
@@ -512,7 +521,7 @@ jQuery(document).ready(function($) {
 
         showProgressUI();
         updateProgress(0);
-        progressBar.css('background-color', '#0073aa');
+        setProgressState('running');
         resultSummaryContainer.hide().empty();
         startButton.hide().prop('disabled', false);
         stopButton.show().prop('disabled', false);
@@ -700,8 +709,9 @@ jQuery(document).ready(function($) {
         downloadLogBtn.show();
 
         if (isError) {
-            progressBar.css('background-color', '#c0392b');
+            setProgressState('error');
         } else if (!isImportStopped && totalRows > 0) {
+            setProgressState('finished');
             updateProgress(100);
         }
 
@@ -756,14 +766,14 @@ jQuery(document).ready(function($) {
         e.stopPropagation();
 
         if (!currentFile && !fileInput.val()) {
-            $(this).addClass('dragover').css('background-color', '#e6f7ff').css('border-color', '#FF4081');
+            $(this).addClass('dragover');
         }
     });
 
     dropZone.on('dragleave dragend drop', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        $(this).removeClass('dragover').css('background-color', '');
+        $(this).removeClass('dragover');
     });
 
     dropZone.on('drop', function(e) {

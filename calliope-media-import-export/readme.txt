@@ -2,8 +2,8 @@
 Contributors: mairaforesto
 Tags: import, export, media, images, seo
 Requires at least: 5.6
-Tested up to: 6.9
-Stable tag: 1.7.9
+Tested up to: 7.0
+Stable tag: 1.7.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,12 @@ Export/Import Media Pro adds saved workflows, remote or server-side CSV sources,
 Yes. You can filter by date range, media type, and attachment context such as unattached files or media attached to posts, pages, and WooCommerce products.
 
 == Changelog ==
+
+= 1.7.10 =
+* Compatibility: Tested with WordPress 7.0.
+* Improvement: Simplified the admin banner by removing the highlight chips.
+* Improvement: Added a suggestions mail link to the admin banner.
+* Improvement: Moved remaining inline admin styles into the plugin stylesheet.
 
 = 1.7.9 =
 * Fixed export media type filtering so selecting Videos, Audio, Documents, or Images uses explicit MIME type lists instead of falling back to images.

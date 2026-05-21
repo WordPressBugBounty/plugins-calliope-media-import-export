@@ -58,24 +58,7 @@ class EIM_Admin {
     }
 
     public function render_locked_menu_styles() {
-        if ( function_exists( 'eim_is_pro_active' ) && eim_is_pro_active() ) {
-            return;
-        }
-        ?>
-        <style>
-            #adminmenu .wp-submenu a[href*="page=eim-pro-locked-"] {
-                color: #9da3ae !important;
-            }
-
-            #adminmenu .wp-submenu a[href*="page=eim-pro-locked-"]::after {
-                content: "\f160";
-                font-family: dashicons;
-                font-size: 14px;
-                margin-left: 6px;
-                vertical-align: middle;
-            }
-        </style>
-        <?php
+        // Kept for backward compatibility with older hooks. Styles are loaded from assets/css/style.css.
     }
 
     public function enqueue_assets( $hook ) {
@@ -278,6 +261,7 @@ class EIM_Admin {
             'version'             => EIM_VERSION,
             'documentation_url'   => isset( $urls['documentation'] ) ? $urls['documentation'] : '',
             'support_url'         => isset( $urls['support'] ) ? $urls['support'] : '',
+            'suggestions_url'     => 'mailto:suggestions@calliope.com.ar',
             'review_url'          => isset( $urls['reviews'] ) ? $urls['reviews'] : '',
             'pro_url'             => isset( $urls['pro'] ) ? $urls['pro'] : '',
             'is_pro_active'       => function_exists( 'eim_is_pro_active' ) ? eim_is_pro_active() : false,
@@ -452,10 +436,13 @@ class EIM_Admin {
                     <?php endif; ?>
                     <div class="eim-banner-actions">
                         <?php if ( ! empty( $context['documentation_url'] ) ) : ?>
-                            <a href="<?php echo esc_url( $context['documentation_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="eim-banner-link"><?php esc_html_e( 'Documentation', 'calliope-media-import-export' ); ?></a>
+                            <a href="<?php echo esc_url( $context['documentation_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="eim-banner-link"><?php esc_html_e( 'Documentación', 'calliope-media-import-export' ); ?></a>
                         <?php endif; ?>
                         <?php if ( ! empty( $context['support_url'] ) ) : ?>
-                            <a href="<?php echo esc_url( $context['support_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="eim-banner-link"><?php esc_html_e( 'Support forum', 'calliope-media-import-export' ); ?></a>
+                            <a href="<?php echo esc_url( $context['support_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="eim-banner-link"><?php esc_html_e( 'Soporte', 'calliope-media-import-export' ); ?></a>
+                        <?php endif; ?>
+                        <?php if ( ! empty( $context['suggestions_url'] ) ) : ?>
+                            <a href="<?php echo esc_url( $context['suggestions_url'] ); ?>" class="eim-banner-link"><?php esc_html_e( 'Sugerencias', 'calliope-media-import-export' ); ?></a>
                         <?php endif; ?>
                         <?php do_action( 'eim_admin_banner_actions', $context ); ?>
                     </div>
@@ -468,12 +455,6 @@ class EIM_Admin {
                         <h1><?php esc_html_e( 'Export/Import Media', 'calliope-media-import-export' ); ?></h1>
                         <p><?php esc_html_e( 'A clean CSV workflow for exporting, previewing, and importing media while helping you avoid duplicate attachments.', 'calliope-media-import-export' ); ?></p>
                     </div>
-                </div>
-                <div class="eim-banner-highlights" aria-label="<?php esc_attr_e( 'Free plugin highlights', 'calliope-media-import-export' ); ?>">
-                    <span class="eim-banner-chip"><?php esc_html_e( 'Preview before import', 'calliope-media-import-export' ); ?></span>
-                    <span class="eim-banner-chip"><?php esc_html_e( 'Duplicate-safe free workflow', 'calliope-media-import-export' ); ?></span>
-                    <span class="eim-banner-chip"><?php esc_html_e( 'Core metadata columns', 'calliope-media-import-export' ); ?></span>
-                    <span class="eim-banner-chip"><?php esc_html_e( 'Batch processing', 'calliope-media-import-export' ); ?></span>
                 </div>
             </div>
         </div>
@@ -506,14 +487,14 @@ class EIM_Admin {
 
                     <p>
                         <label for="eim_media_type"><strong><?php esc_html_e( 'Media Type:', 'calliope-media-import-export' ); ?></strong></label><br>
-                        <select name="eim_media_type" id="eim_media_type" style="min-width: 200px;">
+                        <select name="eim_media_type" id="eim_media_type" class="eim-filter-select">
                             <?php echo $this->build_select_options( $context['export_media_types'], isset( $context['export_defaults']['media_type'] ) ? $context['export_defaults']['media_type'] : 'image' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                         </select>
                     </p>
 
                     <p>
                         <label for="eim_attachment_filter"><strong><?php esc_html_e( 'Filter by Attachment:', 'calliope-media-import-export' ); ?></strong></label><br>
-                        <select name="eim_attachment_filter" id="eim_attachment_filter" style="min-width: 200px;">
+                        <select name="eim_attachment_filter" id="eim_attachment_filter" class="eim-filter-select">
                             <?php echo $this->build_select_options( $context['attachment_filters'], isset( $context['export_defaults']['attachment_filter'] ) ? $context['export_defaults']['attachment_filter'] : 'all' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                         </select>
                     </p>
@@ -555,9 +536,9 @@ class EIM_Admin {
                         <p><?php esc_html_e( 'Drag and drop a CSV file here or click to upload', 'calliope-media-import-export' ); ?></p>
                     </div>
 
-                    <div id="eim-drop-content-success" style="display:none;">
+                    <div id="eim-drop-content-success">
                         <div class="eim-file-card">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                             <span id="eim-file-name-display"></span>
                             <span id="eim-remove-file" title="<?php esc_attr_e( 'Remove file', 'calliope-media-import-export' ); ?>">&times;</span>
                         </div>
@@ -584,7 +565,7 @@ class EIM_Admin {
                 <?php do_action( 'eim_import_form_fields_after', $context ); ?>
 
                 <button type="button" class="button button-primary" id="eim-start-button"><?php esc_html_e( 'Start Import', 'calliope-media-import-export' ); ?></button>
-                <button type="button" class="button" id="eim-stop-button" style="display:none;"><?php esc_html_e( 'Stop Process', 'calliope-media-import-export' ); ?></button>
+                <button type="button" class="button" id="eim-stop-button"><?php esc_html_e( 'Stop Process', 'calliope-media-import-export' ); ?></button>
             </form>
         </div>
         <?php
@@ -795,7 +776,7 @@ class EIM_Admin {
 
     private function render_import_preview_panel() {
         ?>
-        <div id="eim-preview-panel" class="eim-card" style="display:none;">
+        <div id="eim-preview-panel" class="eim-card">
             <h3><?php esc_html_e( 'CSV Preview', 'calliope-media-import-export' ); ?></h3>
             <p><?php esc_html_e( 'Review the file before starting the import.', 'calliope-media-import-export' ); ?></p>
             <div id="eim-preview-content"></div>
@@ -805,21 +786,21 @@ class EIM_Admin {
 
     private function render_progress_panel() {
         ?>
-        <div id="eimp-progress-container" class="eim-card" style="display:none; margin-top: 20px;">
+        <div id="eimp-progress-container" class="eim-card">
             <h3><?php esc_html_e( 'Import Progress:', 'calliope-media-import-export' ); ?></h3>
 
-            <div style="background: #eee; border: 1px solid #ccc; padding: 5px; border-radius: 5px;">
-                <div id="eimp-progress-bar" style="width: 0%; height: 24px; background-color: #0073aa; text-align: center; line-height: 24px; color: white; font-weight: bold; transition: width 0.1s ease; border-radius: 3px;">0%</div>
+            <div class="eim-progress-track">
+                <div id="eimp-progress-bar">0%</div>
             </div>
 
             <div class="eim-warning-message"><?php esc_html_e( 'Keep this tab open while the current import is running.', 'calliope-media-import-export' ); ?></div>
 
-            <div id="eim-import-result-summary" style="display:none;"></div>
+            <div id="eim-import-result-summary"></div>
 
-            <div id="eimp-log" style="background: #fafafa; border: 1px solid #ccc; border-top: none; padding: 10px; max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 13px; margin-top: 5px;"></div>
+            <div id="eimp-log"></div>
 
-            <div style="margin-top: 15px; text-align: right;">
-                <button type="button" class="button" id="eim-download-log" style="display:none;"><?php esc_html_e( 'Download Log (.txt)', 'calliope-media-import-export' ); ?></button>
+            <div class="eim-log-actions">
+                <button type="button" class="button" id="eim-download-log"><?php esc_html_e( 'Download Log (.txt)', 'calliope-media-import-export' ); ?></button>
             </div>
         </div>
         <?php
@@ -830,7 +811,7 @@ class EIM_Admin {
             return;
         }
 
-        $stars_svg = '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#ffb900" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>';
+        $stars_svg = '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>';
         $allowed   = [
             'a'    => [ 'href' => [], 'target' => [], 'rel' => [], 'aria-label' => [] ],
             'svg'  => [ 'width' => [], 'height' => [], 'viewBox' => [] ],

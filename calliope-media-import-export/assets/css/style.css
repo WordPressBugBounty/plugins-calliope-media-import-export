@@ -1,6 +1,6 @@
 /*
  * Plugin Name: Export/Import Media - Custom Styles
- * Version: 1.7.6
+ * Version: 1.7.10
  */
 
 :root {
@@ -152,6 +152,22 @@ input[type="date"] {
     color: var(--eim-text);
 }
 
+.eim-filter-select {
+    min-width: 200px;
+}
+
+#adminmenu .wp-submenu a[href*="page=eim-pro-locked-"] {
+    color: #9da3ae !important;
+}
+
+#adminmenu .wp-submenu a[href*="page=eim-pro-locked-"]::after {
+    content: "\f160";
+    font-family: dashicons;
+    font-size: 14px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
 .eim-main-banner {
     display: block;
     padding: 24px 28px;
@@ -163,6 +179,10 @@ input[type="date"] {
 }
 
 .eim-banner-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 24px;
     min-width: 0;
     width: 100%;
 }
@@ -170,9 +190,11 @@ input[type="date"] {
 .eim-banner-topbar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 18px;
-    margin-bottom: 20px;
+    justify-content: flex-end;
+    gap: 10px;
+    grid-column: 2;
+    grid-row: 1;
+    margin-bottom: 0;
 }
 
 .eim-banner-kicker {
@@ -194,6 +216,8 @@ input[type="date"] {
     grid-template-columns: 56px minmax(0, 1fr);
     align-items: center;
     gap: 16px;
+    grid-column: 1;
+    grid-row: 1;
     width: 100%;
 }
 
@@ -237,34 +261,6 @@ input[type="date"] {
     line-height: 1.6;
 }
 
-.eim-banner-highlights {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 8px;
-    margin-top: 18px;
-    width: 100%;
-}
-
-.eim-banner-chip {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1 1 0;
-    width: auto;
-    min-width: 0;
-    min-height: 34px;
-    padding: 8px 12px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.15);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 600;
-    text-align: center;
-    line-height: 1.2;
-    box-sizing: border-box;
-}
-
 .eim-main-banner.is-pro-active {
     padding-top: 24px;
     padding-bottom: 24px;
@@ -275,6 +271,7 @@ input[type="date"] {
     flex-wrap: wrap;
     justify-content: flex-end;
     gap: 10px;
+    min-width: 0;
 }
 
 .eim-banner-link {
@@ -410,6 +407,11 @@ input[type="date"] {
     border-color: #7c97c3;
 }
 
+.eim-drop-zone.is-selected {
+    border-style: solid;
+    border-color: var(--eim-success);
+}
+
 #eim-drop-content-default {
     display: flex;
     flex-direction: column;
@@ -429,6 +431,19 @@ input[type="date"] {
     color: #4f5b72;
     font-size: 15px;
     pointer-events: none;
+}
+
+#eim-drop-content-success,
+#eim-stop-button,
+#eim-preview-panel,
+#eimp-progress-container,
+#eim-import-result-summary,
+#eim-download-log {
+    display: none;
+}
+
+#eim-drop-content-success {
+    color: var(--eim-success);
 }
 
 .eim-file-card {
@@ -503,6 +518,10 @@ input[type="date"] {
     display: flex;
     flex-direction: column;
     gap: 20px;
+}
+
+#eimp-progress-container {
+    margin-top: 20px;
 }
 
 .eim-preview-grid {
@@ -645,9 +664,35 @@ input[type="date"] {
 }
 
 #eimp-progress-bar {
+    width: 0%;
+    height: 24px;
     background-color: #7c97c3 !important;
     border-radius: 3px;
-    transition: width 0.3s ease;
+    text-align: center;
+    line-height: 24px;
+    color: #fff;
+    font-weight: 700;
+    transition: width 0.1s ease;
+}
+
+#eimp-progress-bar.is-info {
+    background-color: #2980b9 !important;
+}
+
+#eimp-progress-bar.is-running,
+#eimp-progress-bar.is-finished {
+    background-color: #0073aa !important;
+}
+
+#eimp-progress-bar.is-error {
+    background-color: #c0392b !important;
+}
+
+.eim-progress-track {
+    background: #eee;
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 5px;
 }
 
 .eim-warning-message {
@@ -662,8 +707,50 @@ input[type="date"] {
 }
 
 #eimp-log {
+    background: #fafafa;
+    border: 1px solid #ccc;
+    border-top: none;
+    padding: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 13px;
+    margin-top: 5px;
     scrollbar-width: thin;
     scrollbar-color: #c7cfda #fafafa;
+}
+
+.eim-log-actions {
+    margin-top: 15px;
+    text-align: right;
+}
+
+.eim-log-status {
+    color: #333;
+}
+
+.eim-log-status-skipped {
+    color: #e67e22;
+}
+
+.eim-log-status-imported {
+    color: #27ae60;
+}
+
+.eim-log-status-error {
+    color: #c0392b;
+}
+
+.eim-log-status-info {
+    color: #2980b9;
+}
+
+.eim-log-status-warn {
+    color: #b7791f;
+}
+
+.eim-log-status-finished {
+    color: #0073aa;
 }
 
 #eimp-log::-webkit-scrollbar {
@@ -860,25 +947,34 @@ input[type="date"] {
         padding: 22px;
     }
 
+    .eim-banner-main {
+        grid-template-columns: 1fr;
+        align-items: flex-start;
+    }
+
     .eim-banner-topbar,
     .eim-pro-spotlight-card,
     .eim-pro-showcase-heading {
+        grid-column: 1;
+        grid-row: 2;
         flex-direction: column;
         align-items: flex-start;
     }
 
     .eim-banner-content {
+        grid-column: 1;
+        grid-row: 1;
         grid-template-columns: 1fr;
         align-items: flex-start;
+    }
+
+    .eim-banner-actions {
+        justify-content: flex-start;
     }
 
     .eim-banner-text h1,
     .eim-banner-text h3 {
         font-size: 24px;
-    }
-
-    .eim-banner-highlights {
-        flex-wrap: wrap;
     }
 
     .eim-upgrade-note a {
