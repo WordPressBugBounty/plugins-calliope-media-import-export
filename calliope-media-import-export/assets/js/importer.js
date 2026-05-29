@@ -32,9 +32,14 @@ jQuery(document).ready(function($) {
     let lockRetryCount = 0;
     let runtimeBatchSize = 0;
     let importSummary = createEmptySummary();
+    let progressPollTimer = null;
+    let progressPollInFlight = false;
+    let progressCursor = 0;
+    let displayedResultKeys = {};
 
     const maxBatchRetries = 5;
     const maxLockRetries = 12;
+    const liveRowsPerRequest = 1;
 
     function t(key) {
         if (i18n && Object.prototype.hasOwnProperty.call(i18n, key) && String(i18n[key] || '') !== '') {
@@ -69,21 +74,23 @@ jQuery(document).ready(function($) {
         const duplicateStrategy = $('#eim_duplicate_strategy').length ? String($('#eim_duplicate_strategy').val() || 'skip') : 'skip';
         const isLocalImport = $('#eim_local_import').is(':checked');
         const skipThumbnails = $('#eim_skip_thumbnails').is(':checked');
-        let safeLimit = 25;
+        let safeLimit = 50;
 
-        if (conversionFormat !== 'keep' || duplicateStrategy === 'replace_file') {
+        if (conversionFormat === 'avif') {
+            safeLimit = 1;
+        } else if (conversionFormat === 'webp') {
+            safeLimit = 5;
+        } else if (duplicateStrategy === 'replace_file') {
             safeLimit = 10;
         } else if (duplicateStrategy !== 'skip') {
             safeLimit = 15;
-        } else if (isLocalImport && skipThumbnails) {
-            safeLimit = 50;
         }
 
         return Math.min(requested, safeLimit);
     }
 
     function getRuntimeBatchSize() {
-        const selectedBatchSize = getSelectedBatchSize();
+        const selectedBatchSize = Math.min(getSelectedBatchSize(), liveRowsPerRequest);
 
         if (!runtimeBatchSize || runtimeBatchSize > selectedBatchSize) {
             runtimeBatchSize = selectedBatchSize;
@@ -104,6 +111,10 @@ jQuery(document).ready(function($) {
             nextBatchSize = 10;
         } else if (currentBatchSize > 5) {
             nextBatchSize = 5;
+        } else if (currentBatchSize > 2) {
+            nextBatchSize = 2;
+        } else if (currentBatchSize > 1) {
+            nextBatchSize = 1;
         }
 
         if (nextBatchSize < currentBatchSize) {
@@ -148,6 +159,20 @@ jQuery(document).ready(function($) {
         resultSummaryContainer.hide().empty();
     }
 
+    function stopProgressPolling() {
+        if (progressPollTimer) {
+            clearInterval(progressPollTimer);
+            progressPollTimer = null;
+        }
+    }
+
+    function resetProgressTracking() {
+        stopProgressPolling();
+        progressPollInFlight = false;
+        progressCursor = 0;
+        displayedResultKeys = {};
+    }
+
     function resetFileUI() {
         fileInput.val('');
         dropContentSuccess.hide();
@@ -162,6 +187,7 @@ jQuery(document).ready(function($) {
         isValidating = false;
         autoStartAfterValidation = false;
 
+        resetProgressTracking();
         startButton.prop('disabled', false).show();
         stopButton.hide().prop('disabled', false);
         logContainer.empty();
@@ -255,6 +281,100 @@ jQuery(document).ready(function($) {
 
         logContainer.append(row);
         logContainer.scrollTop(logContainer[0].scrollHeight);
+    }
+
+    function getResultKey(result) {
+        if (!result || typeof result !== 'object') {
+            return '';
+        }
+
+        const rowNumber = parseInt(result.row_number || 0, 10);
+        if (rowNumber > 0) {
+            return `row:${rowNumber}`;
+        }
+
+        return [
+            String(result.status || ''),
+            String(result.file || ''),
+            String(result.message || '')
+        ].join('|');
+    }
+
+    function logResultOnce(result) {
+        if (!result || result.status === 'FINISHED') {
+            return false;
+        }
+
+        const key = getResultKey(result);
+        if (key && displayedResultKeys[key]) {
+            return false;
+        }
+
+        if (key) {
+            displayedResultKeys[key] = true;
+        }
+
+        logMessage(result.file || '', result.status || 'INFO', result.message || '');
+        return true;
+    }
+
+    function pollImportProgress() {
+        if (!currentFile || isImportStopped || progressPollInFlight) {
+            return;
+        }
+
+        progressPollInFlight = true;
+
+        $.ajax({
+            url: ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'eim_get_import_progress',
+                nonce: nonce,
+                file: currentFile,
+                after: progressCursor
+            },
+            dataType: 'json'
+        })
+            .done(function(response) {
+                if (!(response && response.success && response.data)) {
+                    return;
+                }
+
+                const entries = Array.isArray(response.data.entries) ? response.data.entries : [];
+                entries.forEach(function(entry) {
+                    const cursor = parseInt(entry.cursor || 0, 10) || 0;
+                    const result = entry.result || {};
+                    progressCursor = Math.max(progressCursor, cursor);
+
+                    if (result && result.status !== 'FINISHED') {
+                        logResultOnce(result);
+
+                        const rowNumber = parseInt(result.row_number || cursor || 0, 10) || 0;
+                        if (rowNumber > 0) {
+                            updateProgress((rowNumber / Math.max(totalRows, 1)) * 100);
+                        }
+                    }
+                });
+
+                progressCursor = Math.max(
+                    progressCursor,
+                    parseInt(response.data.latest_cursor || 0, 10) || 0
+                );
+            })
+            .always(function() {
+                progressPollInFlight = false;
+            });
+    }
+
+    function startProgressPolling() {
+        if (!currentFile) {
+            return;
+        }
+
+        stopProgressPolling();
+        pollImportProgress();
+        progressPollTimer = setInterval(pollImportProgress, 650);
     }
 
     function extractAjaxError(response, fallback = '') {
@@ -557,6 +677,7 @@ jQuery(document).ready(function($) {
         lockRetryCount = 0;
         runtimeBatchSize = getSelectedBatchSize();
         importSummary = createEmptySummary();
+        resetProgressTracking();
 
         showProgressUI();
         updateProgress(0);
@@ -597,14 +718,13 @@ jQuery(document).ready(function($) {
             return;
         }
 
-        const batchSize = getRuntimeBatchSize();
+        const batchSize = liveRowsPerRequest;
         const startLabel = currentRow + 1;
-        const endLabel = totalRows ? Math.min(totalRows, currentRow + batchSize) : currentRow + batchSize;
 
         logMessage(
-            t('processing_batch'),
+            'Procesando imagen',
             'INFO',
-            `${startLabel}-${endLabel}`
+            totalRows ? `#${startLabel} de ${totalRows}` : `#${startLabel}`
         );
 
         $.ajax({
@@ -715,7 +835,7 @@ jQuery(document).ready(function($) {
                     aggregateSummary: $.extend({}, importSummary)
                 }]);
 
-                if (safeBatchSummary.processed > 0) {
+                if (safeBatchSummary.processed > 1) {
                     logMessage(t('batch_summary'), 'INFO', formatSummaryLine(safeBatchSummary));
                 }
 
@@ -737,7 +857,8 @@ jQuery(document).ready(function($) {
                     logMessage(t('process_stopped'), 'FIN');
                     finishImport(false);
                 } else {
-                    const nextBatchDelay = parseInt(batchMeta.batch_size || 0, 10) >= 100 ? 50 : 500;
+                    const conversionFormat = String(batchMeta.convert_images_format || $('#eim_pro_convert_images_format').val() || 'keep');
+                    const nextBatchDelay = conversionFormat !== 'keep' ? 50 : 20;
                     setTimeout(processBatch, nextBatchDelay);
                 }
                 return;
@@ -753,12 +874,15 @@ jQuery(document).ready(function($) {
                 return;
             }
 
+            displayedRows++;
             if (result) {
-                logMessage(result.file || '', result.status || 'INFO', result.message || '');
+                logResultOnce(result);
             }
 
-            displayedRows++;
-            updateProgress(((rowBase + displayedRows) / Math.max(totalRows, 1)) * 100);
+            const rowNumber = parseInt((result && result.row_number) || 0, 10) || 0;
+            const progressRows = rowNumber > 0 ? rowNumber : (rowBase + displayedRows);
+            updateProgress((progressRows / Math.max(totalRows, 1)) * 100);
+
             const rowLogDelay = parseInt(batchMeta.batch_size || 0, 10) >= 100 ? 0 : 5;
             setTimeout(next, rowLogDelay);
         }
@@ -767,6 +891,7 @@ jQuery(document).ready(function($) {
     }
 
     function finishImport(isError) {
+        stopProgressPolling();
         startButton.show().prop('disabled', false);
         stopButton.hide().prop('disabled', false);
         downloadLogBtn.show();

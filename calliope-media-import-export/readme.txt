@@ -3,7 +3,7 @@ Contributors: mairaforesto
 Tags: import, export, media, images, seo
 Requires at least: 5.6
 Tested up to: 7.0
-Stable tag: 1.7.20
+Stable tag: 1.7.26
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 

@@ -43,7 +43,7 @@ class EIM_Config {
                         'id'          => 'eim_skip_thumbnails',
                         'label'       => __( 'Skip Thumbnail Generation', 'calliope-media-import-export' ),
                         'description' => __( 'Speed up imports by skipping thumbnail generation. Turn this on if you plan to regenerate thumbnails later.', 'calliope-media-import-export' ),
-                        'checked'     => false,
+                        'checked'     => true,
                         'feature'     => 'skip_thumbnails',
                     ],
                 ],
@@ -199,4 +199,3 @@ class EIM_Config {
         return $defaults;
     }
 }
-
