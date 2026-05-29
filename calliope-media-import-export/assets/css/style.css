@@ -1,6 +1,6 @@
 /*
  * Plugin Name: Export/Import Media - Custom Styles
- * Version: 1.7.10
+ * Version: 1.7.19
  */
 
 :root {
@@ -14,11 +14,16 @@
     --eim-title: #24314f;
     --eim-primary: #384766;
     --eim-primary-strong: #2c3852;
-    --eim-banner-button: #304a8b;
-    --eim-banner-button-strong: #263d73;
-    --eim-cta: #e0008a;
-    --eim-cta-strong: #b60070;
-    --eim-accent: #34d3f5;
+    --eim-logo-purple: #7d5cff;
+    --eim-logo-blue: #3f6df4;
+    --eim-logo-cyan: #06dfe2;
+    --eim-logo-gradient: linear-gradient(135deg, #7d5cff 0%, #3f6df4 48%, #06dfe2 100%);
+    --eim-logo-gradient-hover: linear-gradient(135deg, #6d4cff 0%, #315fe8 48%, #00c9cc 100%);
+    --eim-banner-button: var(--eim-logo-blue);
+    --eim-banner-button-strong: #315fe8;
+    --eim-cta: var(--eim-logo-blue);
+    --eim-cta-strong: #315fe8;
+    --eim-accent: var(--eim-logo-cyan);
     --eim-success: #1d7d44;
     --eim-success-bg: #edf9f0;
     --eim-gray-card: #f4f6f8;
@@ -86,7 +91,7 @@ body.wp-admin.toplevel_page_export-import-media {
 #eim-start-button.button-primary,
 #eim_export_csv.button,
 #eim_export_csv.button-secondary {
-    background: var(--eim-cta) !important;
+    background: var(--eim-logo-gradient) !important;
     border: 1px solid var(--eim-cta) !important;
     color: #fff !important;
 }
@@ -94,12 +99,11 @@ body.wp-admin.toplevel_page_export-import-media {
 #eim-start-button.button-primary:hover,
 #eim_export_csv.button:hover,
 #eim_export_csv.button-secondary:hover {
-    background: var(--eim-cta-strong) !important;
+    background: var(--eim-logo-gradient-hover) !important;
     border-color: var(--eim-cta-strong) !important;
 }
 
 .eim-import-tools .button,
-.eim-pro-showcase-heading .button,
 #eim-stop-button.button,
 #eim-download-log.button {
     background: #fff !important;
@@ -108,7 +112,6 @@ body.wp-admin.toplevel_page_export-import-media {
 }
 
 .eim-import-tools .button:hover,
-.eim-pro-showcase-heading .button:hover,
 #eim-stop-button.button:hover,
 #eim-download-log.button:hover {
     border-color: #9fb1cb !important;
@@ -116,19 +119,21 @@ body.wp-admin.toplevel_page_export-import-media {
 }
 
 .eim-pro-spotlight-actions .button.button-primary,
+.eim-pro-showcase-heading .button,
 .eim-pro-showcase-card .button.button-primary,
 .eim-pro-locked-page-intro .button.button-primary,
 .eim-pro-locked-card .button.button-primary {
-    background: var(--eim-banner-button) !important;
+    background: var(--eim-logo-gradient) !important;
     border: 1px solid var(--eim-banner-button) !important;
     color: #fff !important;
 }
 
 .eim-pro-spotlight-actions .button.button-primary:hover,
+.eim-pro-showcase-heading .button:hover,
 .eim-pro-showcase-card .button.button-primary:hover,
 .eim-pro-locked-page-intro .button.button-primary:hover,
 .eim-pro-locked-card .button.button-primary:hover {
-    background: var(--eim-banner-button-strong) !important;
+    background: var(--eim-logo-gradient-hover) !important;
     border-color: var(--eim-banner-button-strong) !important;
 }
 
@@ -173,7 +178,7 @@ input[type="date"] {
     padding: 24px 28px;
     margin-bottom: 24px;
     border-radius: 22px;
-    background: linear-gradient(135deg, #372ea3 0%, #2f7fd3 56%, #22d2e6 100%) !important;
+    background: linear-gradient(135deg, #7d5cff 0%, #3f6df4 48%, #06dfe2 100%) !important;
     color: #fff;
     box-shadow: 0 16px 40px rgba(35, 63, 128, 0.20);
 }
@@ -213,29 +218,12 @@ input[type="date"] {
 
 .eim-banner-content {
     display: grid;
-    grid-template-columns: 56px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     align-items: center;
     gap: 16px;
     grid-column: 1;
     grid-row: 1;
     width: 100%;
-}
-
-.eim-banner-logo {
-    width: 56px;
-    height: 56px;
-    flex: 0 0 56px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 16px;
-    background: rgba(255,255,255,0.11);
-}
-
-.eim-banner-logo svg {
-    width: 30px;
-    height: 30px;
-    color: #fff;
 }
 
 .eim-banner-text {
@@ -249,6 +237,7 @@ input[type="date"] {
     margin: 0 0 8px;
     color: #fff !important;
     font-size: 28px;
+    font-weight: 700;
     line-height: 1.15;
 }
 
@@ -858,13 +847,17 @@ input[type="date"] {
     font-size: 16px;
 }
 
+.eim-pro-lock-pill,
 .eim-pro-teaser-badge {
     display: inline-flex;
     align-items: center;
     padding: 4px 10px;
+    border: 1px solid transparent;
     border-radius: 999px;
-    background: #e7ebf1;
-    color: var(--eim-primary);
+    background:
+        linear-gradient(#edf5ff, #edf5ff) padding-box,
+        var(--eim-logo-gradient) border-box;
+    color: var(--eim-primary-strong);
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.06em;
@@ -910,10 +903,24 @@ input[type="date"] {
     align-items: center;
     gap: 2px;
     text-decoration: none;
-    color: #2271b1;
+    color: var(--eim-logo-blue);
     font-weight: 600;
     line-height: 1;
     vertical-align: middle;
+}
+
+.eim-footer-review a svg:nth-child(1),
+.eim-footer-review a svg:nth-child(2) {
+    color: var(--eim-logo-cyan);
+}
+
+.eim-footer-review a svg:nth-child(3) {
+    color: var(--eim-logo-blue);
+}
+
+.eim-footer-review a svg:nth-child(4),
+.eim-footer-review a svg:nth-child(5) {
+    color: var(--eim-logo-purple);
 }
 
 .eim-footer-review svg {

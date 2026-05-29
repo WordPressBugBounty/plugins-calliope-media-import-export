@@ -3,7 +3,7 @@ Contributors: mairaforesto
 Tags: import, export, media, images, seo
 Requires at least: 5.6
 Tested up to: 7.0
-Stable tag: 1.7.10
+Stable tag: 1.7.20
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,7 +24,7 @@ During normal free imports, detected duplicates are skipped to help prevent dupl
 * **Metadata columns:** Supports title, alt text, caption, and description columns in CSV import/export.
 * **Developer friendly:** Includes hooks and filters for extending CSV columns, validation, admin UI, and import/export behavior.
 
-Need more control for larger libraries? The separate **Export/Import Media Pro** add-on adds saved workflows, remote or server-side CSV sources, controlled matching against existing media, selective metadata refreshes, safer replace-file workflows, and background processing with history tools.
+Need more control for larger libraries? The separate **Export/Import Media Pro** add-on adds rollback restore points before imports, image conversion to WebP/AVIF where supported, saved workflows, background processing, controlled matching, metadata updates, and replace-file workflows.
 
 == Features ==
 
@@ -58,13 +58,53 @@ The free plugin performs duplicate detection using stored source data, relative 
 = Does "metadata support" mean the free plugin updates existing media records? =
 No. In the free plugin, metadata columns are supported for standard export/import rows, while detected duplicates are skipped in the normal workflow. Controlled matching, metadata refreshes, selective field updates, and replace-file workflows for existing attachments belong to the separate Pro add-on.
 
+= Can I undo an import? =
+The free plugin gives you preview and logs before/after import. Rollback restore points are available in the Pro add-on.
+
 = What does the Pro add-on add? =
-Export/Import Media Pro adds saved workflows, remote or server-side CSV sources, controlled matching against existing media, selective metadata updates, replace-file workflows, history, and background processing for larger media libraries.
+Export/Import Media Pro adds rollback restore points before imports, image conversion to WebP/AVIF where supported, saved workflows, remote or server-side CSV sources, controlled matching against existing media, selective metadata updates, replace-file workflows, history, and background processing for larger media libraries.
 
 = Can I filter which media items to export? =
 Yes. You can filter by date range, media type, and attachment context such as unattached files or media attached to posts, pages, and WooCommerce products.
 
 == Changelog ==
+
+= 1.7.19 =
+* Import UX: CSV files that contain only headers now validate as an empty preview with a clear warning instead of showing a failed-validation error.
+* Export UX: export now defaults to All Media and warns when the selected filters would create a header-only CSV.
+* Translations: refreshed language files for the new empty-CSV and export-filter notices.
+
+= 1.7.18 =
+* Import: improved CSV validation for files with legacy line endings and clearer feedback when a CSV has headers but no importable data rows.
+* Translations: regenerated language files so new Pro teaser and import error strings do not fall back to English.
+
+= 1.7.17 =
+* Compatibility: Adds safe import context and lifecycle hooks for Pro rollback restore points and Pro image conversion without changing the free import workflow.
+* Messaging: Clarifies that rollback restore points and WebP/AVIF conversion are Pro features.
+
+= 1.7.16 =
+* Design: Aligns the Pro details button and Pro badges with the refreshed logo/banner color palette.
+
+= 1.7.15 =
+* Fix: SVG files can now be imported through the plugin when they pass the plugin's SVG safety checks.
+* Fix: Remote Pro replacement imports now wait until the replacement file is downloaded before running replace_file on an existing match.
+* Security: SVG imports are validated for unsafe markup before attaching or replacing media files.
+
+= 1.7.14 =
+* Fix: Turbo imports now get a larger execution window before the safety time cutoff, so 100-row batches can run as intended when the server allows it.
+* UX: Import logs now warn when a batch was stopped early by the time limit and continues in the next request.
+
+= 1.7.13 =
+* Fix: Keeps PHP upload temporary paths intact during CSV validation so imports work correctly on Windows-based local environments.
+
+= 1.7.12 =
+* Design: Refreshes the admin menu icon, banner, calls to action, and review stars with the logo color palette.
+
+= 1.7.11 =
+* Fix: Keeps temporary remote downloads available until duplicate handling finishes, so Pro replace-file and force-new workflows can run reliably.
+* Fix: Replaces existing attachment files more safely by copying the new file before cleaning up the previous file and generated sizes.
+* Compatibility: Adds a server-side gate so advanced import actions only run when an add-on explicitly enables them.
+* Performance: Streams CSV exports in batches to reduce memory usage on larger media libraries.
 
 = 1.7.10 =
 * Compatibility: Tested with WordPress 7.0.

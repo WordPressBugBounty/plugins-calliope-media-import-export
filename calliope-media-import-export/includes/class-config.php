@@ -22,8 +22,7 @@ class EIM_Config {
                 'batch_size_options' => [
                     '10'  => __( '10 (Safe)', 'calliope-media-import-export' ),
                     '25'  => '25',
-                    '50'  => '50',
-                    '100' => __( '100 (Turbo)', 'calliope-media-import-export' ),
+                    '50'  => __( '50 (Local / advanced servers)', 'calliope-media-import-export' ),
                 ],
                 'options'            => [
                     [
@@ -51,7 +50,7 @@ class EIM_Config {
             ],
             'export'              => [
                 'defaults'                  => [
-                    'media_type'        => 'image',
+                    'media_type'        => 'all',
                     'attachment_filter' => 'all',
                 ],
                 'media_type_options'        => [

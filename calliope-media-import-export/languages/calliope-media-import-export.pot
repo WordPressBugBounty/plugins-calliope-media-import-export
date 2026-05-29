@@ -2,17 +2,7 @@
 # Copyright (C) 2026 Maira Foresto
 # This file is distributed under the same license as the Export/Import Media package.
 msgid ""
-msgstr ""
-"Project-Id-Version: calliope-media-import-export 1.6.14\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\n"
-"POT-Creation-Date: 2026-04-14 21:08+0000\n"
-"PO-Revision-Date: 2026-04-14 21:08+0000\n"
-"Last-Translator: Maira Foresto\n"
-"Language-Team: Calliope\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.18.0\n"
+msgstr "Project-Id-Version: calliope-media-import-export 1.7.18\nReport-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\nPOT-Creation-Date: 2026-04-14 21:08+0000\nPO-Revision-Date: 2026-04-14 21:08+0000\nLast-Translator: Maira Foresto\nLanguage-Team: Calliope\nMIME-Version: 1.0\nContent-Type: text/plain; charset=utf-8\nContent-Transfer-Encoding: 8bit\nGenerated-By: Babel 2.18.0\n"
 
 #: includes/class-importer.php:2248
 #, python-format
@@ -101,6 +91,10 @@ msgstr ""
 
 #: admin/class-admin.php:317
 msgid "Batch summary"
+msgstr ""
+
+#: admin/class-admin.php:318
+msgid "Batch stopped early by the time limit; continuing with the next batch."
 msgstr ""
 
 #: admin/class-admin.php:508
@@ -334,9 +328,7 @@ msgid "File ready. Total media rows:"
 msgstr ""
 
 #: includes/class-importer.php:472
-msgid ""
-"Filename matching is ambiguous because multiple existing media items share this filename. Add Relative Path or "
-"Attachment ID to target a single attachment."
+msgid "Filename matching is ambiguous because multiple existing media items share this filename. Add Relative Path or Attachment ID to target a single attachment."
 msgstr ""
 
 #: admin/class-admin.php:484
@@ -348,9 +340,7 @@ msgid "Filter by date, media type, or attachment context before exporting."
 msgstr ""
 
 #: admin/class-admin.php:663
-msgid ""
-"Find existing attachments by Attachment ID, Source URL, Relative Path, or Filename before deciding whether to skip, "
-"update, or replace them."
+msgid "Find existing attachments by Attachment ID, Source URL, Relative Path, or Filename before deciding whether to skip, update, or replace them."
 msgstr ""
 
 #: admin/class-admin.php:611
@@ -358,15 +348,11 @@ msgid "Format"
 msgstr ""
 
 #: admin/class-admin.php:580
-msgid ""
-"Free covers quick CSV exports. Pro adds saved export profiles, richer packages, and optional background runs for "
-"repeatable migrations and larger media libraries."
+msgid "Free covers quick CSV exports. Pro adds saved export profiles, richer packages, and optional background runs for repeatable migrations and larger media libraries."
 msgstr ""
 
 #: admin/class-admin.php:647
-msgid ""
-"Free handles one-off CSV imports with preview and duplicate prevention. Pro adds saved workflows for matching "
-"existing attachments, refreshing trusted metadata, replacing files, and reusing advanced rules later."
+msgid "Free handles one-off CSV imports with preview and duplicate prevention. Pro adds saved workflows for matching existing attachments, refreshing trusted metadata, replacing files, and reusing advanced rules later."
 msgstr ""
 
 #: admin/class-admin.php:419
@@ -463,9 +449,7 @@ msgid "Invalid temporary file name."
 msgstr ""
 
 #: includes/class-config.php:40
-msgid ""
-"Keep the folder structure from \"Relative Path\" when importing, and reuse files already present in uploads when the "
-"same path exists."
+msgid "Keep the folder structure from \"Relative Path\" when importing, and reuse files already present in uploads when the same path exists."
 msgstr ""
 
 #: admin/class-admin.php:792
@@ -839,22 +823,15 @@ msgid "The current attachment file could not be found."
 msgstr ""
 
 #: admin/class-admin.php:287
-msgid ""
-"The free plugin stays focused on straightforward CSV export/import with preview and duplicate prevention. Pro adds "
-"reusable profiles, background workflows, and controlled rules for matching and updating existing media."
+msgid "The free plugin stays focused on straightforward CSV export/import with preview and duplicate prevention. Pro adds reusable profiles, background workflows, and controlled rules for matching and updating existing media."
 msgstr ""
 
 #: admin/class-admin.php:692
-msgid ""
-"The free plugin stays intentionally focused on clean one-off CSV import and export. Pro adds controlled matching "
-"against existing attachments, selective metadata refreshes, safer replace-file workflows, and reusable setups for "
-"larger libraries."
+msgid "The free plugin stays intentionally focused on clean one-off CSV import and export. Pro adds controlled matching against existing attachments, selective metadata refreshes, safer replace-file workflows, and reusable setups for larger libraries."
 msgstr ""
 
 #: admin/class-admin.php:730
-msgid ""
-"The free version stays clean on purpose. Pro adds a few stronger tools when you need controlled updates, repeatable "
-"workflows, and more operational confidence."
+msgid "The free version stays clean on purpose. Pro adds a few stronger tools when you need controlled updates, repeatable workflows, and more operational confidence."
 msgstr ""
 
 #: includes/class-importer.php:1356
@@ -924,15 +901,11 @@ msgid "Upgrade when you need to work with existing media, not just import new ro
 msgstr ""
 
 #: admin/class-admin.php:504
-msgid ""
-"Upload a CSV, validate it first, review the preview, and import media in batches while the free workflow skips "
-"existing matches it detects."
+msgid "Upload a CSV, validate it first, review the preview, and import media in batches while the free workflow skips existing matches it detects."
 msgstr ""
 
 #: includes/class-config.php:33
-msgid ""
-"Use the \"Relative Path\" column to locate files that already exist in this site's uploads folder. No remote download"
-" is attempted."
+msgid "Use the \"Relative Path\" column to locate files that already exist in this site's uploads folder. No remote download is attempted."
 msgstr ""
 
 #: admin/class-admin.php:462
@@ -989,5 +962,95 @@ msgstr ""
 
 #: admin/class-admin.php:472
 msgid "to"
+msgstr ""
+
+#: includes/class-importer.php
+msgid "SVG imports are disabled."
+msgstr ""
+
+#: includes/class-importer.php
+msgid "SVG file could not be read."
+msgstr ""
+
+#: includes/class-importer.php
+msgid "SVG file is empty."
+msgstr ""
+
+#: includes/class-importer.php
+msgid "SVG file does not contain valid SVG markup."
+msgstr ""
+
+#: includes/class-importer.php
+msgid "SVG file contains potentially unsafe content."
+msgstr ""
+
+#: includes/class-importer.php
+msgid "The SVG file could not be copied into uploads."
+msgstr ""
+
+#: includes/class-config.php
+msgid "50 (Local / advanced servers)"
+msgstr ""
+
+#: includes/class-importer.php
+msgid "A server extension stopped the file upload."
+msgstr ""
+
+#: admin/class-admin.php
+msgid "Convert images to WebP or AVIF"
+msgstr ""
+
+#: admin/class-admin.php
+msgid "Convert supported JPG and PNG imports to WebP or AVIF when your WordPress image editor supports the selected format."
+msgstr ""
+
+#: admin/class-admin.php
+msgid "Create restore points before imports so mistaken metadata updates, new imports, and replace-file runs can be rolled back from Pro history."
+msgstr ""
+
+#: admin/class-admin.php
+msgid "Documentación"
+msgstr ""
+
+#: admin/class-admin.php
+msgid "Rollback restore points"
+msgstr ""
+
+#: admin/class-admin.php
+msgid "Soporte"
+msgstr ""
+
+#: admin/class-admin.php
+msgid "Sugerencias"
+msgstr ""
+
+#: admin/class-admin.php
+msgid "The free plugin stays intentionally focused on clean one-off CSV import and export. Pro adds controlled matching against existing attachments, rollback restore points before imports, image conversion to WebP or AVIF where supported, safer replace-file workflows, and reusable setups for larger libraries."
+msgstr ""
+
+#: includes/class-importer.php
+msgid "The server temporary upload folder is missing."
+msgstr ""
+
+#: includes/class-importer.php
+msgid "The uploaded file could not be written to disk."
+msgstr ""
+
+#: includes/class-importer.php
+msgid "The uploaded file exceeds the form upload limit."
+msgstr ""
+
+#: includes/class-importer.php
+msgid "The uploaded file exceeds the server upload limit."
+msgstr ""
+
+#: includes/class-importer.php
+msgid "The uploaded file was only partially uploaded."
+msgstr ""
+
+msgid "No importable media rows were found. The CSV may only contain headers, or your export filters may have matched no media items."
+msgstr ""
+
+msgid "No media matched the selected export filters. Try exporting All Media or clearing date/attachment filters."
 msgstr ""
 

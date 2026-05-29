@@ -59,7 +59,27 @@ jQuery(document).ready(function($) {
 
 
     function getSelectedBatchSize() {
-        return parseInt($('#batch_size').val(), 10) || parseInt(config.default_batch || 25, 10) || 25;
+        const selected = parseInt($('#batch_size').val(), 10) || parseInt(config.default_batch || 25, 10) || 25;
+        return getSafeBatchSize(selected);
+    }
+
+    function getSafeBatchSize(requestedBatchSize) {
+        const requested = Math.max(1, parseInt(requestedBatchSize, 10) || 25);
+        const conversionFormat = $('#eim_pro_convert_images_format').length ? String($('#eim_pro_convert_images_format').val() || 'keep') : 'keep';
+        const duplicateStrategy = $('#eim_duplicate_strategy').length ? String($('#eim_duplicate_strategy').val() || 'skip') : 'skip';
+        const isLocalImport = $('#eim_local_import').is(':checked');
+        const skipThumbnails = $('#eim_skip_thumbnails').is(':checked');
+        let safeLimit = 25;
+
+        if (conversionFormat !== 'keep' || duplicateStrategy === 'replace_file') {
+            safeLimit = 10;
+        } else if (duplicateStrategy !== 'skip') {
+            safeLimit = 15;
+        } else if (isLocalImport && skipThumbnails) {
+            safeLimit = 50;
+        }
+
+        return Math.min(requested, safeLimit);
     }
 
     function getRuntimeBatchSize() {
@@ -76,14 +96,14 @@ jQuery(document).ready(function($) {
         const currentBatchSize = getRuntimeBatchSize();
         let nextBatchSize = currentBatchSize;
 
-        if (currentBatchSize > 100) {
-            nextBatchSize = 100;
-        } else if (currentBatchSize > 50) {
-            nextBatchSize = 50;
-        } else if (currentBatchSize > 25) {
+        if (currentBatchSize > 25) {
             nextBatchSize = 25;
+        } else if (currentBatchSize > 15) {
+            nextBatchSize = 15;
         } else if (currentBatchSize > 10) {
             nextBatchSize = 10;
+        } else if (currentBatchSize > 5) {
+            nextBatchSize = 5;
         }
 
         if (nextBatchSize < currentBatchSize) {
@@ -465,8 +485,27 @@ jQuery(document).ready(function($) {
                 totalRows = parseInt(response.data.total_rows, 10) || 0;
                 currentFile = response.data.file || '';
 
-                if (!currentFile || totalRows <= 0) {
-                    logMessage(t('empty_csv'), 'ERROR');
+                if (totalRows <= 0) {
+                    renderPreview(response.data.preview || null);
+                    logMessage(t('empty_csv'), 'WARN');
+                    setProgressState('info');
+                    currentFile = '';
+                    isValidating = false;
+                    autoStartAfterValidation = false;
+                    startButton.prop('disabled', true);
+
+                    $(document).trigger('eim:validationEmpty', [{
+                        preview: response.data.preview || null
+                    }]);
+                    return;
+                }
+
+                if (!currentFile) {
+                    logMessage(
+                        t('validation_failed'),
+                        'ERROR',
+                        t('invalid_response')
+                    );
                     resetStateOnError();
                     return;
                 }
@@ -531,15 +570,23 @@ jQuery(document).ready(function($) {
             return String($(this).val() || '');
         }).get();
 
-        $(document).trigger('eim:importStart', [{
+        const startPayload = {
             file: currentFile,
             totalRows: totalRows,
             batchSize: getRuntimeBatchSize(),
             dryRun: $('#eim_dry_run').is(':checked'),
             duplicateStrategy: $('#eim_duplicate_strategy').length ? $('#eim_duplicate_strategy').val() : 'skip',
             matchStrategy: $('#eim_match_strategy').length ? $('#eim_match_strategy').val() : 'auto',
-            selectedUpdateFields: selectedUpdateFields
-        }]);
+            selectedUpdateFields: selectedUpdateFields,
+            deferreds: []
+        };
+
+        $(document).trigger('eim:importStart', [startPayload]);
+
+        if (startPayload.deferreds && startPayload.deferreds.length) {
+            $.when.apply($, startPayload.deferreds).always(processBatch);
+            return;
+        }
 
         processBatch();
     }
@@ -577,7 +624,12 @@ jQuery(document).ready(function($) {
                 match_strategy: $('#eim_match_strategy').length ? $('#eim_match_strategy').val() : 'auto',
                 selected_update_fields: $('input[name="selected_update_fields[]"]:checked').map(function() {
                     return String($(this).val() || '');
-                }).get()
+                }).get(),
+                pro_history_id: $('#eim_pro_history_id').length ? $('#eim_pro_history_id').val() : 0,
+                pro_job_id: $('#eim_pro_job_id').length ? $('#eim_pro_job_id').val() : 0,
+                convert_images_format: $('#eim_pro_convert_images_format').length ? $('#eim_pro_convert_images_format').val() : 'keep',
+                conversion_quality: $('#eim_pro_conversion_quality').length ? $('#eim_pro_conversion_quality').val() : 82,
+                conversion_failure_behavior: $('#eim_pro_conversion_failure_behavior').length ? $('#eim_pro_conversion_failure_behavior').val() : 'keep_original'
             },
             dataType: 'json'
         })
@@ -626,7 +678,7 @@ jQuery(document).ready(function($) {
                     logMessage(
                         t('network_retrying'),
                         'WARN',
-                        `${fallback} (${batchRetryCount}/${maxBatchRetries})`
+                        `${ajaxError} (${batchRetryCount}/${maxBatchRetries})`
                     );
                     setTimeout(processBatch, getRetryDelay(xhr));
                     return;
@@ -665,6 +717,17 @@ jQuery(document).ready(function($) {
 
                 if (safeBatchSummary.processed > 0) {
                     logMessage(t('batch_summary'), 'INFO', formatSummaryLine(safeBatchSummary));
+                }
+
+                if (batchMeta.time_limited) {
+                    const processedRows = parseInt(batchMeta.processed_rows || safeBatchSummary.processed || 0, 10) || 0;
+                    const requestedRows = parseInt(batchMeta.batch_size || getRuntimeBatchSize(), 10) || getRuntimeBatchSize();
+
+                    logMessage(
+                        t('batch_time_limited'),
+                        'WARN',
+                        `${processedRows}/${requestedRows}`
+                    );
                 }
 
                 if (batchMeta.is_finished || currentRow >= totalRows) {

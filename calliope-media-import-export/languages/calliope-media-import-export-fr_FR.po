@@ -2,20 +2,7 @@
 # Copyright (C) 2026 Maira Foresto
 # This file is distributed under the same license as the Export/Import Media package.
 msgid ""
-msgstr ""
-"Project-Id-Version: calliope-media-import-export 1.6.9\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\n"
-"POT-Creation-Date: 2026-04-14 21:08+0000\n"
-"PO-Revision-Date: 2026-04-19 00:00+0000\n"
-"Last-Translator: Maira Foresto\n"
-"Language: fr_FR\n"
-"Language-Team: Calliope\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.18.0\n"
-"X-Generator: Codex\n"
+msgstr "Project-Id-Version: calliope-media-import-export 1.6.9\nReport-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\nPOT-Creation-Date: 2026-04-14 21:08+0000\nPO-Revision-Date: 2026-04-19 00:00+0000\nLast-Translator: Maira Foresto\nLanguage: fr_FR\nLanguage-Team: Calliope\nPlural-Forms: nplurals=2; plural=(n > 1);\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nGenerated-By: Babel 2.18.0\nX-Generator: Codex\n"
 
 #: includes/class-importer.php:2248
 #, python-format
@@ -972,4 +959,79 @@ msgstr "Vous ne disposez pas des autorisations suffisantes."
 #: admin/class-admin.php:472
 msgid "to"
 msgstr "à"
+
+msgid "Batch stopped early by the time limit; continuing with the next batch."
+msgstr "Le lot s’est arrêté plus tôt à cause de la limite de temps ; poursuite avec le lot suivant."
+
+msgid "SVG imports are disabled."
+msgstr "Les imports SVG sont désactivés."
+
+msgid "SVG file could not be read."
+msgstr "Le fichier SVG n’a pas pu être lu."
+
+msgid "SVG file is empty."
+msgstr "Le fichier SVG est vide."
+
+msgid "SVG file does not contain valid SVG markup."
+msgstr "Le fichier SVG ne contient pas de balisage SVG valide."
+
+msgid "SVG file contains potentially unsafe content."
+msgstr "Le fichier SVG contient du contenu potentiellement dangereux."
+
+msgid "The SVG file could not be copied into uploads."
+msgstr "Le fichier SVG n’a pas pu être copié dans les téléversements."
+
+msgid "50 (Local / advanced servers)"
+msgstr "50 (local / serveurs avancés)"
+
+msgid "A server extension stopped the file upload."
+msgstr "Une extension du serveur a interrompu le téléversement du fichier."
+
+msgid "Convert images to WebP or AVIF"
+msgstr "Convertir les images en WebP ou AVIF"
+
+msgid "Convert supported JPG and PNG imports to WebP or AVIF when your WordPress image editor supports the selected format."
+msgstr "Convertit les imports JPG et PNG pris en charge en WebP ou AVIF lorsque l’éditeur d’images WordPress prend en charge le format sélectionné."
+
+msgid "Create restore points before imports so mistaken metadata updates, new imports, and replace-file runs can be rolled back from Pro history."
+msgstr "Crée des points de restauration avant les imports afin que les mises à jour de métadonnées erronées, les nouveaux imports et les remplacements de fichiers puissent être annulés depuis l’historique Pro."
+
+msgid "Documentación"
+msgstr "Documentation"
+
+msgid "Rollback restore points"
+msgstr "Points de restauration rollback"
+
+msgid "Soporte"
+msgstr "Support"
+
+msgid "Sugerencias"
+msgstr "Suggestions"
+
+msgid "The free plugin stays intentionally focused on clean one-off CSV import and export. Pro adds controlled matching against existing attachments, rollback restore points before imports, image conversion to WebP or AVIF where supported, safer replace-file workflows, and reusable setups for larger libraries."
+msgstr "L’extension gratuite reste volontairement centrée sur les imports et exports CSV ponctuels et propres. Pro ajoute la correspondance contrôlée avec les pièces jointes existantes, des points de restauration avant import, la conversion d’images en WebP ou AVIF lorsque l’environnement le permet, des flux de remplacement de fichiers plus sûrs et des configurations réutilisables pour les grandes médiathèques."
+
+msgid "The server temporary upload folder is missing."
+msgstr "Le dossier temporaire de téléversement du serveur est manquant."
+
+msgid "The uploaded file could not be written to disk."
+msgstr "Le fichier téléversé n’a pas pu être écrit sur le disque."
+
+msgid "The uploaded file exceeds the form upload limit."
+msgstr "Le fichier téléversé dépasse la limite du formulaire."
+
+msgid "The uploaded file exceeds the server upload limit."
+msgstr "Le fichier téléversé dépasse la limite du serveur."
+
+msgid "The uploaded file was only partially uploaded."
+msgstr "Le fichier n’a été téléversé que partiellement."
+
+msgid "The CSV has headers but no data rows to import. Export or upload a CSV with at least one media row below the header."
+msgstr "Le CSV contient des en-têtes, mais aucune ligne de données à importer. Exportez ou téléversez un CSV avec au moins une ligne de média sous l’en-tête."
+
+msgid "No importable media rows were found. The CSV may only contain headers, or your export filters may have matched no media items."
+msgstr "Aucune ligne de média importable n’a été trouvée. Le CSV peut ne contenir que des en-têtes, ou vos filtres d’exportation peuvent n’avoir trouvé aucun média."
+
+msgid "No media matched the selected export filters. Try exporting All Media or clearing date/attachment filters."
+msgstr "Aucun média ne correspond aux filtres d’exportation sélectionnés. Essayez d’exporter Tous les médias ou de supprimer les filtres de date/pièce jointe."
 

@@ -2,20 +2,7 @@
 # Copyright (C) 2026 Maira Foresto
 # This file is distributed under the same license as the Export/Import Media package.
 msgid ""
-msgstr ""
-"Project-Id-Version: calliope-media-import-export 1.6.9\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\n"
-"POT-Creation-Date: 2026-04-14 21:08+0000\n"
-"PO-Revision-Date: 2026-04-19 00:00+0000\n"
-"Last-Translator: Maira Foresto\n"
-"Language: zh_CN\n"
-"Language-Team: Calliope\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.18.0\n"
-"X-Generator: Codex\n"
+msgstr "Project-Id-Version: calliope-media-import-export 1.6.9\nReport-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\nPOT-Creation-Date: 2026-04-14 21:08+0000\nPO-Revision-Date: 2026-04-19 00:00+0000\nLast-Translator: Maira Foresto\nLanguage: zh_CN\nLanguage-Team: Calliope\nPlural-Forms: nplurals=1; plural=0;\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nGenerated-By: Babel 2.18.0\nX-Generator: Codex\n"
 
 #: includes/class-importer.php:2248
 #, python-format
@@ -972,4 +959,79 @@ msgstr "您没有足够的权限。"
 #: admin/class-admin.php:472
 msgid "to"
 msgstr "到"
+
+msgid "Batch stopped early by the time limit; continuing with the next batch."
+msgstr "批次因时间限制提前停止；将继续处理下一个批次。"
+
+msgid "SVG imports are disabled."
+msgstr "SVG 导入已禁用。"
+
+msgid "SVG file could not be read."
+msgstr "无法读取 SVG 文件。"
+
+msgid "SVG file is empty."
+msgstr "SVG 文件为空。"
+
+msgid "SVG file does not contain valid SVG markup."
+msgstr "SVG 文件不包含有效的 SVG 标记。"
+
+msgid "SVG file contains potentially unsafe content."
+msgstr "SVG 文件包含潜在不安全内容。"
+
+msgid "The SVG file could not be copied into uploads."
+msgstr "无法将 SVG 文件复制到 uploads。"
+
+msgid "100 (Turbo)"
+msgstr "100（Turbo）"
+
+msgid "A server extension stopped the file upload."
+msgstr "服务器扩展阻止了文件上传。"
+
+msgid "Convert images to WebP or AVIF"
+msgstr "将图片转换为 WebP 或 AVIF"
+
+msgid "Convert supported JPG and PNG imports to WebP or AVIF when your WordPress image editor supports the selected format."
+msgstr "当 WordPress 图片编辑器支持所选格式时，将支持的 JPG 和 PNG 导入转换为 WebP 或 AVIF。"
+
+msgid "Create restore points before imports so mistaken metadata updates, new imports, and replace-file runs can be rolled back from Pro history."
+msgstr "在导入前创建还原点，这样错误的元数据更新、新导入和替换文件操作都可以从 Pro 历史记录中回滚。"
+
+msgid "Documentación"
+msgstr "文档"
+
+msgid "Rollback restore points"
+msgstr "回滚还原点"
+
+msgid "Soporte"
+msgstr "支持"
+
+msgid "Sugerencias"
+msgstr "建议"
+
+msgid "The free plugin stays intentionally focused on clean one-off CSV import and export. Pro adds controlled matching against existing attachments, rollback restore points before imports, image conversion to WebP or AVIF where supported, safer replace-file workflows, and reusable setups for larger libraries."
+msgstr "免费插件专注于清晰的一次性 CSV 导入和导出。Pro 增加了与现有附件的受控匹配、导入前的回滚还原点、在支持的环境中将图片转换为 WebP 或 AVIF、更安全的替换文件流程，以及适合大型媒体库的可复用设置。"
+
+msgid "The server temporary upload folder is missing."
+msgstr "服务器临时上传文件夹缺失。"
+
+msgid "The uploaded file could not be written to disk."
+msgstr "上传的文件无法写入磁盘。"
+
+msgid "The uploaded file exceeds the form upload limit."
+msgstr "上传的文件超过了表单上传限制。"
+
+msgid "The uploaded file exceeds the server upload limit."
+msgstr "上传的文件超过了服务器上传限制。"
+
+msgid "The uploaded file was only partially uploaded."
+msgstr "文件只上传了一部分。"
+
+msgid "The CSV has headers but no data rows to import. Export or upload a CSV with at least one media row below the header."
+msgstr "CSV 包含表头，但没有可导入的数据行。请导出或上传一个在表头下至少包含一条媒体记录的 CSV。"
+
+msgid "No importable media rows were found. The CSV may only contain headers, or your export filters may have matched no media items."
+msgstr "未找到可导入的媒体行。CSV 可能只包含表头，或者你的导出筛选条件没有匹配到任何媒体项目。"
+
+msgid "No media matched the selected export filters. Try exporting All Media or clearing date/attachment filters."
+msgstr "没有媒体符合所选导出筛选条件。请尝试导出“所有媒体”，或清除日期/附件筛选条件。"
 

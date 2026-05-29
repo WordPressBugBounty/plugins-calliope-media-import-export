@@ -17,6 +17,7 @@ class EIM_Admin {
 
     public function __construct() {
         add_action( 'admin_menu', [ $this, 'register_menu' ] );
+        add_action( 'admin_head', [ $this, 'render_menu_icon_styles' ] );
         add_action( 'current_screen', [ $this, 'maybe_hide_admin_notices' ], 0 );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
         add_filter( 'plugin_action_links_' . EIM_BASENAME, [ $this, 'add_settings_link' ] );
@@ -52,9 +53,26 @@ class EIM_Admin {
             eim_get_required_capability(),
             EIM_ADMIN_PAGE_SLUG,
             [ $this, 'render_admin_page' ],
-            'dashicons-images-alt2',
+            EIM_URL . 'assets/images/menu-icon.png',
             58
         );
+    }
+
+    public function render_menu_icon_styles() {
+        ?>
+        <style>
+            #adminmenu #toplevel_page_export-import-media .wp-menu-image img {
+                width: 20px;
+                height: 20px;
+                max-width: 20px;
+                max-height: 20px;
+                object-fit: contain;
+                opacity: 1;
+                filter: brightness(1.2) saturate(1.25);
+                padding: 7px 0 0;
+            }
+        </style>
+        <?php
     }
 
     public function render_locked_menu_styles() {
@@ -123,6 +141,7 @@ class EIM_Admin {
         ?>
         <div class="wrap eim-admin-shell">
             <?php $this->render_page_header( $context ); ?>
+            <?php $this->render_contextual_notice(); ?>
 
             <div class="eim-admin-columns">
                 <div class="eim-admin-main">
@@ -146,6 +165,21 @@ class EIM_Admin {
         </div>
         <?php
         do_action( 'eim_admin_after_page', $context );
+    }
+
+    private function render_contextual_notice() {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only admin feedback after redirected export attempts.
+        $notice = isset( $_GET['eim_notice'] ) ? sanitize_key( wp_unslash( $_GET['eim_notice'] ) ) : '';
+
+        if ( 'empty_export' !== $notice ) {
+            return;
+        }
+
+        ?>
+        <div class="notice notice-warning eim-admin-notice">
+            <p><?php esc_html_e( 'No media matched the selected export filters. Try exporting All Media or clearing date/attachment filters.', 'calliope-media-import-export' ); ?></p>
+        </div>
+        <?php
     }
 
     public function download_sample_csv() {
@@ -313,7 +347,7 @@ class EIM_Admin {
             'validation_failed'           => esc_html__( 'Validation failed:', 'calliope-media-import-export' ),
             'validation_success'          => esc_html__( 'Validation successful.', 'calliope-media-import-export' ),
             'file_ready'                  => esc_html__( 'File ready. Total media rows:', 'calliope-media-import-export' ),
-            'empty_csv'                   => esc_html__( 'The CSV file is empty.', 'calliope-media-import-export' ),
+            'empty_csv'                   => esc_html__( 'No importable media rows were found. The CSV may only contain headers, or your export filters may have matched no media items.', 'calliope-media-import-export' ),
             'server_error'                => esc_html__( 'Server communication error.', 'calliope-media-import-export' ),
             'permission_error'            => esc_html__( 'You do not have permission to run this import.', 'calliope-media-import-export' ),
             'stopping_process'            => esc_html__( 'Stopping the process...', 'calliope-media-import-export' ),
@@ -325,6 +359,7 @@ class EIM_Admin {
             'process_stopped'             => esc_html__( 'Import stopped by user.', 'calliope-media-import-export' ),
             'processing_batch'            => esc_html__( 'Processing media rows...', 'calliope-media-import-export' ),
             'batch_summary'               => esc_html__( 'Batch summary', 'calliope-media-import-export' ),
+            'batch_time_limited'          => esc_html__( 'Batch stopped early by the time limit; continuing with the next batch.', 'calliope-media-import-export' ),
             'log_empty'                   => esc_html__( 'Log is empty. Nothing to download.', 'calliope-media-import-export' ),
             'log_status_info'             => esc_html__( 'Info', 'calliope-media-import-export' ),
             'log_status_warning'          => esc_html__( 'Warning', 'calliope-media-import-export' ),
@@ -371,7 +406,7 @@ class EIM_Admin {
             'validation_failed'           => 'Validation failed:',
             'validation_success'          => 'Validation successful.',
             'file_ready'                  => 'File ready. Total media rows:',
-            'empty_csv'                   => 'The CSV file is empty.',
+            'empty_csv'                   => 'No importable media rows were found. The CSV may only contain headers, or your export filters may have matched no media items.',
             'server_error'                => 'Server communication error.',
             'permission_error'            => 'You do not have permission to run this import.',
             'stopping_process'            => 'Stopping the process...',
@@ -383,6 +418,7 @@ class EIM_Admin {
             'process_stopped'             => 'Import stopped by user.',
             'processing_batch'            => 'Processing media rows...',
             'batch_summary'               => 'Batch summary',
+            'batch_time_limited'          => 'Batch stopped early by the time limit; continuing with the next batch.',
             'log_empty'                   => 'Log is empty. Nothing to download.',
             'log_status_info'             => 'Info',
             'log_status_warning'          => 'Warning',
@@ -448,9 +484,6 @@ class EIM_Admin {
                     </div>
                 </div>
                 <div class="eim-banner-content">
-                    <div class="eim-banner-logo" aria-hidden="true">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="8 12 12 16 16 12"></polyline><line x1="12" y1="8" x2="12" y2="16"></line></svg>
-                    </div>
                     <div class="eim-banner-text">
                         <h1><?php esc_html_e( 'Export/Import Media', 'calliope-media-import-export' ); ?></h1>
                         <p><?php esc_html_e( 'A clean CSV workflow for exporting, previewing, and importing media while helping you avoid duplicate attachments.', 'calliope-media-import-export' ); ?></p>
@@ -693,7 +726,7 @@ class EIM_Admin {
             <div class="eim-pro-spotlight-copy">
                 <span class="eim-pro-eyebrow"><?php esc_html_e( 'Pro add-on', 'calliope-media-import-export' ); ?></span>
                 <h2><?php esc_html_e( 'Upgrade when you need to work with existing media, not just import new rows.', 'calliope-media-import-export' ); ?></h2>
-                <p><?php esc_html_e( 'The free plugin stays intentionally focused on clean one-off CSV import and export. Pro adds controlled matching against existing attachments, selective metadata refreshes, safer replace-file workflows, and reusable setups for larger libraries.', 'calliope-media-import-export' ); ?></p>
+                <p><?php esc_html_e( 'The free plugin stays intentionally focused on clean one-off CSV import and export. Pro adds controlled matching against existing attachments, rollback restore points before imports, image conversion to WebP or AVIF where supported, safer replace-file workflows, and reusable setups for larger libraries.', 'calliope-media-import-export' ); ?></p>
             </div>
             <div class="eim-pro-spotlight-actions">
                 <a href="<?php echo esc_url( $context['pro_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="button button-primary"><?php esc_html_e( 'Explore Pro', 'calliope-media-import-export' ); ?></a>
@@ -723,6 +756,14 @@ class EIM_Admin {
             [
                 'title'       => __( 'Replace files safely and review history', 'calliope-media-import-export' ),
                 'description' => __( 'Replace outdated media more carefully and keep a record of what happened during heavier runs.', 'calliope-media-import-export' ),
+            ],
+            [
+                'title'       => __( 'Rollback restore points', 'calliope-media-import-export' ),
+                'description' => __( 'Create restore points before imports so mistaken metadata updates, new imports, and replace-file runs can be rolled back from Pro history.', 'calliope-media-import-export' ),
+            ],
+            [
+                'title'       => __( 'Convert images to WebP or AVIF', 'calliope-media-import-export' ),
+                'description' => __( 'Convert supported JPG and PNG imports to WebP or AVIF when your WordPress image editor supports the selected format.', 'calliope-media-import-export' ),
             ],
         ];
         ?>

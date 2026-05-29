@@ -125,6 +125,19 @@ class EIM_Exporter {
         $column_keys = isset( $context['column_keys'] ) ? $context['column_keys'] : null;
         $filename    = $this->get_export_filename( $context );
 
+        if ( ! $this->export_has_matching_rows( $context ) ) {
+            wp_safe_redirect(
+                add_query_arg(
+                    [
+                        'page'       => defined( 'EIM_ADMIN_PAGE_SLUG' ) ? EIM_ADMIN_PAGE_SLUG : 'export-import-media',
+                        'eim_notice' => 'empty_export',
+                    ],
+                    admin_url( 'admin.php' )
+                )
+            );
+            exit;
+        }
+
         ignore_user_abort( true );
         // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- Long exports may need additional execution time.
         @set_time_limit( 0 );
@@ -179,6 +192,8 @@ class EIM_Exporter {
             'max_file_size'     => $this->get_context_absint( $request, 'eim_max_file_size', 'max_file_size' ),
             'custom_meta_key'   => $this->get_context_string( $request, 'eim_custom_meta_key', 'custom_meta_key' ),
             'custom_meta_value' => $this->get_context_string( $request, 'eim_custom_meta_value', 'custom_meta_value' ),
+            'posts_per_page'    => $this->get_context_absint( $request, 'eim_posts_per_page', 'posts_per_page' ),
+            'paged'             => $this->get_context_absint( $request, 'eim_paged', 'paged' ),
         ];
 
         if ( null === $context['column_keys'] && isset( $request['column_keys'] ) ) {
@@ -206,10 +221,28 @@ class EIM_Exporter {
             $context['orderby'] = 'date';
         }
 
+        $context['posts_per_page'] = max( 0, absint( $context['posts_per_page'] ) );
+        $context['paged']          = max( 0, absint( $context['paged'] ) );
+
         return apply_filters( 'eim_export_request_context', $context, $request );
     }
 
+    public function export_has_matching_rows( $context = [] ) {
+        $raw_count = 0;
+        $context   = $this->normalize_export_context( $context );
+        $context['posts_per_page'] = 1;
+        $context['paged']          = 1;
+
+        return ! empty( $this->query_attachment_ids_page( $context, $raw_count ) );
+    }
+
     public function query_attachment_ids( $context = [] ) {
+        $raw_count = 0;
+
+        return $this->query_attachment_ids_page( $context, $raw_count );
+    }
+
+    private function query_attachment_ids_page( $context = [], &$raw_count = 0 ) {
         $context = $this->normalize_export_context( $context );
         $args    = $this->build_query_args( $context );
 
@@ -217,7 +250,8 @@ class EIM_Exporter {
         $query = new WP_Query( $args );
         $this->detach_parent_filters();
 
-        $ids = ! empty( $query->posts ) ? array_map( 'absint', $query->posts ) : [];
+        $ids       = ! empty( $query->posts ) ? array_map( 'absint', $query->posts ) : [];
+        $raw_count = count( $ids );
 
         return $this->filter_attachment_ids_after_query( $ids, $context );
     }
@@ -258,12 +292,33 @@ class EIM_Exporter {
             return false;
         }
 
-        $dataset = $this->generate_export_dataset( $context, $column_keys );
-        fputcsv( $stream, $dataset['headers'] );
+        $context     = $this->normalize_export_context( $context );
+        $column_keys = $this->resolve_export_column_keys( $column_keys, $context );
+        $headers     = $this->get_column_headers( $context, $column_keys );
+        $batch_size  = max( 1, absint( apply_filters( 'eim_export_stream_batch_size', 250, $context ) ) );
+        $page        = 1;
 
-        foreach ( $dataset['rows'] as $row ) {
-            fputcsv( $stream, $row );
-        }
+        fputcsv( $stream, $headers );
+
+        do {
+            $raw_count    = 0;
+            $page_context = array_merge(
+                $context,
+                [
+                    'posts_per_page' => $batch_size,
+                    'paged'          => $page,
+                ]
+            );
+
+            foreach ( $this->query_attachment_ids_page( $page_context, $raw_count ) as $attachment_id ) {
+                $attachment = get_post( $attachment_id );
+                if ( $attachment instanceof WP_Post ) {
+                    fputcsv( $stream, $this->build_export_row( $attachment, $column_keys, $context ) );
+                }
+            }
+
+            $page++;
+        } while ( $raw_count >= $batch_size );
 
         return true;
     }
@@ -321,14 +376,21 @@ class EIM_Exporter {
     }
 
     public function build_query_args( $context ) {
+        $posts_per_page = ! empty( $context['posts_per_page'] ) ? absint( $context['posts_per_page'] ) : -1;
+
         $args = [
             'post_type'      => 'attachment',
             'post_status'    => 'inherit',
-            'posts_per_page' => -1,
+            'posts_per_page' => $posts_per_page,
             'fields'         => 'ids',
             'orderby'        => isset( $context['orderby'] ) ? $context['orderby'] : 'date',
             'order'          => isset( $context['order'] ) ? $context['order'] : 'DESC',
+            'no_found_rows'  => true,
         ];
+
+        if ( $posts_per_page > 0 && ! empty( $context['paged'] ) ) {
+            $args['paged'] = absint( $context['paged'] );
+        }
 
         $mime_types = $this->get_post_mime_types_from_context( $context );
         if ( ! empty( $mime_types ) ) {
