@@ -1,42 +1,42 @@
-=== Export/Import Media ===
+=== Export/Import Media - CSV Media Library Import & Export ===
 Contributors: mairaforesto
-Tags: import, export, media, images, seo
+Tags: csv import, csv export, media library, media import, media export
 Requires at least: 5.6
 Tested up to: 7.0
-Stable tag: 1.7.26
+Stable tag: 1.7.27
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Import and export your WordPress media library using CSV, with preview, batch processing, duplicate prevention, and core media metadata columns.
+Import and export your WordPress media library from CSV with preview, batch processing, metadata support, and duplicate prevention.
 
 == Description ==
 
-**Export/Import Media** helps you move media between WordPress sites using CSV while preserving core media metadata columns such as alt text, title, caption, and description.
+Need to move or rebuild a media library without manually re-uploading every file? **Export/Import Media** helps you import WordPress media from CSV, export media data to CSV, and keep core attachment metadata organized during the process.
 
-The free workflow is built for straightforward media export and import. The plugin generates a CSV file containing useful media information such as URLs, relative paths, alt text, titles, captions, and descriptions. You can validate that CSV, preview it before importing, and process rows in batches from a cleaner admin screen focused on the core workflow.
+The free plugin focuses on the essential CSV workflow: export your current media library, prepare or upload a CSV, validate the file, preview rows before import, and process media in batches from the WordPress admin. Supported CSV columns include the media URL, relative path, title, alt text, caption, and description.
 
-During normal free imports, detected duplicates are skipped to help prevent duplicate attachments in the library. Metadata columns are supported for rows that are imported, while controlled matching and update rules for already-existing media are handled by the separate Pro add-on.
+During standard free imports, detected duplicates are skipped to help prevent duplicate attachments in the media library. Metadata is preserved for newly imported media rows. Updating existing attachments, controlled matching rules, rollback restore points, saved workflows, background processing, image conversion options, and replace-file workflows are handled by the separate **Export/Import Media Pro** add-on.
 
 **Why use this plugin?**
-* **Straightforward CSV workflows:** Export media data, validate incoming CSV files, preview them, and import them in batches.
-* **Batch import:** AJAX-powered processing helps avoid browser and timeout issues on medium and large imports.
-* **Duplicate prevention:** Detects existing matches and skips them in the normal free workflow.
-* **Metadata columns:** Supports title, alt text, caption, and description columns in CSV import/export.
-* **Developer friendly:** Includes hooks and filters for extending CSV columns, validation, admin UI, and import/export behavior.
-
-Need more control for larger libraries? The separate **Export/Import Media Pro** add-on adds rollback restore points before imports, image conversion to WebP/AVIF where supported, saved workflows, background processing, controlled matching, metadata updates, and replace-file workflows.
+* **CSV-first workflow:** Export, validate, preview, and import media library data using a readable CSV file.
+* **Batch processing:** Import media rows in smaller AJAX batches to reduce timeout risk.
+* **Metadata support:** Preserve title, alt text, caption, and description for imported attachments.
+* **Duplicate prevention:** Skip existing matches in the standard free workflow.
+* **Local file support:** Register files that already exist inside your WordPress uploads directory.
+* **Developer friendly:** Use hooks and filters to extend CSV columns, validation, admin UI, and import/export behavior.
 
 == Features ==
 
-* **CSV Export:** Export media data to CSV with filters by date, media type, and attachment context.
-* **CSV Preview:** Validate and preview the file before importing.
-* **Batch Processing:** Import media rows in AJAX batches.
-* **Local Import Mode:** Register files that already exist in `/uploads/` without downloading them again.
-* **Honor Relative Path:** Reuse or preserve folder paths from the CSV.
-* **Skip Thumbnail Generation:** Speed up large imports when needed.
-* **Duplicate Prevention:** Uses source meta and file fingerprints to detect existing matches and skip those rows in the standard free workflow.
-* **Metadata Columns:** Imports and exports title, alt text, caption, and description columns for supported rows.
-* **Downloadable Log:** Save an import log as `.txt` after the process finishes.
+* **CSV export:** Export media library data to CSV with filters for date range, media type, and attachment context.
+* **CSV validation and preview:** Upload a CSV, validate required columns, and preview rows before import.
+* **Batch import:** Process media rows in batches from the WordPress admin.
+* **Metadata support:** Import and export title, alt text, caption, and description columns.
+* **Duplicate prevention:** Detect existing matches and skip duplicate rows in the standard free workflow.
+* **Local Import Mode:** Import files that already exist in `/uploads/` without downloading them again.
+* **Honor Relative Path:** Reuse or preserve relative upload paths from the CSV when available.
+* **Skip Thumbnail Generation:** Skip intermediate image sizes during import when speed matters more than thumbnails.
+* **Downloadable import log:** Download a `.txt` log after an import finishes.
+* **Hooks and filters:** Extend CSV columns, validation, admin UI, and import/export behavior.
 
 == Installation ==
 
@@ -47,27 +47,54 @@ Need more control for larger libraries? The separate **Export/Import Media Pro**
 == Frequently Asked Questions ==
 
 = Does this plugin move the actual media files? =
-Yes. During a remote import, the plugin securely downloads the file from the URL provided in the CSV and adds it to your media library, generating the necessary attachment records.
+Yes, when you run a remote import. The plugin downloads the file from the URL in the CSV, adds it to the WordPress media library, and creates the attachment record. With Local Import Mode, it can also register files that already exist inside your uploads directory.
+
+= Can I import WordPress media from CSV? =
+Yes. Prepare a CSV with an absolute URL or relative path for each file, upload it in the plugin screen, validate it, preview the rows, and start the batch import.
+
+= What metadata can I import? =
+The free plugin supports common media metadata columns including title, alt text, caption, and description. It also reads media location columns such as absolute URL and relative path.
+
+= What happens if a file already exists? =
+The free plugin checks for existing matches using stored source data, relative paths, attachment paths, and file fingerprints. If it finds a duplicate, it skips that row instead of creating another attachment.
+
+= Does the free plugin update existing media? =
+No. In the free plugin, detected duplicates are skipped in the standard workflow. Updating metadata on existing attachments, selecting match rules, and replacing files are Pro workflows.
 
 = How does the "Skip Thumbnail Generation" work? =
 By checking this option, WordPress imports only the original image and skips creating intermediate image sizes during the import process. This makes large image imports faster. You can regenerate thumbnails later using a dedicated plugin.
 
-= What happens if a media file already exists? =
-The free plugin performs duplicate detection using stored source data, relative paths, attachment paths, and fingerprints. If it finds an existing match, it skips that row to help prevent duplicates in the library.
-
-= Does "metadata support" mean the free plugin updates existing media records? =
-No. In the free plugin, metadata columns are supported for standard export/import rows, while detected duplicates are skipped in the normal workflow. Controlled matching, metadata refreshes, selective field updates, and replace-file workflows for existing attachments belong to the separate Pro add-on.
-
 = Can I undo an import? =
-The free plugin gives you preview and logs before/after import. Rollback restore points are available in the Pro add-on.
+The free plugin provides preview and downloadable logs, but it does not include rollback. Rollback restore points before import are available in the Pro add-on.
 
 = What does the Pro add-on add? =
-Export/Import Media Pro adds rollback restore points before imports, image conversion to WebP/AVIF where supported, saved workflows, remote or server-side CSV sources, controlled matching against existing media, selective metadata updates, replace-file workflows, history, and background processing for larger media libraries.
+Export/Import Media Pro adds rollback restore points before imports, saved workflows, background processing, controlled matching, selective metadata updates, replace-file workflows, history, and image conversion options where the server and source file handling support them.
 
 = Can I filter which media items to export? =
-Yes. You can filter by date range, media type, and attachment context such as unattached files or media attached to posts, pages, and WooCommerce products.
+Yes. You can filter exports by date range, media type, and attachment context, including unattached files and media attached to posts or pages.
+
+= Does it work with WooCommerce product images? =
+Export filters can include product attachment context when WooCommerce is active and product attachments are available. The standard free CSV import creates media attachments; assigning imported images to products is outside the free import workflow.
+
+= Can I use local files already inside uploads? =
+Yes. Enable Local Import Mode and provide relative paths for files that already exist inside your WordPress uploads directory. Honor Relative Path can preserve or reuse folder paths from the CSV when appropriate.
+
+== Screenshots ==
+
+1. Export media library to CSV with filters for date, media type, and attachment context.
+2. Upload and validate a CSV before importing media into WordPress.
+3. Preview CSV rows, metadata, and duplicate status before starting the import.
+4. Import media in batches with progress feedback and a downloadable log.
+5. Review imported media with title, alt text, caption, and description preserved.
 
 == Changelog ==
+
+= 1.7.27 =
+* Improved the WordPress.org readme with clearer CSV media import/export positioning and screenshot captions.
+* Added a dismissible review popup shown once after 7 days to administrators, while keeping the existing review footer visible.
+* Improved admin internationalization and refreshed translations.
+* Changed review stars to a consistent golden color.
+* Loaded plugin translations from the bundled languages directory more reliably.
 
 = 1.7.19 =
 * Import UX: CSV files that contain only headers now validate as an empty preview with a clear warning instead of showing a failed-validation error.

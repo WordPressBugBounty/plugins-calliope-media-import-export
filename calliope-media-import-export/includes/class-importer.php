@@ -17,6 +17,11 @@ class EIM_Importer {
     }
 
     public static function activate_plugin() {
+        $installed_at_option = defined( 'EIM_INSTALLED_AT_OPTION' ) ? EIM_INSTALLED_AT_OPTION : 'eim_installed_at';
+        if ( false === get_option( $installed_at_option, false ) ) {
+            add_option( $installed_at_option, time(), '', false );
+        }
+
         if ( ! wp_next_scheduled( 'eim_daily_cleanup_event' ) ) {
             wp_schedule_event( time(), 'daily', 'eim_daily_cleanup_event' );
         }

@@ -20,8 +20,10 @@ class EIM_Admin {
         add_action( 'admin_head', [ $this, 'render_menu_icon_styles' ] );
         add_action( 'current_screen', [ $this, 'maybe_hide_admin_notices' ], 0 );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+        add_action( 'admin_init', [ $this, 'ensure_installed_at_option' ] );
         add_filter( 'plugin_action_links_' . EIM_BASENAME, [ $this, 'add_settings_link' ] );
         add_action( 'admin_post_eim_download_sample_csv', [ $this, 'download_sample_csv' ] );
+        add_action( 'wp_ajax_eim_dismiss_review_popup', [ $this, 'dismiss_review_popup' ] );
     }
 
     public function maybe_hide_admin_notices( $screen ) {
@@ -116,6 +118,11 @@ class EIM_Admin {
             ],
         ];
 
+        $review_popup_data = $this->get_review_popup_script_data();
+        if ( ! empty( $review_popup_data ) ) {
+            $script_data['reviewPopup'] = $review_popup_data;
+        }
+
         wp_localize_script(
             'eim-importer-js',
             'eim_ajax',
@@ -130,6 +137,23 @@ class EIM_Admin {
         return $links;
     }
 
+    public function ensure_installed_at_option() {
+        return $this->get_installed_at();
+    }
+
+    public function dismiss_review_popup() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'You do not have permission to dismiss this notice.', 'calliope-media-import-export' ) ], 403 );
+        }
+
+        check_ajax_referer( 'eim_dismiss_review_popup', 'nonce' );
+
+        $dismissed_option = defined( 'EIM_REVIEW_POPUP_DISMISSED_OPTION' ) ? EIM_REVIEW_POPUP_DISMISSED_OPTION : 'eim_review_popup_dismissed';
+        update_option( $dismissed_option, time(), false );
+
+        wp_send_json_success( [ 'dismissed' => true ] );
+    }
+
     public function render_admin_page() {
         if ( ! eim_current_user_can_manage() ) {
             wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'calliope-media-import-export' ) );
@@ -142,6 +166,7 @@ class EIM_Admin {
         <div class="wrap eim-admin-shell">
             <?php $this->render_page_header( $context ); ?>
             <?php $this->render_contextual_notice(); ?>
+            <?php $this->render_review_popup( $context ); ?>
 
             <div class="eim-admin-columns">
                 <div class="eim-admin-main">
@@ -309,6 +334,62 @@ class EIM_Admin {
         ];
     }
 
+    private function get_installed_at() {
+        $installed_at_option = defined( 'EIM_INSTALLED_AT_OPTION' ) ? EIM_INSTALLED_AT_OPTION : 'eim_installed_at';
+        $installed_at        = get_option( $installed_at_option, false );
+
+        if ( false === $installed_at ) {
+            $installed_at = time();
+            add_option( $installed_at_option, $installed_at, '', false );
+        }
+
+        return absint( $installed_at );
+    }
+
+    private function is_review_popup_dismissed() {
+        $dismissed_option = defined( 'EIM_REVIEW_POPUP_DISMISSED_OPTION' ) ? EIM_REVIEW_POPUP_DISMISSED_OPTION : 'eim_review_popup_dismissed';
+
+        return false !== get_option( $dismissed_option, false );
+    }
+
+    private function get_review_url( $context = null ) {
+        if ( is_array( $context ) && ! empty( $context['review_url'] ) ) {
+            return (string) $context['review_url'];
+        }
+
+        $urls = eim_get_setting( 'urls', [] );
+
+        return isset( $urls['reviews'] ) ? (string) $urls['reviews'] : '';
+    }
+
+    private function should_show_review_popup( $context = null ) {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            return false;
+        }
+
+        if ( $this->is_review_popup_dismissed() ) {
+            return false;
+        }
+
+        $installed_at = $this->get_installed_at();
+        if ( $installed_at <= 0 || time() < ( $installed_at + ( 7 * DAY_IN_SECONDS ) ) ) {
+            return false;
+        }
+
+        return '' !== $this->get_review_url( $context );
+    }
+
+    private function get_review_popup_script_data() {
+        if ( ! $this->should_show_review_popup() ) {
+            return [];
+        }
+
+        return [
+            'dismissAction' => 'eim_dismiss_review_popup',
+            'dismissNonce'  => wp_create_nonce( 'eim_dismiss_review_popup' ),
+        ];
+    }
+
     public function render_locked_pro_page() {
         if ( ! eim_current_user_can_manage() ) {
             wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'calliope-media-import-export' ) );
@@ -358,6 +439,9 @@ class EIM_Admin {
             'process_complete'            => esc_html__( 'Import completed.', 'calliope-media-import-export' ),
             'process_stopped'             => esc_html__( 'Import stopped by user.', 'calliope-media-import-export' ),
             'processing_batch'            => esc_html__( 'Processing media rows...', 'calliope-media-import-export' ),
+            'processing_image'            => esc_html__( 'Processing image', 'calliope-media-import-export' ),
+            /* translators: 1: current import row number, 2: total import rows. */
+            'processing_position'         => esc_html__( '#%1$s of %2$s', 'calliope-media-import-export' ),
             'batch_summary'               => esc_html__( 'Batch summary', 'calliope-media-import-export' ),
             'batch_time_limited'          => esc_html__( 'Batch stopped early by the time limit; continuing with the next batch.', 'calliope-media-import-export' ),
             'log_empty'                   => esc_html__( 'Log is empty. Nothing to download.', 'calliope-media-import-export' ),
@@ -417,6 +501,8 @@ class EIM_Admin {
             'process_complete'            => 'Import completed.',
             'process_stopped'             => 'Import stopped by user.',
             'processing_batch'            => 'Processing media rows...',
+            'processing_image'            => 'Processing image',
+            'processing_position'         => '#%1$s of %2$s',
             'batch_summary'               => 'Batch summary',
             'batch_time_limited'          => 'Batch stopped early by the time limit; continuing with the next batch.',
             'log_empty'                   => 'Log is empty. Nothing to download.',
@@ -472,13 +558,13 @@ class EIM_Admin {
                     <?php endif; ?>
                     <div class="eim-banner-actions">
                         <?php if ( ! empty( $context['documentation_url'] ) ) : ?>
-                            <a href="<?php echo esc_url( $context['documentation_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="eim-banner-link"><?php esc_html_e( 'Documentación', 'calliope-media-import-export' ); ?></a>
+                            <a href="<?php echo esc_url( $context['documentation_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="eim-banner-link"><?php esc_html_e( 'Documentation', 'calliope-media-import-export' ); ?></a>
                         <?php endif; ?>
                         <?php if ( ! empty( $context['support_url'] ) ) : ?>
-                            <a href="<?php echo esc_url( $context['support_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="eim-banner-link"><?php esc_html_e( 'Soporte', 'calliope-media-import-export' ); ?></a>
+                            <a href="<?php echo esc_url( $context['support_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="eim-banner-link"><?php esc_html_e( 'Support', 'calliope-media-import-export' ); ?></a>
                         <?php endif; ?>
                         <?php if ( ! empty( $context['suggestions_url'] ) ) : ?>
-                            <a href="<?php echo esc_url( $context['suggestions_url'] ); ?>" class="eim-banner-link"><?php esc_html_e( 'Sugerencias', 'calliope-media-import-export' ); ?></a>
+                            <a href="<?php echo esc_url( $context['suggestions_url'] ); ?>" class="eim-banner-link"><?php esc_html_e( 'Suggestions', 'calliope-media-import-export' ); ?></a>
                         <?php endif; ?>
                         <?php do_action( 'eim_admin_banner_actions', $context ); ?>
                     </div>
@@ -847,6 +933,34 @@ class EIM_Admin {
         <?php
     }
 
+    private function render_review_popup( $context ) {
+        if ( ! $this->should_show_review_popup( $context ) ) {
+            return;
+        }
+
+        $review_url = $this->get_review_url( $context );
+        if ( '' === $review_url ) {
+            return;
+        }
+
+        $stars_svg = '<svg width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>';
+        $allowed   = [
+            'svg'  => [ 'width' => [], 'height' => [], 'viewBox' => [] ],
+            'path' => [ 'fill' => [], 'd' => [] ],
+        ];
+        ?>
+        <div id="eim-review-popup" class="eim-review-popup">
+            <a class="eim-review-popup-link" href="<?php echo esc_url( $review_url ); ?>" target="_blank" rel="noopener noreferrer" aria-labelledby="eim-review-popup-title">
+                <span class="eim-review-popup-stars" aria-hidden="true"><?php echo wp_kses( str_repeat( $stars_svg, 5 ), $allowed ); ?></span>
+                <span id="eim-review-popup-title" class="eim-review-popup-title"><?php esc_html_e( 'Enjoying Export/Import Media?', 'calliope-media-import-export' ); ?></span>
+                <span class="eim-review-popup-message"><?php esc_html_e( 'If Export/Import Media helped you move your WordPress media library with CSV, a quick rating on WordPress.org would really help the plugin grow.', 'calliope-media-import-export' ); ?></span>
+                <span class="eim-review-popup-cta"><?php esc_html_e( 'Click anywhere to leave a review', 'calliope-media-import-export' ); ?></span>
+            </a>
+            <button type="button" class="eim-review-popup-close" aria-label="<?php esc_attr_e( 'Close review request', 'calliope-media-import-export' ); ?>">&times;</button>
+        </div>
+        <?php
+    }
+
     private function render_footer_review( $context ) {
         if ( empty( $context['review_url'] ) ) {
             return;
@@ -872,6 +986,7 @@ class EIM_Admin {
                     wp_kses( str_repeat( $stars_svg, 5 ), $allowed )
                 );
                 ?>
+                <a href="<?php echo esc_url( $context['review_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="eim-footer-review-cta"><?php esc_html_e( 'Leave a review', 'calliope-media-import-export' ); ?></a>
             </div>
         </div>
         <?php

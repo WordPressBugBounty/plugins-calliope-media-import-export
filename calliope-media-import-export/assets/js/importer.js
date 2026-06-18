@@ -21,6 +21,7 @@ jQuery(document).ready(function($) {
     const i18n = (window.eim_ajax && eim_ajax.i18n) ? eim_ajax.i18n : {};
     const fallbackI18n = (window.eim_ajax && eim_ajax.fallback_i18n) ? eim_ajax.fallback_i18n : {};
     const config = (window.eim_ajax && eim_ajax.config) ? eim_ajax.config : {};
+    const reviewPopup = (window.eim_ajax && eim_ajax.reviewPopup) ? eim_ajax.reviewPopup : {};
 
     let totalRows = 0;
     let currentRow = 0;
@@ -60,6 +61,53 @@ jQuery(document).ready(function($) {
             skipped: 0,
             errors: 0
         };
+    }
+
+    function markReviewPopupDismissed(reason) {
+        if (!ajaxUrl || !reviewPopup.dismissNonce) {
+            return null;
+        }
+
+        return $.post(ajaxUrl, {
+            action: reviewPopup.dismissAction || 'eim_dismiss_review_popup',
+            nonce: reviewPopup.dismissNonce,
+            reason: reason || 'dismissed'
+        });
+    }
+
+    function initReviewPopup() {
+        const popup = $('#eim-review-popup');
+
+        if (!popup.length) {
+            return;
+        }
+
+        function hidePopup() {
+            popup.addClass('is-hidden');
+
+            setTimeout(function() {
+                popup.remove();
+            }, 180);
+        }
+
+        markReviewPopupDismissed('shown');
+
+        popup.find('.eim-review-popup-link').on('click', function() {
+            markReviewPopupDismissed('review_clicked');
+            hidePopup();
+        });
+
+        popup.find('.eim-review-popup-close').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            markReviewPopupDismissed('closed');
+            hidePopup();
+        });
+
+        $(document).on('eim:importStart', function() {
+            popup.addClass('is-hidden-during-import');
+        });
     }
 
 
@@ -720,11 +768,16 @@ jQuery(document).ready(function($) {
 
         const batchSize = liveRowsPerRequest;
         const startLabel = currentRow + 1;
+        const rowPosition = totalRows
+            ? (t('processing_position') || '#%1$s of %2$s')
+                .replace('%1$s', String(startLabel))
+                .replace('%2$s', String(totalRows))
+            : `#${startLabel}`;
 
         logMessage(
-            'Procesando imagen',
+            t('processing_image') || 'Processing image',
             'INFO',
-            totalRows ? `#${startLabel} de ${totalRows}` : `#${startLabel}`
+            rowPosition
         );
 
         $.ajax({
@@ -1047,4 +1100,6 @@ jQuery(document).ready(function($) {
         $(this).prop('disabled', true);
         logMessage(t('stopping_process'), 'INFO');
     });
+
+    initReviewPopup();
 });

@@ -2,7 +2,7 @@
 /*
 Plugin Name: Export/Import Media
 Description: CSV export/import for your media library with preview, batch processing, duplicate prevention, and core metadata columns.
-Version: 1.7.26
+Version: 1.7.27
 Requires at least: 5.6
 Requires PHP: 7.4
 Author: CalliopeWP
@@ -28,7 +28,7 @@ if ( ! defined( 'EIM_FILE' ) ) {
 }
 
 if ( ! defined( 'EIM_VERSION' ) ) {
-    define( 'EIM_VERSION', '1.7.26' );
+    define( 'EIM_VERSION', '1.7.27' );
 }
 
 if ( ! defined( 'EIM_PUBLIC_SLUG' ) ) {
@@ -54,6 +54,27 @@ if ( ! defined( 'EIM_URL' ) ) {
 if ( ! defined( 'EIM_BASENAME' ) ) {
     define( 'EIM_BASENAME', plugin_basename( EIM_FILE ) );
 }
+
+if ( ! defined( 'EIM_INSTALLED_AT_OPTION' ) ) {
+    define( 'EIM_INSTALLED_AT_OPTION', 'eim_installed_at' );
+}
+
+if ( ! defined( 'EIM_REVIEW_POPUP_DISMISSED_OPTION' ) ) {
+    define( 'EIM_REVIEW_POPUP_DISMISSED_OPTION', 'eim_review_popup_dismissed' );
+}
+
+if ( ! function_exists( 'eim_load_textdomain' ) ) {
+    /**
+     * Load bundled translations for the free plugin.
+     *
+     * @return void
+     */
+    function eim_load_textdomain() {
+        load_plugin_textdomain( EIM_TEXT_DOMAIN, false, dirname( EIM_BASENAME ) . '/languages' );
+    }
+}
+
+add_action( 'plugins_loaded', 'eim_load_textdomain' );
 
 require_once EIM_PATH . 'includes/class-config.php';
 require_once EIM_PATH . 'includes/class-eim-service-registry.php';

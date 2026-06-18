@@ -2,7 +2,7 @@
 # Copyright (C) 2026 Maira Foresto
 # This file is distributed under the same license as the Export/Import Media package.
 msgid ""
-msgstr "Project-Id-Version: calliope-media-import-export 1.6.14\nReport-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\nPOT-Creation-Date: 2026-04-14 21:08+0000\nPO-Revision-Date: 2026-04-14 21:08+0000\nLast-Translator: Maira Foresto\nLanguage: es_ES\nLanguage-Team: Calliope\nPlural-Forms: nplurals=2; plural=(n != 1);\nMIME-Version: 1.0\nContent-Type: text/plain; charset=utf-8\nContent-Transfer-Encoding: 8bit\nGenerated-By: Babel 2.18.0\n"
+msgstr "Project-Id-Version: calliope-media-import-export 1.7.27\nReport-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\nPOT-Creation-Date: 2026-04-14 21:08+0000\nPO-Revision-Date: 2026-04-14 21:08+0000\nLast-Translator: Maira Foresto\nLanguage: es_ES\nLanguage-Team: Calliope\nPlural-Forms: nplurals=2; plural=(n != 1);\nMIME-Version: 1.0\nContent-Type: text/plain; charset=utf-8\nContent-Transfer-Encoding: 8bit\nGenerated-By: Babel 2.18.0\n"
 
 #: includes/class-importer.php:2248
 #, python-format
@@ -189,9 +189,17 @@ msgstr "Delimitador"
 msgid "Description"
 msgstr "Descripción"
 
-#: admin/class-admin.php:439
+#: admin/class-admin.php:479
 msgid "Documentation"
 msgstr "Documentación"
+
+#: admin/class-admin.php:482
+msgid "Support"
+msgstr "Soporte"
+
+#: admin/class-admin.php:485
+msgid "Suggestions"
+msgstr "Sugerencias"
 
 #: includes/class-config.php:63
 msgid "Documents (PDF, ZIP, etc.)"
@@ -592,6 +600,15 @@ msgstr "Procesado"
 #: admin/class-admin.php:316
 msgid "Processing media rows..."
 msgstr "Procesando filas de medios..."
+
+#: admin/class-admin.php:361
+msgid "Processing image"
+msgstr "Procesando imagen"
+
+#. translators: 1: current import row number, 2: total import rows.
+#: admin/class-admin.php:363
+msgid "#%1$s of %2$s"
+msgstr "#%1$s de %2$s"
 
 #: admin/class-admin.php:826
 msgid "Rate 5 stars"
@@ -1003,17 +1020,8 @@ msgstr "Convierte importaciones JPG y PNG compatibles a WebP o AVIF cuando el ed
 msgid "Create restore points before imports so mistaken metadata updates, new imports, and replace-file runs can be rolled back from Pro history."
 msgstr "Crea puntos de restauración antes de importar para que las actualizaciones de metadatos por error, las nuevas importaciones y los reemplazos de archivo puedan revertirse desde el historial Pro."
 
-msgid "Documentación"
-msgstr "Documentación"
-
 msgid "Rollback restore points"
 msgstr "Puntos de restauración rollback"
-
-msgid "Soporte"
-msgstr "Soporte"
-
-msgid "Sugerencias"
-msgstr "Sugerencias"
 
 msgid "The free plugin stays intentionally focused on clean one-off CSV import and export. Pro adds controlled matching against existing attachments, rollback restore points before imports, image conversion to WebP or AVIF where supported, safer replace-file workflows, and reusable setups for larger libraries."
 msgstr "El plugin gratuito se mantiene intencionalmente enfocado en importaciones y exportaciones CSV puntuales y limpias. Pro añade coincidencia controlada con adjuntos existentes, puntos de restauración antes de importar, conversión de imágenes a WebP o AVIF cuando el servidor lo permite, flujos más seguros para reemplazar archivos y configuraciones reutilizables para bibliotecas grandes."
@@ -1042,3 +1050,22 @@ msgstr "No se encontraron filas de medios para importar. El CSV puede contener s
 msgid "No media matched the selected export filters. Try exporting All Media or clearing date/attachment filters."
 msgstr "Ningún medio coincide con los filtros de exportación seleccionados. Probá exportar Todos los medios o limpiar los filtros de fecha/adjunto."
 
+#: admin/class-admin.php
+msgid "If Export/Import Media helped you move your WordPress media library with CSV, a quick rating on WordPress.org would really help the plugin grow."
+msgstr "Si Export/Import Media te ayudó a mover tu biblioteca de medios con CSV, una calificación en WordPress.org ayudaría mucho a que el plugin crezca."
+
+#: admin/class-admin.php
+msgid "Click anywhere to leave a review"
+msgstr "Haz clic para dejar una reseña"
+
+#: admin/class-admin.php
+msgid "Close review request"
+msgstr "Cerrar solicitud de reseña"
+
+#: admin/class-admin.php
+msgid "Leave a review"
+msgstr "Dejar reseña"
+
+#: admin/class-admin.php
+msgid "You do not have permission to dismiss this notice."
+msgstr "No tienes permisos para cerrar este aviso."

@@ -2,7 +2,7 @@
 # Copyright (C) 2026 Maira Foresto
 # This file is distributed under the same license as the Export/Import Media package.
 msgid ""
-msgstr "Project-Id-Version: calliope-media-import-export 1.6.9\nReport-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\nPOT-Creation-Date: 2026-04-14 21:08+0000\nPO-Revision-Date: 2026-04-19 00:00+0000\nLast-Translator: Maira Foresto\nLanguage: zh_CN\nLanguage-Team: Calliope\nPlural-Forms: nplurals=1; plural=0;\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nGenerated-By: Babel 2.18.0\nX-Generator: Codex\n"
+msgstr "Project-Id-Version: calliope-media-import-export 1.7.27\nReport-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\nPOT-Creation-Date: 2026-04-14 21:08+0000\nPO-Revision-Date: 2026-04-19 00:00+0000\nLast-Translator: Maira Foresto\nLanguage: zh_CN\nLanguage-Team: Calliope\nPlural-Forms: nplurals=1; plural=0;\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nGenerated-By: Babel 2.18.0\nX-Generator: Codex\n"
 
 #: includes/class-importer.php:2248
 #, python-format
@@ -1035,3 +1035,22 @@ msgstr "未找到可导入的媒体行。CSV 可能只包含表头，或者你�
 msgid "No media matched the selected export filters. Try exporting All Media or clearing date/attachment filters."
 msgstr "没有媒体符合所选导出筛选条件。请尝试导出“所有媒体”，或清除日期/附件筛选条件。"
 
+#: admin/class-admin.php
+msgid "If Export/Import Media helped you move your WordPress media library with CSV, a quick rating on WordPress.org would really help the plugin grow."
+msgstr "如果 Export/Import Media 帮助你通过 CSV 迁移 WordPress 媒体库，在 WordPress.org 上快速评分将非常有助于插件成长。"
+
+#: admin/class-admin.php
+msgid "Click anywhere to leave a review"
+msgstr "点击任意位置留下评价"
+
+#: admin/class-admin.php
+msgid "Close review request"
+msgstr "关闭评价请求"
+
+#: admin/class-admin.php
+msgid "Leave a review"
+msgstr "留下评价"
+
+#: admin/class-admin.php
+msgid "You do not have permission to dismiss this notice."
+msgstr "你没有权限关闭此通知。"
