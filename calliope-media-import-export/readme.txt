@@ -3,7 +3,7 @@ Contributors: mairaforesto
 Tags: csv import, csv export, media library, media import, media export
 Requires at least: 5.6
 Tested up to: 7.0
-Stable tag: 1.7.27
+Stable tag: 1.7.28
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,6 +16,10 @@ Need to move or rebuild a media library without manually re-uploading every file
 The free plugin focuses on the essential CSV workflow: export your current media library, prepare or upload a CSV, validate the file, preview rows before import, and process media in batches from the WordPress admin. Supported CSV columns include the media URL, relative path, title, alt text, caption, and description.
 
 During standard free imports, detected duplicates are skipped to help prevent duplicate attachments in the media library. Metadata is preserved for newly imported media rows. Updating existing attachments, controlled matching rules, rollback restore points, saved workflows, background processing, image conversion options, and replace-file workflows are handled by the separate **Export/Import Media Pro** add-on.
+
+**Watch the demo:**
+
+https://www.youtube.com/watch?v=QfXuZOJLgFc
 
 **Why use this plugin?**
 * **CSV-first workflow:** Export, validate, preview, and import media library data using a readable CSV file.
@@ -88,6 +92,10 @@ Yes. Enable Local Import Mode and provide relative paths for files that already 
 5. Review imported media with title, alt text, caption, and description preserved.
 
 == Changelog ==
+
+= 1.7.28 =
+* Added the YouTube demo video to the WordPress.org readme so it can be embedded on the plugin page.
+* Bumped plugin release metadata to 1.7.28.
 
 = 1.7.27 =
 * Improved the WordPress.org readme with clearer CSV media import/export positioning and screenshot captions.
