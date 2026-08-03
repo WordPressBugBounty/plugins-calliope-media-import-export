@@ -1,0 +1,4 @@
+Absolute URL,Relative Path,Title,Alt Text
+https://example.com/a.jpg,2026/08/a.jpg,"Title, with comma",Alt A
+,2026/08/b.jpg,Title B,Alt B
+,,Missing source,Alt C

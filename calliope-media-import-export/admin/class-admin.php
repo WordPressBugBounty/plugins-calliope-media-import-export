@@ -235,21 +235,19 @@ class EIM_Admin {
             : [ 'ID', 'Absolute URL', 'Relative Path', 'File', 'Alt Text', 'Caption', 'Description', 'Title' ];
 
         $sample_image_url = defined( 'EIM_URL' ) ? EIM_URL . 'assets/images/eim-sample.png' : '';
+        $sample_row       = [
+            '',
+            $sample_image_url,
+            '',
+            'eim-sample.png',
+            'Sample alt text',
+            'Sample caption',
+            'Sample description',
+            'Sample title',
+        ];
 
-        fputcsv( $output, $headers );
-        fputcsv(
-            $output,
-            [
-                '',
-                $sample_image_url,
-                '',
-                'eim-sample.png',
-                'Sample alt text',
-                'Sample caption',
-                'Sample description',
-                'Sample title',
-            ]
-        );
+        fputcsv( $output, array_map( [ $this, 'escape_csv_cell' ], $headers ) );
+        fputcsv( $output, array_map( [ $this, 'escape_csv_cell' ], $sample_row ) );
 
         // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing the browser output stream after writing the CSV.
         fclose( $output );
@@ -481,6 +479,16 @@ class EIM_Admin {
             'summary_skipped'             => esc_html__( 'Skipped', 'calliope-media-import-export' ),
             'summary_errors'              => esc_html__( 'Errors', 'calliope-media-import-export' ),
         ];
+    }
+
+    private function escape_csv_cell( $value ) {
+        $value = (string) $value;
+
+        if ( '' !== $value && in_array( $value[0], [ '=', '+', '-', '@', "\t", "\r" ], true ) ) {
+            $value = "'" . $value;
+        }
+
+        return $value;
     }
 
     private function get_import_script_i18n_defaults() {

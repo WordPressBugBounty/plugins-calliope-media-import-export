@@ -2,7 +2,7 @@
 /*
 Plugin Name: Export/Import Media
 Description: CSV export/import for your media library with preview, batch processing, duplicate prevention, and core metadata columns.
-Version: 1.7.28
+Version: 1.7.30
 Requires at least: 5.6
 Requires PHP: 7.4
 Author: CalliopeWP
@@ -28,7 +28,7 @@ if ( ! defined( 'EIM_FILE' ) ) {
 }
 
 if ( ! defined( 'EIM_VERSION' ) ) {
-    define( 'EIM_VERSION', '1.7.28' );
+    define( 'EIM_VERSION', '1.7.30' );
 }
 
 if ( ! defined( 'EIM_PUBLIC_SLUG' ) ) {
@@ -75,6 +75,11 @@ if ( ! function_exists( 'eim_load_textdomain' ) ) {
 }
 
 add_action( 'plugins_loaded', 'eim_load_textdomain' );
+
+$eim_vendor_autoload = EIM_PATH . 'vendor/autoload.php';
+if ( file_exists( $eim_vendor_autoload ) ) {
+    require_once $eim_vendor_autoload;
+}
 
 require_once EIM_PATH . 'includes/class-config.php';
 require_once EIM_PATH . 'includes/class-eim-service-registry.php';
@@ -192,6 +197,30 @@ if ( ! function_exists( 'eim_get_service' ) ) {
     }
 }
 
+if ( ! class_exists( 'EIM_Csv_Reader', false ) ) {
+    require_once EIM_PATH . 'includes/class-csv-reader.php';
+}
+
+if ( ! class_exists( 'EIM_Filesystem', false ) ) {
+    require_once EIM_PATH . 'includes/class-filesystem.php';
+}
+
+if ( ! class_exists( 'EIM_Attachment_Matcher', false ) ) {
+    require_once EIM_PATH . 'includes/class-attachment-matcher.php';
+}
+
+if ( ! class_exists( 'EIM_Svg_Import_Validator', false ) ) {
+    require_once EIM_PATH . 'includes/class-svg-import-validator.php';
+}
+
+if ( ! class_exists( 'EIM_Attachment_Writer', false ) ) {
+    require_once EIM_PATH . 'includes/class-attachment-writer.php';
+}
+
+if ( ! class_exists( 'EIM_Temp_File_Manager', false ) ) {
+    require_once EIM_PATH . 'includes/class-temp-file-manager.php';
+}
+
 if ( ! class_exists( 'EIM_Importer', false ) ) {
     require_once EIM_PATH . 'includes/class-importer.php';
 }
@@ -218,18 +247,23 @@ if ( ! function_exists( 'eim_init_plugin' ) ) {
 
         $booted = true;
 
-        $services = [];
+        $services     = [];
+        $filesystem   = class_exists( 'EIM_Filesystem' ) ? new EIM_Filesystem() : null;
+
+        if ( $filesystem ) {
+            $services['filesystem'] = $filesystem;
+        }
 
         if ( class_exists( 'EIM_Admin' ) ) {
             $services['admin'] = new EIM_Admin();
         }
 
         if ( class_exists( 'EIM_Importer' ) ) {
-            $services['importer'] = new EIM_Importer();
+            $services['importer'] = new EIM_Importer( $filesystem );
         }
 
         if ( class_exists( 'EIM_Exporter' ) ) {
-            $services['exporter'] = new EIM_Exporter();
+            $services['exporter'] = new EIM_Exporter( $filesystem );
         }
 
         EIM_Service_Registry::set_services( $services );

@@ -6,8 +6,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 class EIM_Exporter {
 
     private $filter_parent_type = '';
+    private $filesystem;
+    private $active_export_path = 'php://output';
 
-    public function __construct() {
+    public function __construct( ?EIM_Filesystem $filesystem = null ) {
+        $this->filesystem = $filesystem ? $filesystem : new EIM_Filesystem();
         add_action( 'admin_post_eim_export_csv', [ $this, 'handle_export' ] );
     }
 
@@ -298,7 +301,15 @@ class EIM_Exporter {
         $batch_size  = max( 1, absint( apply_filters( 'eim_export_stream_batch_size', 250, $context ) ) );
         $page        = 1;
 
-        fputcsv( $stream, $headers );
+        $header_written = $this->filesystem->write_csv_row(
+            $stream,
+            array_map( [ $this, 'escape_csv_cell' ], $headers ),
+            $this->active_export_path,
+            'export_csv_header_write_failed'
+        );
+        if ( is_wp_error( $header_written ) ) {
+            return false;
+        }
 
         do {
             $raw_count    = 0;
@@ -313,7 +324,16 @@ class EIM_Exporter {
             foreach ( $this->query_attachment_ids_page( $page_context, $raw_count ) as $attachment_id ) {
                 $attachment = get_post( $attachment_id );
                 if ( $attachment instanceof WP_Post ) {
-                    fputcsv( $stream, $this->build_export_row( $attachment, $column_keys, $context ) );
+                    $row = $this->build_export_row( $attachment, $column_keys, $context );
+                    $row_written = $this->filesystem->write_csv_row(
+                        $stream,
+                        array_map( [ $this, 'escape_csv_cell' ], $row ),
+                        $this->active_export_path,
+                        'export_csv_row_write_failed'
+                    );
+                    if ( is_wp_error( $row_written ) ) {
+                        return false;
+                    }
                 }
             }
 
@@ -330,22 +350,30 @@ class EIM_Exporter {
         }
 
         $directory = wp_normalize_path( dirname( $file_path ) );
-        if ( ! is_dir( $directory ) ) {
-            wp_mkdir_p( $directory );
+        $directory_created = $this->filesystem->mkdir( $directory, 'export_directory_create_failed' );
+        if ( is_wp_error( $directory_created ) ) {
+            return new WP_Error( 'eim_export_directory_unwritable', __( 'Could not create the export directory.', 'calliope-media-import-export' ), $directory_created->get_error_data() );
         }
 
-        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Writing the export CSV to a generated file path.
-        $handle = @fopen( $file_path, 'wb' );
-        if ( ! $handle ) {
-            return new WP_Error( 'eim_export_file_unwritable', __( 'Could not create the export file.', 'calliope-media-import-export' ) );
+        $handle = $this->filesystem->open_stream( $file_path, 'wb', 'export_stream_open_failed' );
+        if ( is_wp_error( $handle ) ) {
+            return new WP_Error( 'eim_export_file_unwritable', __( 'Could not create the export file.', 'calliope-media-import-export' ), $handle->get_error_data() );
         }
 
-        $written = $this->write_csv_to_stream( $handle, $context, $column_keys );
-        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing the generated export file after writing the CSV.
-        fclose( $handle );
+        $previous_export_path     = $this->active_export_path;
+        $this->active_export_path = $file_path;
+        $closed                   = true;
+        try {
+            $written = $this->write_csv_to_stream( $handle, $context, $column_keys );
+        } finally {
+            $closed = $this->filesystem->close_stream( $handle, $file_path, 'export_stream_close_failed' );
+            $this->active_export_path = $previous_export_path;
+        }
 
-        if ( ! $written ) {
-            return new WP_Error( 'eim_export_file_write_failed', __( 'Could not write the export file.', 'calliope-media-import-export' ) );
+        if ( ! $written || is_wp_error( $closed ) || ! $closed ) {
+            $this->filesystem->delete( $file_path, 'export_partial_file_cleanup_failed' );
+            $last_error = $this->filesystem->get_last_error();
+            return new WP_Error( 'eim_export_file_write_failed', __( 'Could not write the export file.', 'calliope-media-import-export' ), is_wp_error( $last_error ) ? $last_error->get_error_data() : [] );
         }
 
         return $file_path;
@@ -810,6 +838,16 @@ class EIM_Exporter {
         }
 
         return sanitize_text_field( (string) $value );
+    }
+
+    private function escape_csv_cell( $value ) {
+        $value = (string) $value;
+
+        if ( '' !== $value && in_array( $value[0], [ '=', '+', '-', '@', "\t", "\r" ], true ) ) {
+            $value = "'" . $value;
+        }
+
+        return $value;
     }
 
     private function normalize_column_keys_value( $value ) {

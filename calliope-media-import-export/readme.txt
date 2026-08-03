@@ -3,7 +3,7 @@ Contributors: mairaforesto
 Tags: csv import, csv export, media library, media import, media export
 Requires at least: 5.6
 Tested up to: 7.0
-Stable tag: 1.7.28
+Stable tag: 1.7.30
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,7 +19,7 @@ During standard free imports, detected duplicates are skipped to help prevent du
 
 **Watch the demo:**
 
-https://www.youtube.com/watch?v=QfXuZOJLgFc
+https://youtu.be/YIZX2yUxoZM
 
 **Why use this plugin?**
 * **CSV-first workflow:** Export, validate, preview, and import media library data using a readable CSV file.
@@ -92,6 +92,17 @@ Yes. Enable Local Import Mode and provide relative paths for files that already 
 5. Review imported media with title, alt text, caption, and description preserved.
 
 == Changelog ==
+
+= 1.7.30 =
+* Security: Escaped exported CSV cells that begin with formula-triggering characters to prevent spreadsheet formula injection.
+* Security: Replaced manual SVG safety regex checks with parser-based sanitization using enshrined/svg-sanitize, and now stores sanitized SVG contents on import.
+* Reliability: Migrated critical import/export file writes, metadata, progress logs, replacement copies, SVG writes, and temporary cleanup to the WordPress Filesystem API.
+* Diagnostics: Filesystem failures now return WP_Error details and log the operation, path, active transport, native warning, and directory permission context instead of hiding failures with the @ operator.
+* Architecture: Split the importer into focused CSV reader, attachment matcher, attachment writer, SVG validator, and temporary file manager services, leaving EIM_Importer as the AJAX and batch orchestrator.
+* Testing: Added PHPUnit 9.6 coverage for CSV parsing and attachment matching, plus regression tests for filesystem failures, importer service wiring, temporary file locks, cleanup, and SVG sanitization.
+* Compatibility: Improved support for Excel sep= delimiter directives and declared CSV escape behavior explicitly for newer PHP versions.
+* Documentation: Updated the embedded YouTube demo video.
+* Bumped plugin release metadata to 1.7.30.
 
 = 1.7.28 =
 * Added the YouTube demo video to the WordPress.org readme so it can be embedded on the plugin page.
