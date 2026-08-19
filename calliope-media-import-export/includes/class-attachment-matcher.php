@@ -162,6 +162,44 @@ class EIM_Attachment_Matcher {
         return 0;
     }
 
+    public function find_existing_attachment_id_by_fingerprint( $fingerprint ) {
+        global $wpdb;
+
+        $fingerprint = is_string( $fingerprint ) ? trim( $fingerprint ) : '';
+        if ( '' === $fingerprint ) {
+            return 0;
+        }
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Prepared fingerprint lookup for a downloaded incoming media file.
+        $id = (int) $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value = %s LIMIT 1",
+                '_eim_file_fingerprint',
+                $fingerprint
+            )
+        );
+
+        if ( $id ) {
+            return $id;
+        }
+
+        if ( 0 === strpos( $fingerprint, 'md5:' ) ) {
+            $md5 = substr( $fingerprint, 4 );
+            if ( $md5 ) {
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Backward-compatible MD5 fingerprint lookup.
+                return (int) $wpdb->get_var(
+                    $wpdb->prepare(
+                        "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value = %s LIMIT 1",
+                        '_eim_file_hash',
+                        $md5
+                    )
+                );
+            }
+        }
+
+        return 0;
+    }
+
     public function find_attachments_by_name_candidates( $filename, $rel_path = '' ) {
         global $wpdb;
 

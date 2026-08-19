@@ -12,23 +12,42 @@ class EIM_Svg_Import_Validator {
     }
 
     public function is_svg_import_file( $file_path, $filename = '' ) {
-        $filename = strtolower( (string) $filename );
+        $filename  = strtolower( trim( (string) $filename ) );
         $file_path = (string) $file_path;
 
-        if ( '' !== $filename && preg_match( '/\.svg$/i', $filename ) ) {
-            return true;
+        // When an explicit filename includes an extension, trust that declared
+        // type for routing. Content sniffing must never turn a .png/.jpg/etc.
+        // into an SVG merely because downloaded HTML or metadata contains
+        // the string "<svg".
+        if ( '' !== $filename ) {
+            $filename_ext = strtolower( (string) pathinfo( $filename, PATHINFO_EXTENSION ) );
+            if ( '' !== $filename_ext ) {
+                return 'svg' === $filename_ext;
+            }
         }
 
-        if ( '' !== $file_path && preg_match( '/\.svg$/i', $file_path ) ) {
-            return true;
+        if ( '' !== $file_path ) {
+            $path_ext = strtolower( (string) pathinfo( $file_path, PATHINFO_EXTENSION ) );
+            if ( 'svg' === $path_ext ) {
+                return true;
+            }
+
+            // WordPress temporary downloads may end in .tmp/.temp; those names
+            // do not describe the original media type, so allow the final
+            // content-sniff fallback below when no filename extension exists.
+            if ( '' !== $path_ext && ! in_array( $path_ext, [ 'tmp', 'temp' ], true ) ) {
+                return false;
+            }
         }
 
         if ( '' === $file_path || ! is_readable( $file_path ) ) {
             return false;
         }
 
+        // Content sniffing is a last resort only when neither source carries an
+        // extension (for example a temporary upload path with no original name).
         $contents = $this->filesystem->get_contents( $file_path, 'svg_detection_read_failed' );
-        return ! is_wp_error( $contents ) && is_string( $contents ) && false !== stripos( substr( $contents, 0, 512 ), '<svg' );
+        return ! is_wp_error( $contents ) && is_string( $contents ) && false !== stripos( substr( ltrim( $contents ), 0, 512 ), '<svg' );
     }
 
     public function maybe_validate_svg_import_file( $file_path, $filename = '' ) {

@@ -2,7 +2,7 @@
 # Copyright (C) 2026 Maira Foresto
 # This file is distributed under the same license as the Export/Import Media package.
 msgid ""
-msgstr "Project-Id-Version: calliope-media-import-export 1.7.30\nReport-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\nPOT-Creation-Date: 2026-04-14 21:08+0000\nPO-Revision-Date: 2026-04-19 00:00+0000\nLast-Translator: Maira Foresto\nLanguage: pt_BR\nLanguage-Team: Calliope\nPlural-Forms: nplurals=2; plural=(n > 1);\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nGenerated-By: Babel 2.18.0\nX-Generator: Codex\n"
+msgstr "Project-Id-Version: calliope-media-import-export 1.8.0\nReport-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\nPOT-Creation-Date: 2026-04-14 21:08+0000\nPO-Revision-Date: 2026-04-19 00:00+0000\nLast-Translator: Maira Foresto\nLanguage: pt_BR\nLanguage-Team: Calliope\nPlural-Forms: nplurals=2; plural=(n > 1);\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nGenerated-By: Babel 2.18.0\nX-Generator: Codex\n"
 
 #: includes/class-importer.php:2248
 #, python-format
@@ -1054,3 +1054,24 @@ msgstr "Deixar avaliação"
 #: admin/class-admin.php
 msgid "You do not have permission to dismiss this notice."
 msgstr "Você não tem permissão para dispensar este aviso."
+
+msgid "Processing media file"
+msgstr "Processando arquivo de mídia"
+
+msgid "unknown content"
+msgstr "conteúdo desconhecido"
+
+msgid "The remote file could not be downloaded."
+msgstr "Não foi possível baixar o arquivo remoto."
+
+#, php-format
+msgid "Downloaded content does not match the expected .%1$s file type (detected: %2$s)."
+msgstr "O conteúdo baixado não corresponde ao tipo de arquivo .%1$s esperado (detectado: %2$s)."
+
+#, php-format
+msgid "Matched the same attachment ID from the CSV/source (ID %d). File content was not downloaded again."
+msgstr "Foi encontrado o mesmo ID de anexo do CSV/origem (ID %d). O conteúdo do arquivo não foi baixado novamente."
+
+#, php-format
+msgid "Duplicate content verified by file fingerprint (ID %d)."
+msgstr "Conteúdo duplicado verificado pela impressão digital do arquivo (ID %d)."

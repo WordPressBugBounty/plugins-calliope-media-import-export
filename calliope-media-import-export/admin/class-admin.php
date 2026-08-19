@@ -246,8 +246,8 @@ class EIM_Admin {
             'Sample title',
         ];
 
-        fputcsv( $output, array_map( [ $this, 'escape_csv_cell' ], $headers ) );
-        fputcsv( $output, array_map( [ $this, 'escape_csv_cell' ], $sample_row ) );
+        fputcsv( $output, array_map( [ $this, 'escape_csv_cell' ], $headers ), ',', '"', '\\' );
+        fputcsv( $output, array_map( [ $this, 'escape_csv_cell' ], $sample_row ), ',', '"', '\\' );
 
         // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing the browser output stream after writing the CSV.
         fclose( $output );
@@ -437,7 +437,7 @@ class EIM_Admin {
             'process_complete'            => esc_html__( 'Import completed.', 'calliope-media-import-export' ),
             'process_stopped'             => esc_html__( 'Import stopped by user.', 'calliope-media-import-export' ),
             'processing_batch'            => esc_html__( 'Processing media rows...', 'calliope-media-import-export' ),
-            'processing_image'            => esc_html__( 'Processing image', 'calliope-media-import-export' ),
+            'processing_image'            => esc_html__( 'Processing media file', 'calliope-media-import-export' ),
             /* translators: 1: current import row number, 2: total import rows. */
             'processing_position'         => esc_html__( '#%1$s of %2$s', 'calliope-media-import-export' ),
             'batch_summary'               => esc_html__( 'Batch summary', 'calliope-media-import-export' ),
@@ -509,7 +509,7 @@ class EIM_Admin {
             'process_complete'            => 'Import completed.',
             'process_stopped'             => 'Import stopped by user.',
             'processing_batch'            => 'Processing media rows...',
-            'processing_image'            => 'Processing image',
+            'processing_image'            => 'Processing media file',
             'processing_position'         => '#%1$s of %2$s',
             'batch_summary'               => 'Batch summary',
             'batch_time_limited'          => 'Batch stopped early by the time limit; continuing with the next batch.',

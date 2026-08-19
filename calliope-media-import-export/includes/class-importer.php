@@ -756,6 +756,8 @@ class EIM_Importer {
         $existing_id = 0;
         $deferred_duplicate_id = 0;
         $deferred_duplicate_reason = '';
+        $verify_deferred_duplicate_content = false;
+        $skip_source_duplicate_rematch = false;
 
         if ( 'filename' === $match_strategy && '' !== $filename ) {
             $filename_candidates = array_values(
@@ -787,10 +789,33 @@ class EIM_Importer {
         }
 
         if ( $existing_id ) {
+            $previously_verified_source_match = $this->is_previously_verified_source_match( $existing_id, $url, $rel_path );
+
             if ( 'replace_file' === $duplicate_strategy && ! $dry_run ) {
                 $deferred_duplicate_id     = $existing_id;
                 $deferred_duplicate_reason = 'duplicate_existing';
+            } elseif ( ! $dry_run && 'skip' === $duplicate_strategy && 'auto' === $match_strategy && ( ! $csv_id || $existing_id !== $csv_id ) && ! $previously_verified_source_match ) {
+                // A source URL/path match without the same CSV attachment ID is only
+                // a candidate duplicate until its content has been verified. Once a
+                // prior import has stored both the source provenance and a fingerprint,
+                // repeating the same CSV can safely skip it without downloading it again.
+                $deferred_duplicate_id              = $existing_id;
+                $deferred_duplicate_reason          = 'source_match_candidate';
+                $verify_deferred_duplicate_content  = true;
             } else {
+                if ( $previously_verified_source_match ) {
+                    $this->log_import_event(
+                        'source_match_previously_verified',
+                        [
+                            'filename'       => $filename,
+                            'attachment_id'  => (int) $existing_id,
+                            'csv_id'         => (int) $csv_id,
+                            'url'            => $url,
+                            'relative_path'  => $rel_path,
+                        ]
+                    );
+                }
+
                 $duplicate_result = $this->resolve_duplicate_result(
                     $existing_id,
                     $duplicate_strategy,
@@ -806,7 +831,9 @@ class EIM_Importer {
                     '',
                     $custom_meta,
                     $row,
-                    'duplicate_existing',
+                    $previously_verified_source_match
+                        ? 'source_match_previously_verified'
+                        : ( ( $csv_id && $existing_id === $csv_id ) ? 'source_match_same_csv_id' : 'duplicate_existing' ),
                     $request_context
                 );
                 if ( null !== $duplicate_result ) {
@@ -969,8 +996,11 @@ class EIM_Importer {
         }
 
         $existing_file = $this->resolve_uploads_file_from_source( $url, $honor_relative_path ? $rel_path : '' );
+        $remote_replace_requires_download = $deferred_duplicate_id
+            && 'replace_file' === $duplicate_strategy
+            && ! $this->looks_like_local_upload_url( $url );
 
-        if ( '' !== $existing_file ) {
+        if ( '' !== $existing_file && ! $remote_replace_requires_download ) {
             $this->log_import_event(
                 'existing_upload_file_found',
                 [
@@ -1050,7 +1080,7 @@ class EIM_Importer {
             ]
         );
 
-        $tmp_file = download_url( $url, $download_timeout );
+        $tmp_file = $this->download_remote_file_with_retry( $url, $download_timeout, $filename );
         if ( is_wp_error( $tmp_file ) ) {
             $this->log_import_event(
                 'download_error',
@@ -1089,6 +1119,29 @@ class EIM_Importer {
             'name'     => $filename ? $filename : 'media-file',
             'tmp_name' => $tmp_file,
         ];
+
+        $type_validation = $this->validate_downloaded_file_type( $tmp_file, $file_array['name'] );
+        if ( is_wp_error( $type_validation ) ) {
+            $this->log_import_event(
+                'download_type_mismatch',
+                [
+                    'filename' => $filename,
+                    'url'      => $url,
+                    'message'  => $type_validation->get_error_message(),
+                ]
+            );
+
+            if ( file_exists( $tmp_file ) ) {
+                wp_delete_file( $tmp_file );
+            }
+
+            return $this->build_item_result(
+                'ERROR',
+                $filename,
+                $type_validation->get_error_message(),
+                [ 'reason' => 'download_type_mismatch' ]
+            );
+        }
 
         $svg_validation = $this->maybe_validate_svg_import_file( $tmp_file, $file_array['name'] );
         if ( is_wp_error( $svg_validation ) ) {
@@ -1129,35 +1182,88 @@ class EIM_Importer {
         $fingerprint = $this->get_file_fingerprint( $tmp_file );
 
         if ( $deferred_duplicate_id ) {
-            $duplicate_result = $this->resolve_duplicate_result(
-                $deferred_duplicate_id,
-                $duplicate_strategy,
-                $dry_run,
-                $filename,
-                $title,
-                $alt,
-                $caption,
-                $description,
-                $url,
-                $rel_path,
-                $fingerprint,
-                $tmp_file,
-                $custom_meta,
-                $row,
-                $deferred_duplicate_reason ? $deferred_duplicate_reason : 'duplicate_existing',
-                $request_context
-            );
+            if ( $verify_deferred_duplicate_content ) {
+                $candidate_file        = get_attached_file( $deferred_duplicate_id );
+                $candidate_fingerprint = $candidate_file && file_exists( $candidate_file )
+                    ? $this->get_file_fingerprint( $candidate_file )
+                    : '';
+                $content_matches       = '' !== $fingerprint
+                    && '' !== $candidate_fingerprint
+                    && hash_equals( $fingerprint, $candidate_fingerprint );
 
-            if ( null !== $duplicate_result ) {
-                if ( file_exists( $tmp_file ) ) {
-                    wp_delete_file( $tmp_file );
+                if ( $content_matches ) {
+                    $duplicate_result = $this->resolve_duplicate_result(
+                        $deferred_duplicate_id,
+                        $duplicate_strategy,
+                        $dry_run,
+                        $filename,
+                        $title,
+                        $alt,
+                        $caption,
+                        $description,
+                        $url,
+                        $rel_path,
+                        $fingerprint,
+                        $tmp_file,
+                        $custom_meta,
+                        $row,
+                        'content_fingerprint_verified',
+                        $request_context
+                    );
+
+                    if ( null !== $duplicate_result ) {
+                        if ( file_exists( $tmp_file ) ) {
+                            wp_delete_file( $tmp_file );
+                        }
+
+                        return $duplicate_result;
+                    }
+                } else {
+                    $this->log_import_event(
+                        'duplicate_candidate_rejected',
+                        [
+                            'filename'              => $filename,
+                            'candidate_id'          => (int) $deferred_duplicate_id,
+                            'csv_id'                => (int) $csv_id,
+                            'incoming_fingerprint'  => $fingerprint,
+                            'candidate_fingerprint' => $candidate_fingerprint,
+                        ]
+                    );
+                    $skip_source_duplicate_rematch = true;
                 }
+            } else {
+                $duplicate_result = $this->resolve_duplicate_result(
+                    $deferred_duplicate_id,
+                    $duplicate_strategy,
+                    $dry_run,
+                    $filename,
+                    $title,
+                    $alt,
+                    $caption,
+                    $description,
+                    $url,
+                    $rel_path,
+                    $fingerprint,
+                    $tmp_file,
+                    $custom_meta,
+                    $row,
+                    $deferred_duplicate_reason ? $deferred_duplicate_reason : 'duplicate_existing',
+                    $request_context
+                );
 
-                return $duplicate_result;
+                if ( null !== $duplicate_result ) {
+                    if ( file_exists( $tmp_file ) ) {
+                        wp_delete_file( $tmp_file );
+                    }
+
+                    return $duplicate_result;
+                }
             }
         }
 
-        $existing_id = $this->find_existing_attachment_id( $url, $rel_path, $tmp_file, $filename, $fingerprint, $match_strategy );
+        $existing_id = $skip_source_duplicate_rematch
+            ? $this->attachment_matcher->find_existing_attachment_id_by_fingerprint( $fingerprint )
+            : $this->find_existing_attachment_id( $url, $rel_path, $tmp_file, $filename, $fingerprint, $match_strategy );
 
         if ( $existing_id ) {
             $duplicate_result = $this->resolve_duplicate_result(
@@ -1175,7 +1281,7 @@ class EIM_Importer {
                 $tmp_file,
                 $custom_meta,
                 $row,
-                'duplicate_existing',
+                $skip_source_duplicate_rematch ? 'content_fingerprint_verified' : 'duplicate_existing',
                 $request_context
             );
             if ( null !== $duplicate_result ) {
@@ -1249,6 +1355,33 @@ class EIM_Importer {
 
     private function attach_existing_media_file( $file_path, $filename, $title, $alt, $caption, $description, $url, $rel_path, $row, $request_context = [] ) {
         return call_user_func_array( [ $this->attachment_writer, 'attach_existing_media_file' ], func_get_args() );
+    }
+
+    private function is_previously_verified_source_match( $attachment_id, $url, $rel_path ) {
+        $attachment_id = absint( $attachment_id );
+        if ( ! $attachment_id ) {
+            return false;
+        }
+
+        // A stored fingerprint proves that this attachment has already gone through
+        // an actual file-content verification (or was created from that source).
+        // Source metadata alone is not enough because older imports may have
+        // backfilled URL/path metadata before strict fingerprint verification existed.
+        $stored_fingerprint = trim( (string) get_post_meta( $attachment_id, '_eim_file_fingerprint', true ) );
+        if ( '' === $stored_fingerprint ) {
+            return false;
+        }
+
+        $stored_url = trim( (string) get_post_meta( $attachment_id, '_eim_source_url', true ) );
+        $stored_rel = trim( (string) get_post_meta( $attachment_id, '_eim_source_rel_path', true ) );
+        $url        = trim( (string) $url );
+        $rel_path   = trim( (string) $rel_path );
+
+        if ( '' !== $url && '' !== $stored_url && $stored_url === $url ) {
+            return true;
+        }
+
+        return '' !== $rel_path && '' !== $stored_rel && $stored_rel === $rel_path;
     }
 
     private function find_existing_attachment_id( $url, $rel_path, $incoming_file_path = null, $filename = '', $incoming_fingerprint = '', $match_strategy = 'auto' ) {
@@ -1584,16 +1717,183 @@ class EIM_Importer {
         return $elapsed >= max( 1, $time_limit - $guard );
     }
 
+    private function download_remote_file_with_retry( $url, $timeout, $filename = '' ) {
+        $timeout  = max( 1, absint( $timeout ) );
+        $attempts = max( 1, min( 3, absint( apply_filters( 'eim_import_download_attempts', 2, $url, $filename ) ) ) );
+        $last_error = null;
+
+        for ( $attempt = 1; $attempt <= $attempts; $attempt++ ) {
+            $attempt_timeout = 1 === $attempt
+                ? $timeout
+                : min( 180, max( 120, $timeout * 2 ) );
+            $attempt_start = microtime( true );
+
+            $this->log_import_event(
+                'download_attempt',
+                [
+                    'filename' => $filename,
+                    'url'      => $url,
+                    'attempt'  => $attempt,
+                    'attempts' => $attempts,
+                    'timeout'  => $attempt_timeout,
+                ]
+            );
+
+            $tmp_file = download_url( $url, $attempt_timeout );
+            if ( ! is_wp_error( $tmp_file ) ) {
+                $this->log_import_event(
+                    'download_attempt_success',
+                    [
+                        'filename' => $filename,
+                        'attempt'  => $attempt,
+                        'timeout'  => $attempt_timeout,
+                        'elapsed'  => round( microtime( true ) - $attempt_start, 3 ),
+                    ]
+                );
+                return $tmp_file;
+            }
+
+            $last_error = $tmp_file;
+            $this->log_import_event(
+                'download_attempt_error',
+                [
+                    'filename' => $filename,
+                    'attempt'  => $attempt,
+                    'timeout'  => $attempt_timeout,
+                    'elapsed'  => round( microtime( true ) - $attempt_start, 3 ),
+                    'message'  => $tmp_file->get_error_message(),
+                ]
+            );
+
+            if ( $attempt >= $attempts || ! $this->is_retryable_download_error( $tmp_file ) ) {
+                break;
+            }
+        }
+
+        return is_wp_error( $last_error )
+            ? $last_error
+            : new WP_Error( 'eim_download_failed', __( 'The remote file could not be downloaded.', 'calliope-media-import-export' ) );
+    }
+
+    private function is_retryable_download_error( $error ) {
+        if ( ! is_wp_error( $error ) ) {
+            return false;
+        }
+
+        $message = strtolower( (string) $error->get_error_message() );
+        $retryable_fragments = [
+            'curl error 28',
+            'timed out',
+            'timeout',
+            'temporarily unavailable',
+            'connection reset',
+            'connection aborted',
+            'bad gateway',
+            'gateway timeout',
+            'service unavailable',
+            'briefly unavailable',
+            'http 502',
+            'http 503',
+            'http 504',
+        ];
+
+        foreach ( $retryable_fragments as $fragment ) {
+            if ( false !== strpos( $message, $fragment ) ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function validate_downloaded_file_type( $file_path, $filename ) {
+        $file_path = (string) $file_path;
+        $filename  = sanitize_file_name( (string) $filename );
+        $extension = strtolower( (string) pathinfo( $filename, PATHINFO_EXTENSION ) );
+
+        if ( '' === $file_path || ! file_exists( $file_path ) || '' === $extension ) {
+            return true;
+        }
+
+        // SVG has its own sanitizer/validator immediately after this check.
+        if ( 'svg' === $extension ) {
+            return true;
+        }
+
+        $detected_mime = '';
+        if ( function_exists( 'wp_get_image_mime' ) ) {
+            $detected_mime = (string) wp_get_image_mime( $file_path );
+        }
+
+        if ( '' === $detected_mime && class_exists( 'finfo' ) ) {
+            try {
+                $finfo = new finfo( FILEINFO_MIME_TYPE );
+                $mime  = $finfo->file( $file_path );
+                if ( is_string( $mime ) ) {
+                    $detected_mime = strtolower( trim( $mime ) );
+                }
+            } catch ( Throwable $exception ) {
+                $detected_mime = '';
+            }
+        }
+
+        $image_mimes = [
+            'jpg'  => [ 'image/jpeg' ],
+            'jpeg' => [ 'image/jpeg' ],
+            'jpe'  => [ 'image/jpeg' ],
+            'png'  => [ 'image/png' ],
+            'gif'  => [ 'image/gif' ],
+            'webp' => [ 'image/webp' ],
+            'avif' => [ 'image/avif' ],
+            'bmp'  => [ 'image/bmp', 'image/x-ms-bmp' ],
+            'ico'  => [ 'image/x-icon', 'image/vnd.microsoft.icon' ],
+        ];
+
+        if ( isset( $image_mimes[ $extension ] ) ) {
+            if ( '' === $detected_mime || ! in_array( strtolower( $detected_mime ), $image_mimes[ $extension ], true ) ) {
+                $detected_label = '' !== $detected_mime ? $detected_mime : __( 'unknown content', 'calliope-media-import-export' );
+                return new WP_Error(
+                    'eim_download_type_mismatch',
+                    sprintf(
+                        /* translators: 1: expected file extension, 2: detected MIME type. */
+                        __( 'Downloaded content does not match the expected .%1$s file type (detected: %2$s).', 'calliope-media-import-export' ),
+                        $extension,
+                        $detected_label
+                    )
+                );
+            }
+
+            return true;
+        }
+
+        // For non-image media, avoid false positives from MIME databases but
+        // explicitly reject the most common case: a server returned an HTML or
+        // SVG error/document while the CSV points to another file type.
+        if ( in_array( strtolower( $detected_mime ), [ 'text/html', 'application/xhtml+xml', 'image/svg+xml' ], true ) ) {
+            return new WP_Error(
+                'eim_download_type_mismatch',
+                sprintf(
+                    /* translators: 1: expected file extension, 2: detected MIME type. */
+                    __( 'Downloaded content does not match the expected .%1$s file type (detected: %2$s).', 'calliope-media-import-export' ),
+                    $extension,
+                    $detected_mime
+                )
+            );
+        }
+
+        return true;
+    }
+
     private function get_download_timeout( $context = [], $url = '' ) {
         $context = is_array( $context ) ? $context : [];
-        $timeout = 5;
+        $timeout = 60;
 
         if ( ! empty( $context['local_import'] ) ) {
-            $timeout = 3;
+            $timeout = 30;
         }
 
         if ( $this->looks_like_local_upload_url( $url ) ) {
-            $timeout = 2;
+            $timeout = 15;
         }
 
         /**
@@ -1603,7 +1903,7 @@ class EIM_Importer {
          * @param int   $timeout Timeout in seconds.
          * @param array $context Normalized import request context.
          */
-        return max( 1, min( 30, absint( apply_filters( 'eim_import_download_timeout', $timeout, $context, $url ) ) ) );
+        return max( 1, min( 180, absint( apply_filters( 'eim_import_download_timeout', $timeout, $context, $url ) ) ) );
     }
 
     private function can_extend_server_time_limit() {
@@ -1640,7 +1940,10 @@ class EIM_Importer {
             return;
         }
 
-        $target_limit = max( 120, $time_limit + 60 );
+        // A single large remote item may use the normal download attempt plus
+        // one longer retry. Give the request enough headroom to finish hashing
+        // and attachment creation after the transfer completes.
+        $target_limit = max( 300, $time_limit + 180 );
 
         // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- Import batches need a little extra time when the host allows it.
         @set_time_limit( $target_limit );
@@ -1652,7 +1955,10 @@ class EIM_Importer {
             return self::LOCK_TTL;
         }
 
-        return max( self::LOCK_TTL, $time_limit + 45 );
+        // Keep the batch lock alive across a long download plus one retry so
+        // another request cannot start the same batch while the first is still
+        // finishing the current media item.
+        return max( self::LOCK_TTL, $time_limit + 210 );
     }
 
     private function log_import_event( $event, $context = [] ) {

@@ -40,7 +40,7 @@ jQuery(document).ready(function($) {
 
     const maxBatchRetries = 5;
     const maxLockRetries = 12;
-    const liveRowsPerRequest = 1;
+    const liveRowsPerRequest = 50;
 
     function t(key) {
         if (i18n && Object.prototype.hasOwnProperty.call(i18n, key) && String(i18n[key] || '') !== '') {
@@ -171,11 +171,12 @@ jQuery(document).ready(function($) {
     }
 
     function isBusyLockResponse(xhr) {
-        if (!(xhr && parseInt(xhr.status, 10) === 409)) {
-            return false;
-        }
-
-        return extractAjaxError(xhr, '').toLowerCase().indexOf('another import request') !== -1;
+        // HTTP 409 is emitted by the importer only when another request still
+        // owns the temporary-file lock. Do not inspect the translated error
+        // message here: doing so makes lock detection language-dependent and
+        // can incorrectly reduce a user-selected batch size (for example,
+        // 50 -> 25 -> 15 on a Spanish installation).
+        return !!(xhr && parseInt(xhr.status, 10) === 409);
     }
 
     function getRetryDelay(xhr) {
@@ -766,7 +767,7 @@ jQuery(document).ready(function($) {
             return;
         }
 
-        const batchSize = liveRowsPerRequest;
+        const batchSize = getRuntimeBatchSize();
         const startLabel = currentRow + 1;
         const rowPosition = totalRows
             ? (t('processing_position') || '#%1$s of %2$s')
@@ -775,7 +776,7 @@ jQuery(document).ready(function($) {
             : `#${startLabel}`;
 
         logMessage(
-            t('processing_image') || 'Processing image',
+            t('processing_image') || 'Processing media file',
             'INFO',
             rowPosition
         );

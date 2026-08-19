@@ -2,8 +2,8 @@
 Contributors: mairaforesto
 Tags: csv import, csv export, media library, media import, media export
 Requires at least: 5.6
-Tested up to: 7.0
-Stable tag: 1.7.30
+Tested up to: 7.1
+Stable tag: 1.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -92,6 +92,23 @@ Yes. Enable Local Import Mode and provide relative paths for files that already 
 5. Review imported media with title, alt text, caption, and description preserved.
 
 == Changelog ==
+
+= 1.8.0 =
+* Fix: Prevented PNG, JPG, WebP and other explicitly named files from being routed through SVG sanitization just because downloaded content contains the string `<svg`.
+* Fix: Added downloaded image type validation so HTML/SVG error responses masquerading as images are reported as a clear file-type mismatch.
+* Reliability: Increased remote media download timeouts and added one longer retry for transient timeout or connection failures, improving large video imports. Bad Gateway and transient 502/503/504-style failures are also eligible for the retry.
+* Fix: Automatic duplicate matches that point to a different CSV attachment ID (or a CSV without an ID) are now verified by file fingerprint before being skipped.
+* Performance: Previously fingerprint-verified source URL/path matches are reused on later passes, avoiding repeated remote downloads for the same already-verified duplicate.
+* Reliability: The browser importer now uses the configured runtime batch size (capped at 25 rows per AJAX request) instead of forcing one request per media row, substantially reducing request pressure on large libraries.
+* Diagnostics: Duplicate logs now distinguish same-ID source matches from content verified by fingerprint.
+* UI: Renamed the generic progress label from “Processing image” to “Processing media file”.
+* Compatibility: Reviewed the server-side media import/export paths against the WordPress 7.1 media changes, including attachment creation, sideloads, metadata generation, relative upload paths, and thumbnail-skip behavior.
+* Reliability: Guaranteed cleanup of the temporary `upload_dir` filter even if a sideload callback throws, preventing import-specific upload paths from leaking into later operations in the same request.
+* Pro integration: Fixed remote `Replace file` flows so an existing Relative Path cannot short-circuit the remote download; the replacement binary is now actually fetched before the existing attachment is updated.
+* Pro integration: Corrected replace-file cleanup ordering so same-path replacements keep the new original file and regenerated thumbnails are not removed as stale sizes.
+* Compatibility: Declared CSV enclosure/escape arguments explicitly in the admin sample export for clean behavior on newer PHP versions while preserving the existing CSV format.
+* QA: Re-ran CSV parsing, attachment matching, duplicate prevention, local and remote imports, metadata preservation, paged streaming exports, and Pro integration regression scenarios before release.
+* Compatibility: Tested up to WordPress 7.1 and bumped the Free release to 1.8.0.
 
 = 1.7.30 =
 * Security: Escaped exported CSV cells that begin with formula-triggering characters to prevent spreadsheet formula injection.

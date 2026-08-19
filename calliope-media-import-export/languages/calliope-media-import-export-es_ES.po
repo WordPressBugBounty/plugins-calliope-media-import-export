@@ -2,7 +2,7 @@
 # Copyright (C) 2026 Maira Foresto
 # This file is distributed under the same license as the Export/Import Media package.
 msgid ""
-msgstr "Project-Id-Version: calliope-media-import-export 1.7.30\nReport-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\nPOT-Creation-Date: 2026-04-14 21:08+0000\nPO-Revision-Date: 2026-04-14 21:08+0000\nLast-Translator: Maira Foresto\nLanguage: es_ES\nLanguage-Team: Calliope\nPlural-Forms: nplurals=2; plural=(n != 1);\nMIME-Version: 1.0\nContent-Type: text/plain; charset=utf-8\nContent-Transfer-Encoding: 8bit\nGenerated-By: Babel 2.18.0\n"
+msgstr "Project-Id-Version: calliope-media-import-export 1.8.0\nReport-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\nPOT-Creation-Date: 2026-04-14 21:08+0000\nPO-Revision-Date: 2026-04-14 21:08+0000\nLast-Translator: Maira Foresto\nLanguage: es_ES\nLanguage-Team: Calliope\nPlural-Forms: nplurals=2; plural=(n != 1);\nMIME-Version: 1.0\nContent-Type: text/plain; charset=utf-8\nContent-Transfer-Encoding: 8bit\nGenerated-By: Babel 2.18.0\n"
 
 #: includes/class-importer.php:2248
 #, python-format
@@ -1069,3 +1069,24 @@ msgstr "Dejar reseña"
 #: admin/class-admin.php
 msgid "You do not have permission to dismiss this notice."
 msgstr "No tienes permisos para cerrar este aviso."
+
+msgid "Processing media file"
+msgstr "Procesando archivo multimedia"
+
+msgid "unknown content"
+msgstr "contenido desconocido"
+
+msgid "The remote file could not be downloaded."
+msgstr "No se pudo descargar el archivo remoto."
+
+#, php-format
+msgid "Downloaded content does not match the expected .%1$s file type (detected: %2$s)."
+msgstr "El contenido descargado no coincide con el tipo de archivo .%1$s esperado (detectado: %2$s)."
+
+#, php-format
+msgid "Matched the same attachment ID from the CSV/source (ID %d). File content was not downloaded again."
+msgstr "Se encontró el mismo ID de adjunto del CSV/origen (ID %d). No se volvió a descargar el contenido del archivo."
+
+#, php-format
+msgid "Duplicate content verified by file fingerprint (ID %d)."
+msgstr "Contenido duplicado verificado mediante la huella del archivo (ID %d)."

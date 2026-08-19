@@ -1,8 +1,8 @@
 <?php return array(
     'root' => array(
         'name' => 'calliopewp/export-import-media',
-        'pretty_version' => '1.7.30',
-        'version' => '1.7.30.0',
+        'pretty_version' => '1.8.0',
+        'version' => '1.8.0.0',
         'reference' => null,
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
@@ -11,8 +11,8 @@
     ),
     'versions' => array(
         'calliopewp/export-import-media' => array(
-            'pretty_version' => '1.7.30',
-            'version' => '1.7.30.0',
+            'pretty_version' => '1.8.0',
+            'version' => '1.8.0.0',
             'reference' => null,
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',

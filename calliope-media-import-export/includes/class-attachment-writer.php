@@ -392,30 +392,41 @@ class EIM_Attachment_Writer {
             $this->backfill_fingerprint_meta( $attachment_id, $fingerprint );
         }
 
+        if ( $dry_run ) {
+            $skip_message = sprintf(
+                /* translators: %d: attachment ID. */
+                __( 'Dry run: duplicate detected (ID %d) and it would be skipped.', 'calliope-media-import-export' ),
+                $attachment_id
+            );
+        } elseif ( 'csv_id_match' === $reason || 'source_match_same_csv_id' === $reason ) {
+            $skip_message = sprintf(
+                /* translators: %d: attachment ID. */
+                __( 'Matched the same attachment ID from the CSV/source (ID %d). File content was not downloaded again.', 'calliope-media-import-export' ),
+                $attachment_id
+            );
+        } elseif ( 'content_fingerprint_verified' === $reason ) {
+            $skip_message = sprintf(
+                /* translators: %d: attachment ID. */
+                __( 'Duplicate content verified by file fingerprint (ID %d).', 'calliope-media-import-export' ),
+                $attachment_id
+            );
+        } else {
+            $skip_message = sprintf(
+                /* translators: %d: attachment ID. */
+                __( 'Duplicate detected (ID %d)', 'calliope-media-import-export' ),
+                $attachment_id
+            );
+        }
+
         return $this->build_item_result(
             'SKIPPED',
             $filename,
-            $dry_run
-                ? sprintf(
-                    /* translators: %d: attachment ID. */
-                    __( 'Dry run: duplicate detected (ID %d) and it would be skipped.', 'calliope-media-import-export' ),
-                    $attachment_id
-                )
-                : ( 'csv_id_match' === $reason
-                    ? sprintf(
-                        /* translators: %d: attachment ID. */
-                        __( 'Matched existing attachment (ID %d)', 'calliope-media-import-export' ),
-                        $attachment_id
-                    )
-                    : sprintf(
-                        /* translators: %d: attachment ID. */
-                        __( 'Duplicate detected (ID %d)', 'calliope-media-import-export' ),
-                        $attachment_id
-                    ) ),
+            $skip_message,
             [
                 'reason'             => $dry_run ? 'dry_run_duplicate_skip' : (string) $reason,
                 'attachment_id'      => $attachment_id,
                 'duplicate_detected' => true,
+                'content_verified'   => 'content_fingerprint_verified' === $reason,
             ]
         );
     }
@@ -566,6 +577,8 @@ class EIM_Attachment_Writer {
 
         do_action( 'eim_before_replace_existing_media_file', $attachment_id, $source_file_path, $row, $action_context );
 
+        $old_metadata = wp_get_attachment_metadata( $attachment_id );
+
         if ( $source_is_svg && is_string( $clean_svg ) ) {
             $svg_write = $this->svg_validator->write_sanitized_svg_file(
                 $target_path,
@@ -584,7 +597,10 @@ class EIM_Attachment_Writer {
             }
         }
 
-        $old_metadata = wp_get_attachment_metadata( $attachment_id );
+        // Remove old generated sizes before regenerating them. Cleaning them after
+        // wp_generate_attachment_metadata() could delete freshly-created files that
+        // reuse the same standard thumbnail filenames.
+        $this->cleanup_attachment_generated_sizes( $current_file, $old_metadata );
 
         update_attached_file( $attachment_id, $target_path );
 
@@ -628,14 +644,19 @@ class EIM_Attachment_Writer {
             $request_context
         );
 
-        $this->cleanup_attachment_generated_files( $current_file, $old_metadata );
+        // If the replacement uses a different filename, remove the old original
+        // only after the new file and metadata are safely in place. When the path is
+        // unchanged, the current file is already the replacement and must be kept.
+        if ( wp_normalize_path( $current_file ) !== wp_normalize_path( $target_path ) && file_exists( $current_file ) ) {
+            wp_delete_file( $current_file );
+        }
 
         do_action( 'eim_after_replace_existing_media_file', $attachment_id, $row, $action_context );
 
         return $attachment_id;
     }
 
-    private function cleanup_attachment_generated_files( $current_file, $metadata ) {
+    private function cleanup_attachment_generated_sizes( $current_file, $metadata ) {
         $current_file = wp_normalize_path( (string) $current_file );
         if ( '' === $current_file ) {
             return;
@@ -655,9 +676,6 @@ class EIM_Attachment_Writer {
             }
         }
 
-        if ( file_exists( $current_file ) ) {
-            wp_delete_file( $current_file );
-        }
     }
 
     public function apply_custom_meta( $attachment_id, $custom_meta ) {
@@ -1178,10 +1196,12 @@ class EIM_Attachment_Writer {
         };
 
         add_filter( 'upload_dir', $filter );
-        $id = media_handle_sideload( $file_array, 0 );
-        remove_filter( 'upload_dir', $filter );
 
-        return $id;
+        try {
+            return media_handle_sideload( $file_array, 0 );
+        } finally {
+            remove_filter( 'upload_dir', $filter );
+        }
     }
 
     public function normalize_selected_update_fields( $fields ) {

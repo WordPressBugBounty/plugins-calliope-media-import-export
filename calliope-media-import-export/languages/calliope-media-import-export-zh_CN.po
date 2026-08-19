@@ -2,7 +2,7 @@
 # Copyright (C) 2026 Maira Foresto
 # This file is distributed under the same license as the Export/Import Media package.
 msgid ""
-msgstr "Project-Id-Version: calliope-media-import-export 1.7.30\nReport-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\nPOT-Creation-Date: 2026-04-14 21:08+0000\nPO-Revision-Date: 2026-04-19 00:00+0000\nLast-Translator: Maira Foresto\nLanguage: zh_CN\nLanguage-Team: Calliope\nPlural-Forms: nplurals=1; plural=0;\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nGenerated-By: Babel 2.18.0\nX-Generator: Codex\n"
+msgstr "Project-Id-Version: calliope-media-import-export 1.8.0\nReport-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\nPOT-Creation-Date: 2026-04-14 21:08+0000\nPO-Revision-Date: 2026-04-19 00:00+0000\nLast-Translator: Maira Foresto\nLanguage: zh_CN\nLanguage-Team: Calliope\nPlural-Forms: nplurals=1; plural=0;\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nGenerated-By: Babel 2.18.0\nX-Generator: Codex\n"
 
 #: includes/class-importer.php:2248
 #, python-format
@@ -1054,3 +1054,24 @@ msgstr "留下评价"
 #: admin/class-admin.php
 msgid "You do not have permission to dismiss this notice."
 msgstr "你没有权限关闭此通知。"
+
+msgid "Processing media file"
+msgstr "正在处理媒体文件"
+
+msgid "unknown content"
+msgstr "未知内容"
+
+msgid "The remote file could not be downloaded."
+msgstr "无法下载远程文件。"
+
+#, php-format
+msgid "Downloaded content does not match the expected .%1$s file type (detected: %2$s)."
+msgstr "下载的内容与预期的 .%1$s 文件类型不匹配（检测到：%2$s）。"
+
+#, php-format
+msgid "Matched the same attachment ID from the CSV/source (ID %d). File content was not downloaded again."
+msgstr "CSV/来源中的附件 ID 与现有附件相同（ID %d）。未再次下载文件内容。"
+
+#, php-format
+msgid "Duplicate content verified by file fingerprint (ID %d)."
+msgstr "已通过文件指纹确认重复内容（ID %d）。"
