@@ -2,11 +2,11 @@
 /*
 Plugin Name: Export/Import Media
 Description: CSV export/import for your media library with preview, batch processing, duplicate prevention, and core metadata columns.
-Version: 1.8.0
+Version: 1.8.1
 Requires at least: 5.6
 Requires PHP: 7.4
 Author: CalliopeWP
-Author URI: https://pluginswordpress.calliope.com.ar/
+Author URI: https://calliopewp.com/
 License: GPLv2 or later
 Text Domain: calliope-media-import-export
 Domain Path: /languages
@@ -28,7 +28,7 @@ if ( ! defined( 'EIM_FILE' ) ) {
 }
 
 if ( ! defined( 'EIM_VERSION' ) ) {
-    define( 'EIM_VERSION', '1.8.0' );
+    define( 'EIM_VERSION', '1.8.1' );
 }
 
 if ( ! defined( 'EIM_PUBLIC_SLUG' ) ) {

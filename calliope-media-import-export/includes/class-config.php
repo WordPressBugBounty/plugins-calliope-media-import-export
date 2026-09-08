@@ -100,10 +100,10 @@ class EIM_Config {
                 'cli',
             ],
             'urls'                => [
-                'documentation' => 'https://pluginswordpress.calliope.com.ar/export-import-media/',
+                'documentation' => 'https://calliopewp.com/export-import-media/',
                 'support'       => 'https://wordpress.org/support/plugin/' . $public_slug . '/',
                 'reviews'       => 'https://wordpress.org/support/plugin/' . $public_slug . '/reviews/#new-post',
-                'pro'           => 'https://pluginswordpress.calliope.com.ar/export-import-media/',
+                'pro'           => 'https://calliopewp.com/export-import-media/',
             ],
         ];
 

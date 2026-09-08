@@ -3,7 +3,7 @@ Contributors: mairaforesto
 Tags: csv import, csv export, media library, media import, media export
 Requires at least: 5.6
 Tested up to: 7.1
-Stable tag: 1.8.0
+Stable tag: 1.8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -92,6 +92,9 @@ Yes. Enable Local Import Mode and provide relative paths for files that already 
 5. Review imported media with title, alt text, caption, and description preserved.
 
 == Changelog ==
+
+= 1.8.1 =
+* Updated human-facing CalliopeWP documentation, author and Pro links to calliopewp.com after the public domain migration.
 
 = 1.8.0 =
 * Fix: Prevented PNG, JPG, WebP and other explicitly named files from being routed through SVG sanitization just because downloaded content contains the string `<svg`.
