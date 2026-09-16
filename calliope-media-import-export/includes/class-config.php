@@ -43,8 +43,15 @@ class EIM_Config {
                         'id'          => 'eim_skip_thumbnails',
                         'label'       => __( 'Skip Thumbnail Generation', 'calliope-media-import-export' ),
                         'description' => __( 'Speed up imports by skipping thumbnail generation. Turn this on if you plan to regenerate thumbnails later.', 'calliope-media-import-export' ),
-                        'checked'     => true,
+                        'checked'     => false,
                         'feature'     => 'skip_thumbnails',
+                    ],
+                    [
+                        'id'          => 'eim_allow_svg_imports',
+                        'label'       => __( 'Allow sanitized SVG imports', 'calliope-media-import-export' ),
+                        'description' => __( 'SVG files can contain active content. Leave this off unless you need SVGs. When enabled, every SVG is sanitized before import, and files that cannot be safely sanitized are rejected.', 'calliope-media-import-export' ),
+                        'checked'     => false,
+                        'feature'     => 'svg_imports',
                     ],
                 ],
             ],
@@ -77,6 +84,7 @@ class EIM_Config {
                 'local_import'              => true,
                 'relative_path'             => true,
                 'skip_thumbnails'           => true,
+                'svg_imports'                => true,
                 'duplicate_detection'       => true,
                 'advanced_column_mapping'   => false,
                 'dry_run'                   => false,
@@ -166,6 +174,20 @@ class EIM_Config {
     public static function get_import_option_definitions() {
         $options = self::get( 'import.options', [] );
         $options = is_array( $options ) ? $options : [];
+
+        // Import checkboxes are request-scoped controls, not persistent user
+        // preferences. Older releases could leave a stored configuration value
+        // that kept thumbnail skipping enabled after an update even though the
+        // current safe default is OFF. Keep the current default authoritative
+        // while still allowing integrations to override it through the public
+        // eim_admin_import_options filter below.
+        foreach ( $options as &$option ) {
+            if ( isset( $option['id'] ) && 'eim_skip_thumbnails' === $option['id'] ) {
+                $option['checked'] = false;
+            }
+        }
+        unset( $option );
+
         return apply_filters( 'eim_admin_import_options', $options );
     }
 

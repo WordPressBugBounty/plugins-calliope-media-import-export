@@ -1072,7 +1072,7 @@ class EIM_Attachment_Writer {
     private function get_import_allowed_mimes() {
         $allowed_mimes = get_allowed_mime_types();
 
-        if ( apply_filters( 'eim_allow_svg_imports', true ) ) {
+        if ( $this->svg_validator->allows_svg_imports() ) {
             $allowed_mimes['svg'] = 'image/svg+xml';
         }
 

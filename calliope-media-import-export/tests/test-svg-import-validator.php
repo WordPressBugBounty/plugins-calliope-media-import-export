@@ -80,6 +80,11 @@ require_once dirname( __DIR__ ) . '/vendor/autoload.php';
 require_once dirname( __DIR__ ) . '/includes/class-filesystem.php';
 require_once dirname( __DIR__ ) . '/includes/class-svg-import-validator.php';
 
+if ( ! class_exists( 'DOMDocument' ) ) {
+    echo "SVG validator tests skipped: DOMDocument is unavailable in this PHP runtime.\n";
+    exit( 0 );
+}
+
 $fixture = tempnam( sys_get_temp_dir(), 'eim-svg-' );
 $dirty   = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" onload="alert(1)"><script>alert(1)</script><a href="https://attacker.example/track"><rect width="10" height="10" fill="red" /></a><use xlink:href="#local" /></svg>';
 file_put_contents( $fixture, $dirty );

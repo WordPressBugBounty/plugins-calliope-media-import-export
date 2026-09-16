@@ -237,7 +237,7 @@ jQuery(document).ready(function($) {
         autoStartAfterValidation = false;
 
         resetProgressTracking();
-        startButton.prop('disabled', false).show();
+        startButton.prop('disabled', true).show();
         stopButton.hide().prop('disabled', false);
         logContainer.empty();
         progressContainer.hide();
@@ -265,7 +265,10 @@ jQuery(document).ready(function($) {
 
     function updateProgress(percent) {
         const safePercent = Math.min(100, Math.max(0, percent));
-        progressBar.css('width', safePercent + '%').text(Math.round(safePercent) + '%');
+        progressBar
+            .css('width', safePercent + '%')
+            .text(Math.round(safePercent) + '%')
+            .attr('aria-valuenow', String(Math.round(safePercent)));
     }
 
     function getStatusLabel(status) {
@@ -605,7 +608,7 @@ jQuery(document).ready(function($) {
         autoStartAfterValidation = false;
         currentFile = '';
         batchRetryCount = 0;
-        startButton.prop('disabled', false);
+        startButton.prop('disabled', true);
         resetPreviewUI();
     }
 
@@ -747,6 +750,7 @@ jQuery(document).ready(function($) {
             dryRun: $('#eim_dry_run').is(':checked'),
             duplicateStrategy: $('#eim_duplicate_strategy').length ? $('#eim_duplicate_strategy').val() : 'skip',
             matchStrategy: $('#eim_match_strategy').length ? $('#eim_match_strategy').val() : 'auto',
+            allowSvgImports: $('#eim_allow_svg_imports').is(':checked'),
             selectedUpdateFields: selectedUpdateFields,
             deferreds: []
         };
@@ -793,6 +797,7 @@ jQuery(document).ready(function($) {
                 local_import: $('#eim_local_import').is(':checked'),
                 skip_thumbnails: $('#eim_skip_thumbnails').is(':checked'),
                 honor_relative_path: $('#eim_honor_relative_path').is(':checked'),
+                allow_svg_imports: $('#eim_allow_svg_imports').is(':checked'),
                 dry_run: $('#eim_dry_run').is(':checked'),
                 duplicate_strategy: $('#eim_duplicate_strategy').length ? $('#eim_duplicate_strategy').val() : 'skip',
                 match_strategy: $('#eim_match_strategy').length ? $('#eim_match_strategy').val() : 'auto',
@@ -905,7 +910,11 @@ jQuery(document).ready(function($) {
                 }
 
                 if (batchMeta.is_finished || currentRow >= totalRows) {
-                    logMessage(t('process_complete'), 'FIN');
+                    const completionHasErrors = parseInt(importSummary.errors || 0, 10) > 0;
+                    const completionMessage = completionHasErrors
+                        ? `${String(t('process_complete') || '').replace(/\.$/, '')} — ${t('summary_errors')}: ${importSummary.errors}`
+                        : t('process_complete');
+                    logMessage(completionMessage, completionHasErrors ? 'WARN' : 'FIN');
                     finishImport(false);
                 } else if (isImportStopped) {
                     logMessage(t('process_stopped'), 'FIN');
@@ -1044,7 +1053,10 @@ jQuery(document).ready(function($) {
             setFileSelectedUI(this.files[0].name);
             autoStartAfterValidation = false;
             validateCsvFile();
+            return;
         }
+
+        resetFileUI();
     });
 
     downloadLogBtn.on('click', function(e) {
@@ -1083,6 +1095,7 @@ jQuery(document).ready(function($) {
         }
 
         if (!fileInput[0].files.length) {
+            startButton.prop('disabled', true);
             alert(t('select_csv'));
             return;
         }

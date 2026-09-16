@@ -3,7 +3,7 @@ Contributors: mairaforesto
 Tags: csv import, csv export, media library, media import, media export
 Requires at least: 5.6
 Tested up to: 7.1
-Stable tag: 1.8.1
+Stable tag: 1.8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -39,6 +39,7 @@ https://youtu.be/YIZX2yUxoZM
 * **Local Import Mode:** Import files that already exist in `/uploads/` without downloading them again.
 * **Honor Relative Path:** Reuse or preserve relative upload paths from the CSV when available.
 * **Skip Thumbnail Generation:** Skip intermediate image sizes during import when speed matters more than thumbnails.
+* **Optional sanitized SVG import:** SVG import is disabled by default and can be explicitly enabled per import; enabled SVG files are sanitized before storage.
 * **Downloadable import log:** Download a `.txt` log after an import finishes.
 * **Hooks and filters:** Extend CSV columns, validation, admin UI, and import/export behavior.
 
@@ -92,6 +93,16 @@ Yes. Enable Local Import Mode and provide relative paths for files that already 
 5. Review imported media with title, alt text, caption, and description preserved.
 
 == Changelog ==
+
+= 1.8.2 =
+* Security: SVG imports are now explicit opt-in per import, remain disabled by default, and continue through the sanitizer before storage.
+* UX: Thumbnail generation is now the safe default; “Skip Thumbnail Generation” starts off and legacy stored settings no longer silently re-enable it.
+* UX: Start Import now stays disabled until a valid CSV is selected, resets when the file is removed, and remains disabled after validation failures.
+* UX: Imports that finish with failed rows now clearly report completion with errors instead of looking like a clean success.
+* UX: Kept the core Export → Import workflow uninterrupted by removing the mid-flow Pro spotlight and duplicate review popup while preserving the non-blocking footer review request.
+* Compatibility: Export/Import Media no longer suppresses unrelated WordPress, hosting, security, or third-party admin notices on its screen.
+* Accessibility: Added progressbar state, live summary updates, and log semantics to the import progress UI.
+* QA: Completed live staging regression coverage for SVG safety, thumbnail generation, CSV export integrity, 250+ item export batching, imports, duplicate handling, malformed/partial CSVs, UX, and PHP/JavaScript errors before release.
 
 = 1.8.1 =
 * Updated human-facing CalliopeWP documentation, author and Pro links to calliopewp.com after the public domain migration.

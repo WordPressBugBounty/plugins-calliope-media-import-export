@@ -253,6 +253,7 @@ class EIM_Importer {
         $local_import    = $this->get_request_bool( 'local_import' );
         $skip_thumbnails = $this->get_request_bool( 'skip_thumbnails' );
         $honor_rel_path  = $this->get_request_bool( 'honor_relative_path', true );
+        $allow_svg       = $this->get_request_bool( 'allow_svg_imports' );
         $results         = [];
         $handle          = null;
         $thumbs_disabled = false;
@@ -272,6 +273,7 @@ class EIM_Importer {
                 'local_import'        => $local_import,
                 'skip_thumbnails'     => $skip_thumbnails,
                 'honor_relative_path' => $honor_rel_path,
+                'allow_svg_imports'    => $allow_svg,
                 'dry_run'             => $this->get_request_bool( 'dry_run' ),
                 'duplicate_strategy'  => $this->get_request_string( 'duplicate_strategy', 'skip' ),
                 'match_strategy'      => $this->get_request_string( 'match_strategy', 'auto' ),
@@ -292,6 +294,8 @@ class EIM_Importer {
         $local_import    = $request_context['local_import'];
         $skip_thumbnails = $request_context['skip_thumbnails'];
         $honor_rel_path  = $request_context['honor_relative_path'];
+        $allow_svg       = $request_context['allow_svg_imports'];
+        $this->svg_validator->set_svg_imports_allowed( $allow_svg );
 
         $this->log_import_event(
             'batch_start',
@@ -304,6 +308,7 @@ class EIM_Importer {
                 'local_import'        => $local_import,
                 'skip_thumbnails'     => $skip_thumbnails,
                 'honor_relative_path' => $honor_rel_path,
+                'allow_svg_imports'    => $allow_svg,
                 'dry_run'             => ! empty( $request_context['dry_run'] ),
                 'source'              => 'ajax',
             ]
@@ -466,6 +471,7 @@ class EIM_Importer {
                 'local_import'    => $local_import,
                 'skip_thumbnails' => $skip_thumbnails,
                 'honor_rel_path'  => $honor_rel_path,
+                'allow_svg_imports' => $allow_svg,
                 'dry_run'         => ! empty( $request_context['dry_run'] ),
                 'duplicate_strategy' => $request_context['duplicate_strategy'],
                 'pro_history_id'  => isset( $request_context['pro_history_id'] ) ? absint( $request_context['pro_history_id'] ) : 0,
@@ -497,6 +503,7 @@ class EIM_Importer {
 
     public function run_import_from_path( $file_path, $args = [] ) {
         $context = $this->normalize_import_request_context( $args );
+        $this->svg_validator->set_svg_imports_allowed( ! empty( $context['allow_svg_imports'] ) );
         $time_limit = $this->get_batch_time_limit_for_context( $this->get_batch_time_limit( $context['batch_size'] ), $context );
         $this->extend_server_time_limit( $time_limit );
 
@@ -628,6 +635,7 @@ class EIM_Importer {
                 'local_import'        => $context['local_import'],
                 'skip_thumbnails'     => $context['skip_thumbnails'],
                 'honor_rel_path'      => $context['honor_relative_path'],
+                'allow_svg_imports'    => ! empty( $context['allow_svg_imports'] ),
                 'dry_run'             => ! empty( $context['dry_run'] ),
                 'duplicate_strategy'  => $context['duplicate_strategy'],
                 'pro_history_id'      => isset( $context['pro_history_id'] ) ? absint( $context['pro_history_id'] ) : 0,
@@ -1475,6 +1483,7 @@ class EIM_Importer {
             'local_import'        => false,
             'skip_thumbnails'     => false,
             'honor_relative_path' => true,
+            'allow_svg_imports'    => false,
             'dry_run'             => false,
             'duplicate_strategy'  => 'skip',
             'match_strategy'      => 'auto',
@@ -1498,6 +1507,7 @@ class EIM_Importer {
         $context['local_import']        = ! empty( $context['local_import'] );
         $context['skip_thumbnails']     = ! empty( $context['skip_thumbnails'] );
         $context['honor_relative_path'] = ! isset( $context['honor_relative_path'] ) || ! empty( $context['honor_relative_path'] );
+        $context['allow_svg_imports']    = ! empty( $context['allow_svg_imports'] );
         $context['dry_run']             = ! empty( $context['dry_run'] ) && ! empty( $context['advanced_import_actions_allowed'] );
         $context['duplicate_strategy']  = $this->normalize_duplicate_strategy( $context['duplicate_strategy'], ! empty( $context['advanced_import_actions_allowed'] ) );
         $context['match_strategy']      = $this->normalize_match_strategy( $context['match_strategy'], ! empty( $context['advanced_import_actions_allowed'] ) );

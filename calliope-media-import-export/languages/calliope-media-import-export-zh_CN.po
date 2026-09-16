@@ -2,7 +2,7 @@
 # Copyright (C) 2026 Maira Foresto
 # This file is distributed under the same license as the Export/Import Media package.
 msgid ""
-msgstr "Project-Id-Version: calliope-media-import-export 1.8.0\nReport-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\nPOT-Creation-Date: 2026-04-14 21:08+0000\nPO-Revision-Date: 2026-04-19 00:00+0000\nLast-Translator: Maira Foresto\nLanguage: zh_CN\nLanguage-Team: Calliope\nPlural-Forms: nplurals=1; plural=0;\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nGenerated-By: Babel 2.18.0\nX-Generator: Codex\n"
+msgstr "Project-Id-Version: calliope-media-import-export 1.8.2\nReport-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\nPOT-Creation-Date: 2026-09-15 22:30+0000\nPO-Revision-Date: 2026-09-15 22:30+0000\nLast-Translator: Maira Foresto\nLanguage: zh_CN\nLanguage-Team: Calliope\nPlural-Forms: nplurals=1; plural=0;\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nGenerated-By: Babel 2.18.0\nX-Generator: Codex\n"
 
 #: includes/class-importer.php:2248
 #, python-format
@@ -1075,3 +1075,16 @@ msgstr "CSV/来源中的附件 ID 与现有附件相同（ID %d）。未再次�
 #, php-format
 msgid "Duplicate content verified by file fingerprint (ID %d)."
 msgstr "已通过文件指纹确认重复内容（ID %d）。"
+
+#: includes/class-config.php:51
+msgid "Allow sanitized SVG imports"
+msgstr "允许导入经过清理的 SVG"
+
+#: includes/class-config.php:52
+msgid "SVG files can contain active content. Leave this off unless you need SVGs. When enabled, every SVG is sanitized before import, and files that cannot be safely sanitized are rejected."
+msgstr "SVG 文件可能包含活动内容。除非确实需要 SVG，否则请保持此选项关闭。启用后，每个 SVG 都会在导入前进行安全清理，无法安全清理的文件将被拒绝。"
+
+#: includes/class-svg-import-validator.php:70
+msgid "SVG imports are disabled. Enable \"Allow sanitized SVG imports\" to import SVG files."
+msgstr "SVG 导入已禁用。请启用“允许导入经过清理的 SVG”以导入 SVG 文件。"
+

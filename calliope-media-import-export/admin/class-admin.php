@@ -18,7 +18,6 @@ class EIM_Admin {
     public function __construct() {
         add_action( 'admin_menu', [ $this, 'register_menu' ] );
         add_action( 'admin_head', [ $this, 'render_menu_icon_styles' ] );
-        add_action( 'current_screen', [ $this, 'maybe_hide_admin_notices' ], 0 );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
         add_action( 'admin_init', [ $this, 'ensure_installed_at_option' ] );
         add_filter( 'plugin_action_links_' . EIM_BASENAME, [ $this, 'add_settings_link' ] );
@@ -27,25 +26,10 @@ class EIM_Admin {
     }
 
     public function maybe_hide_admin_notices( $screen ) {
-        if ( ! is_object( $screen ) ) {
-            return;
-        }
-
-        $is_target = ( isset( $screen->id ) && in_array( $screen->id, $this->get_main_screen_ids(), true ) );
-
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the current admin page slug does not change state.
-        if ( ! $is_target && isset( $_GET['page'] ) ) {
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the current admin page slug does not change state.
-            $page      = sanitize_text_field( wp_unslash( $_GET['page'] ) );
-            $is_target = ( EIM_ADMIN_PAGE_SLUG === $page );
-        }
-
-        if ( $is_target ) {
-            remove_all_actions( 'admin_notices' );
-            remove_all_actions( 'all_admin_notices' );
-            remove_all_actions( 'network_admin_notices' );
-            remove_all_actions( 'user_admin_notices' );
-        }
+        // Kept as a no-op for backward compatibility. Export/Import Media must
+        // not remove notices registered by WordPress, security tools, hosts,
+        // or other plugins from its admin screen.
+        return;
     }
 
     public function register_menu() {
@@ -118,11 +102,6 @@ class EIM_Admin {
             ],
         ];
 
-        $review_popup_data = $this->get_review_popup_script_data();
-        if ( ! empty( $review_popup_data ) ) {
-            $script_data['reviewPopup'] = $review_popup_data;
-        }
-
         wp_localize_script(
             'eim-importer-js',
             'eim_ajax',
@@ -132,7 +111,7 @@ class EIM_Admin {
     }
 
     public function add_settings_link( $links ) {
-        $settings_link = '<a href="' . esc_url( $this->get_admin_page_url( EIM_ADMIN_PAGE_SLUG ) ) . '">' . esc_html__( 'Settings', 'calliope-media-import-export' ) . '</a>';
+        $settings_link = '<a href="' . esc_url( $this->get_admin_page_url( EIM_ADMIN_PAGE_SLUG ) ) . '">' . esc_html__( 'Export/Import Media', 'calliope-media-import-export' ) . '</a>';
         array_unshift( $links, $settings_link );
         return $links;
     }
@@ -166,15 +145,11 @@ class EIM_Admin {
         <div class="wrap eim-admin-shell">
             <?php $this->render_page_header( $context ); ?>
             <?php $this->render_contextual_notice(); ?>
-            <?php $this->render_review_popup( $context ); ?>
 
             <div class="eim-admin-columns">
                 <div class="eim-admin-main">
                     <?php $this->render_export_section( $context ); ?>
                     <?php do_action( 'eim_admin_after_export_section', $context ); ?>
-                    <?php if ( empty( $context['is_pro_active'] ) ) : ?>
-                        <?php $this->render_pro_spotlight_banner( $context ); ?>
-                    <?php endif; ?>
                     <?php $this->render_import_section( $context ); ?>
                     <?php do_action( 'eim_admin_after_import_section', $context ); ?>
                     <?php $this->render_import_preview_panel(); ?>
@@ -691,7 +666,7 @@ class EIM_Admin {
 
                 <?php do_action( 'eim_import_form_fields_after', $context ); ?>
 
-                <button type="button" class="button button-primary" id="eim-start-button"><?php esc_html_e( 'Start Import', 'calliope-media-import-export' ); ?></button>
+                <button type="button" class="button button-primary" id="eim-start-button" disabled><?php esc_html_e( 'Start Import', 'calliope-media-import-export' ); ?></button>
                 <button type="button" class="button" id="eim-stop-button"><?php esc_html_e( 'Stop Process', 'calliope-media-import-export' ); ?></button>
             </form>
         </div>
@@ -871,7 +846,7 @@ class EIM_Admin {
                 <a href="<?php echo esc_url( $context['pro_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="button"><?php esc_html_e( 'See Pro details', 'calliope-media-import-export' ); ?></a>
             </div>
 
-            <div class="eim-pro-teaser-grid" aria-hidden="true">
+            <div class="eim-pro-teaser-grid">
                 <?php foreach ( $features as $feature ) : ?>
                     <div class="eim-pro-teaser-card">
                         <span class="eim-pro-teaser-badge"><?php esc_html_e( 'Pro', 'calliope-media-import-export' ); ?></span>
@@ -925,14 +900,14 @@ class EIM_Admin {
             <h3><?php esc_html_e( 'Import Progress:', 'calliope-media-import-export' ); ?></h3>
 
             <div class="eim-progress-track">
-                <div id="eimp-progress-bar">0%</div>
+                <div id="eimp-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">0%</div>
             </div>
 
             <div class="eim-warning-message"><?php esc_html_e( 'Keep this tab open while the current import is running.', 'calliope-media-import-export' ); ?></div>
 
-            <div id="eim-import-result-summary"></div>
+            <div id="eim-import-result-summary" aria-live="polite"></div>
 
-            <div id="eimp-log"></div>
+            <div id="eimp-log" role="log"></div>
 
             <div class="eim-log-actions">
                 <button type="button" class="button" id="eim-download-log"><?php esc_html_e( 'Download Log (.txt)', 'calliope-media-import-export' ); ?></button>

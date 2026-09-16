@@ -6,9 +6,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 class EIM_Svg_Import_Validator {
 
     private $filesystem;
+    private $svg_imports_allowed = false;
 
     public function __construct( ?EIM_Filesystem $filesystem = null ) {
         $this->filesystem = $filesystem ? $filesystem : new EIM_Filesystem();
+    }
+
+    public function set_svg_imports_allowed( $allowed ) {
+        $this->svg_imports_allowed = (bool) $allowed;
+    }
+
+    public function allows_svg_imports( $file_path = '', $filename = '' ) {
+        return (bool) apply_filters( 'eim_allow_svg_imports', $this->svg_imports_allowed, $file_path, $filename );
     }
 
     public function is_svg_import_file( $file_path, $filename = '' ) {
@@ -55,8 +64,11 @@ class EIM_Svg_Import_Validator {
             return true;
         }
 
-        if ( ! apply_filters( 'eim_allow_svg_imports', true, $file_path, $filename ) ) {
-            return new WP_Error( 'eim_svg_import_disabled', __( 'SVG imports are disabled.', 'calliope-media-import-export' ) );
+        if ( ! $this->allows_svg_imports( $file_path, $filename ) ) {
+            return new WP_Error(
+                'eim_svg_import_disabled',
+                __( 'SVG imports are disabled. Enable "Allow sanitized SVG imports" to import SVG files.', 'calliope-media-import-export' )
+            );
         }
 
         return $this->validate_safe_svg_file( $file_path );
