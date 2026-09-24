@@ -3,7 +3,7 @@ Contributors: mairaforesto
 Tags: csv import, csv export, media library, media import, media export
 Requires at least: 5.6
 Tested up to: 7.1
-Stable tag: 1.8.2
+Stable tag: 1.8.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -93,6 +93,12 @@ Yes. Enable Local Import Mode and provide relative paths for files that already 
 5. Review imported media with title, alt text, caption, and description preserved.
 
 == Changelog ==
+
+= 1.8.3 =
+* Conversion UX: Added contextual Pro upgrade links in the plugin header, import workflow, import results, and Plugins screen without interrupting the core Export → Import flow.
+* Conversion UX: When Free skips existing media, the import summary now explains that Pro can update metadata or replace existing files while keeping the attachment record intact.
+* Conversion UX: Simplified the Pro showcase around three clear use cases: updating existing media, making safer file changes, and automating repeat work.
+* Analytics: Added UTM attribution to every Free → Pro CTA so voluntary upgrade clicks can be measured without background telemetry or user/site tracking.
 
 = 1.8.2 =
 * Security: SVG imports are now explicit opt-in per import, remain disabled by default, and continue through the sanitizer before storage.

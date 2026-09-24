@@ -2,7 +2,19 @@
 # Copyright (C) 2026 Maira Foresto
 # This file is distributed under the same license as the Export/Import Media package.
 msgid ""
-msgstr "Project-Id-Version: calliope-media-import-export 1.8.2\nReport-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\nPOT-Creation-Date: 2026-09-15 22:30+0000\nPO-Revision-Date: 2026-09-15 22:30+0000\nLast-Translator: Maira Foresto\nLanguage: zh_CN\nLanguage-Team: Calliope\nPlural-Forms: nplurals=1; plural=0;\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nGenerated-By: Babel 2.18.0\nX-Generator: Codex\n"
+msgstr ""
+"Project-Id-Version: calliope-media-import-export 1.8.3\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\n"
+"POT-Creation-Date: 2026-09-15 22:30+0000\n"
+"PO-Revision-Date: 2026-09-15 22:30+0000\n"
+"Last-Translator: Maira Foresto\n"
+"Language: zh_CN\n"
+"Language-Team: Calliope\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
 
 #: includes/class-importer.php:2248
 #, python-format
@@ -324,7 +336,9 @@ msgid "File ready. Total media rows:"
 msgstr "文件准备好。媒体总行数："
 
 #: includes/class-importer.php:472
-msgid "Filename matching is ambiguous because multiple existing media items share this filename. Add Relative Path or Attachment ID to target a single attachment."
+msgid ""
+"Filename matching is ambiguous because multiple existing media items share this filename. Add Relative Path or "
+"Attachment ID to target a single attachment."
 msgstr "文件名匹配不明确，因为多个现有媒体项目共享此文件名。添加相对路径或附件 ID 以定位单个附件。"
 
 #: admin/class-admin.php:484
@@ -336,7 +350,9 @@ msgid "Filter by date, media type, or attachment context before exporting."
 msgstr "导出前可按日期、媒体类型或附件上下文进行筛选。"
 
 #: admin/class-admin.php:663
-msgid "Find existing attachments by Attachment ID, Source URL, Relative Path, or Filename before deciding whether to skip, update, or replace them."
+msgid ""
+"Find existing attachments by Attachment ID, Source URL, Relative Path, or Filename before deciding whether to skip, "
+"update, or replace them."
 msgstr "在决定跳过、更新或替换之前，可先通过附件 ID、来源 URL、相对路径或文件名查找现有附件。"
 
 #: admin/class-admin.php:611
@@ -344,11 +360,15 @@ msgid "Format"
 msgstr "格式"
 
 #: admin/class-admin.php:580
-msgid "Free covers quick CSV exports. Pro adds saved export profiles, richer packages, and optional background runs for repeatable migrations and larger media libraries."
+msgid ""
+"Free covers quick CSV exports. Pro adds saved export profiles, richer packages, and optional background runs for "
+"repeatable migrations and larger media libraries."
 msgstr "免费版支持快速 CSV 导出。Pro 版增加已保存的导出配置、更丰富的打包方式，以及适用于可重复迁移和更大媒体库的可选后台运行。"
 
 #: admin/class-admin.php:647
-msgid "Free handles one-off CSV imports with preview and duplicate prevention. Pro adds saved workflows for matching existing attachments, refreshing trusted metadata, replacing files, and reusing advanced rules later."
+msgid ""
+"Free handles one-off CSV imports with preview and duplicate prevention. Pro adds saved workflows for matching "
+"existing attachments, refreshing trusted metadata, replacing files, and reusing advanced rules later."
 msgstr "免费版支持带预览和防重复的一次性 CSV 导入。Pro 版增加已保存工作流，可匹配现有附件、刷新可信元数据、替换文件，并在后续重复使用高级规则。"
 
 #: admin/class-admin.php:419
@@ -445,7 +465,9 @@ msgid "Invalid temporary file name."
 msgstr "临时文件名无效。"
 
 #: includes/class-config.php:40
-msgid "Keep the folder structure from \"Relative Path\" when importing, and reuse files already present in uploads when the same path exists."
+msgid ""
+"Keep the folder structure from \"Relative Path\" when importing, and reuse files already present in uploads when the "
+"same path exists."
 msgstr "导入时保留 “Relative Path” 的文件夹结构，并在相同路径已存在时复用 uploads 中已有的文件。"
 
 #: admin/class-admin.php:792
@@ -760,7 +782,7 @@ msgstr "第 2 步"
 
 #: admin/class-admin.php:564
 msgid "Stop Process"
-msgstr "停止 Process"
+msgstr "停止处理"
 
 #: admin/class-admin.php:309
 msgid "Stopping the process..."
@@ -819,15 +841,22 @@ msgid "The current attachment file could not be found."
 msgstr "找不到当前的附件文件。"
 
 #: admin/class-admin.php:287
-msgid "The free plugin stays focused on straightforward CSV export/import with preview and duplicate prevention. Pro adds reusable profiles, background workflows, and controlled rules for matching and updating existing media."
+msgid ""
+"The free plugin stays focused on straightforward CSV export/import with preview and duplicate prevention. Pro adds "
+"reusable profiles, background workflows, and controlled rules for matching and updating existing media."
 msgstr "免费插件仍专注于直接的 CSV 导出/导入，带预览和防重复功能。Pro 版增加可复用配置、后台工作流，以及用于匹配和更新现有媒体的受控规则。"
 
 #: admin/class-admin.php:692
-msgid "The free plugin stays intentionally focused on clean one-off CSV import and export. Pro adds controlled matching against existing attachments, selective metadata refreshes, safer replace-file workflows, and reusable setups for larger libraries."
+msgid ""
+"The free plugin stays intentionally focused on clean one-off CSV import and export. Pro adds controlled matching "
+"against existing attachments, selective metadata refreshes, safer replace-file workflows, and reusable setups for "
+"larger libraries."
 msgstr "免费插件有意保持专注于干净的一次性 CSV 导入和导出。Pro 版增加与现有附件的受控匹配、选择性元数据刷新、更安全的替换文件工作流，以及适用于更大媒体库的可复用设置。"
 
 #: admin/class-admin.php:730
-msgid "The free version stays clean on purpose. Pro adds a few stronger tools when you need controlled updates, repeatable workflows, and more operational confidence."
+msgid ""
+"The free version stays clean on purpose. Pro adds a few stronger tools when you need controlled updates, repeatable "
+"workflows, and more operational confidence."
 msgstr "免费版刻意保持简洁。当你需要受控更新、可重复工作流和更高操作把握时，Pro 版会增加几项更强大的工具。"
 
 #: includes/class-importer.php:1356
@@ -897,11 +926,15 @@ msgid "Upgrade when you need to work with existing media, not just import new ro
 msgstr "当你需要处理现有媒体，而不仅仅是导入新行时，再升级到 Pro。"
 
 #: admin/class-admin.php:504
-msgid "Upload a CSV, validate it first, review the preview, and import media in batches while the free workflow skips existing matches it detects."
+msgid ""
+"Upload a CSV, validate it first, review the preview, and import media in batches while the free workflow skips "
+"existing matches it detects."
 msgstr "上传 CSV，先进行验证，查看预览，然后分批导入媒体；免费版工作流会跳过它检测到的现有匹配项。"
 
 #: includes/class-config.php:33
-msgid "Use the \"Relative Path\" column to locate files that already exist in this site's uploads folder. No remote download is attempted."
+msgid ""
+"Use the \"Relative Path\" column to locate files that already exist in this site's uploads folder. No remote download"
+" is attempted."
 msgstr "使用 “Relative Path” 列来定位本网站 uploads 文件夹中已存在的文件。不会尝试远程下载。"
 
 #: admin/class-admin.php:462
@@ -993,7 +1026,9 @@ msgstr "将图片转换为 WebP 或 AVIF"
 msgid "Convert supported JPG and PNG imports to WebP or AVIF when your WordPress image editor supports the selected format."
 msgstr "当 WordPress 图片编辑器支持所选格式时，将支持的 JPG 和 PNG 导入转换为 WebP 或 AVIF。"
 
-msgid "Create restore points before imports so mistaken metadata updates, new imports, and replace-file runs can be rolled back from Pro history."
+msgid ""
+"Create restore points before imports so mistaken metadata updates, new imports, and replace-file runs can be rolled "
+"back from Pro history."
 msgstr "在导入前创建还原点，这样错误的元数据更新、新导入和替换文件操作都可以从 Pro 历史记录中回滚。"
 
 msgid "Documentación"
@@ -1008,7 +1043,10 @@ msgstr "支持"
 msgid "Sugerencias"
 msgstr "建议"
 
-msgid "The free plugin stays intentionally focused on clean one-off CSV import and export. Pro adds controlled matching against existing attachments, rollback restore points before imports, image conversion to WebP or AVIF where supported, safer replace-file workflows, and reusable setups for larger libraries."
+msgid ""
+"The free plugin stays intentionally focused on clean one-off CSV import and export. Pro adds controlled matching "
+"against existing attachments, rollback restore points before imports, image conversion to WebP or AVIF where "
+"supported, safer replace-file workflows, and reusable setups for larger libraries."
 msgstr "免费插件专注于清晰的一次性 CSV 导入和导出。Pro 增加了与现有附件的受控匹配、导入前的回滚还原点、在支持的环境中将图片转换为 WebP 或 AVIF、更安全的替换文件流程，以及适合大型媒体库的可复用设置。"
 
 msgid "The server temporary upload folder is missing."
@@ -1029,14 +1067,18 @@ msgstr "文件只上传了一部分。"
 msgid "The CSV has headers but no data rows to import. Export or upload a CSV with at least one media row below the header."
 msgstr "CSV 包含表头，但没有可导入的数据行。请导出或上传一个在表头下至少包含一条媒体记录的 CSV。"
 
-msgid "No importable media rows were found. The CSV may only contain headers, or your export filters may have matched no media items."
+msgid ""
+"No importable media rows were found. The CSV may only contain headers, or your export filters may have matched no "
+"media items."
 msgstr "未找到可导入的媒体行。CSV 可能只包含表头，或者你的导出筛选条件没有匹配到任何媒体项目。"
 
 msgid "No media matched the selected export filters. Try exporting All Media or clearing date/attachment filters."
 msgstr "没有媒体符合所选导出筛选条件。请尝试导出“所有媒体”，或清除日期/附件筛选条件。"
 
 #: admin/class-admin.php
-msgid "If Export/Import Media helped you move your WordPress media library with CSV, a quick rating on WordPress.org would really help the plugin grow."
+msgid ""
+"If Export/Import Media helped you move your WordPress media library with CSV, a quick rating on WordPress.org would "
+"really help the plugin grow."
 msgstr "如果 Export/Import Media 帮助你通过 CSV 迁移 WordPress 媒体库，在 WordPress.org 上快速评分将非常有助于插件成长。"
 
 #: admin/class-admin.php
@@ -1068,11 +1110,11 @@ msgstr "无法下载远程文件。"
 msgid "Downloaded content does not match the expected .%1$s file type (detected: %2$s)."
 msgstr "下载的内容与预期的 .%1$s 文件类型不匹配（检测到：%2$s）。"
 
-#, php-format
+#, php-format, python-format
 msgid "Matched the same attachment ID from the CSV/source (ID %d). File content was not downloaded again."
 msgstr "CSV/来源中的附件 ID 与现有附件相同（ID %d）。未再次下载文件内容。"
 
-#, php-format
+#, php-format, python-format
 msgid "Duplicate content verified by file fingerprint (ID %d)."
 msgstr "已通过文件指纹确认重复内容（ID %d）。"
 
@@ -1081,10 +1123,81 @@ msgid "Allow sanitized SVG imports"
 msgstr "允许导入经过清理的 SVG"
 
 #: includes/class-config.php:52
-msgid "SVG files can contain active content. Leave this off unless you need SVGs. When enabled, every SVG is sanitized before import, and files that cannot be safely sanitized are rejected."
+msgid ""
+"SVG files can contain active content. Leave this off unless you need SVGs. When enabled, every SVG is sanitized "
+"before import, and files that cannot be safely sanitized are rejected."
 msgstr "SVG 文件可能包含活动内容。除非确实需要 SVG，否则请保持此选项关闭。启用后，每个 SVG 都会在导入前进行安全清理，无法安全清理的文件将被拒绝。"
 
 #: includes/class-svg-import-validator.php:70
 msgid "SVG imports are disabled. Enable \"Allow sanitized SVG imports\" to import SVG files."
 msgstr "SVG 导入已禁用。请启用“允许导入经过清理的 SVG”以导入 SVG 文件。"
 
+msgid "Upgrade to Pro"
+msgstr "升级到 Pro"
+
+msgid "1 existing media item was skipped by Free."
+msgstr "Free 已跳过 1 个现有媒体项目。"
+
+#, python-format
+msgid "%d existing media items were skipped by Free."
+msgstr "Free 已跳过 %d 个现有媒体项目。"
+
+msgid ""
+"Need to update those items instead? Pro can update selected metadata or replace existing files while keeping the "
+"attachment record intact."
+msgstr "想改为更新这些项目吗？Pro 可以更新选定的元数据或替换现有文件，同时保留附件记录不变。"
+
+msgid "See how Pro handles existing media"
+msgstr "查看 Pro 如何处理现有媒体"
+
+msgid "Need to update media already in your library?"
+msgstr "需要更新媒体库中已有的媒体吗？"
+
+msgid ""
+"Free safely skips existing matches to avoid duplicates. Pro can match existing attachments and update alt text, "
+"titles, captions, and descriptions without creating duplicate media."
+msgstr "Free 会安全跳过现有匹配项以避免重复。Pro 可以匹配现有附件，并更新 ALT 文本、标题、说明和描述，而不会创建重复媒体。"
+
+msgid "Update existing media with Pro"
+msgstr "使用 Pro 更新现有媒体"
+
+msgid "Update existing media"
+msgstr "更新现有媒体"
+
+msgid "Bulk-update alt text, titles, captions, and descriptions on existing attachments without creating duplicate media."
+msgstr "批量更新现有附件的 ALT 文本、标题、说明和描述，而不会创建重复媒体。"
+
+msgid "Make bigger changes safely"
+msgstr "更安全地进行较大改动"
+
+msgid ""
+"Replace files, convert supported images, and use restore points so heavier media-library changes are easier to review"
+" and recover."
+msgstr "替换文件、转换受支持的图片并使用还原点，让媒体库中的较大改动更易于检查和恢复。"
+
+msgid "Automate repeat work"
+msgstr "自动化重复工作"
+
+msgid ""
+"Save reusable profiles and run larger or repeatable export/import workflows without rebuilding the same setup every "
+"time."
+msgstr "保存可重复使用的配置，并运行更大规模或可重复的导出/导入流程，无需每次重新设置。"
+
+msgid "When Free is not enough"
+msgstr "当 Free 不再足够"
+
+msgid "Go further when your media library needs more than a one-off import"
+msgstr "当媒体库需要的不只是一次性导入时，进一步使用 Pro"
+
+msgid ""
+"Keep the simple Free workflow for everyday CSV moves, then use Pro when you need to update existing media, make safer"
+" file changes, or repeat the same workflow at scale."
+msgstr "日常 CSV 操作继续使用简洁的 Free 流程；当需要更新现有媒体、更安全地修改文件或大规模重复同一流程时，再使用 Pro。"
+
+msgid "See everything included in Pro"
+msgstr "查看 Pro 包含的全部功能"
+
+
+
+msgid "Invalid CSV. Check for an unclosed quoted field and upload the corrected file."
+msgstr "CSV 无效。请检查是否有未闭合的引号字段，然后上传修正后的文件。"

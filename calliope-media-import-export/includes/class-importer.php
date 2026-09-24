@@ -39,8 +39,10 @@ class EIM_Importer {
             'Caption' => __( 'Caption', 'calliope-media-import-export' ),
             'Description' => __( 'Description', 'calliope-media-import-export' ),
             'This CSV relies on Relative Path. Use Local Import Mode or make sure the referenced files already exist in uploads.' => __( 'This CSV relies on Relative Path. Use Local Import Mode or make sure the referenced files already exist in uploads.', 'calliope-media-import-export' ),
+            /* translators: %s: comma-separated CSV row numbers. */
             ' Example rows: %s.' => __( ' Example rows: %s.', 'calliope-media-import-export' ),
             'Only source columns were detected. Media metadata fields will not be updated from this CSV.' => __( 'Only source columns were detected. Media metadata fields will not be updated from this CSV.', 'calliope-media-import-export' ),
+            'Invalid CSV. Check for an unclosed quoted field and upload the corrected file.' => __( 'Invalid CSV. Check for an unclosed quoted field and upload the corrected file.', 'calliope-media-import-export' ),
         ];
 
         $this->csv_reader = new EIM_Csv_Reader(
@@ -51,6 +53,7 @@ class EIM_Importer {
                 },
                 'plural_translator' => function( $single, $plural, $count ) {
                     if ( '%d row is missing both Absolute URL and Relative Path and will fail unless the CSV is corrected.' === $single ) {
+                        /* translators: %d: number of CSV rows missing both supported media source columns. */
                         return _n(
                             '%d row is missing both Absolute URL and Relative Path and will fail unless the CSV is corrected.',
                             '%d rows are missing both Absolute URL and Relative Path and will fail unless the CSV is corrected.',
@@ -447,7 +450,7 @@ class EIM_Importer {
         }
 
         if ( is_resource( $handle ) ) {
-            fclose( $handle );
+            $this->close_file_handle( $handle );
         }
 
         $this->release_temp_lock( $lock_key );
@@ -1979,12 +1982,16 @@ class EIM_Importer {
             $event = 'event';
         }
 
-        $encoded = wp_json_encode( $context, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
-        if ( false === $encoded ) {
-            $encoded = '{}';
+        /**
+         * Fires for diagnostic import events without writing unsolicited data
+         * to the site's PHP error log.
+         *
+         * @param string $event   Sanitized event name.
+         * @param array  $context Diagnostic context.
+         */
+        if ( function_exists( 'do_action' ) ) {
+            do_action( 'eim_import_log_event', $event, $context );
         }
-
-        error_log( '[EIM_IMPORT] ' . $event . ' | ' . $encoded );
     }
 
     private function send_batch_error( $message, $status_code = 400 ) {

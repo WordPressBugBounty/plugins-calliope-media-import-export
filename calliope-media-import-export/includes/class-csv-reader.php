@@ -41,6 +41,7 @@ class EIM_Csv_Reader {
         }
 
         $this->detect_incompatible_import_file( $file_path );
+        $this->assert_valid_csv_enclosures( $file_path );
         $delimiter = $this->detect_csv_delimiter( $file_path );
         $handle    = $this->open_read_handle( $file_path );
 
@@ -292,15 +293,10 @@ class EIM_Csv_Reader {
 
     public function open_read_handle( $file_path ) {
         $warning = '';
-        $this->capture_native_warning(
-            function() {
-                return ini_set( 'auto_detect_line_endings', '1' );
-            },
-            $warning
-        );
 
         $handle = $this->capture_native_warning(
             function() use ( $file_path ) {
+                // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- CSV files are streamed to support large imports without loading the entire file into memory.
                 return fopen( $file_path, 'rb' );
             },
             $warning
@@ -316,6 +312,7 @@ class EIM_Csv_Reader {
 
     public function close_file_handle( $handle ) {
         if ( is_resource( $handle ) ) {
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closes the CSV stream opened for memory-safe parsing.
             fclose( $handle );
         }
     }
@@ -408,6 +405,55 @@ class EIM_Csv_Reader {
             $preview_rows,
             $this->build_csv_warnings( $summary, $header_map, $missing_row_index )
         );
+    }
+
+    /**
+     * Reject structurally malformed CSV files before fgetcsv() can merge rows
+     * because of an unterminated quoted field. Valid quoted multiline fields
+     * remain supported as long as the closing quote is present.
+     *
+     * @param string $file_path CSV file path.
+     * @throws EIM_Csv_Reader_Exception When quoted fields are not balanced.
+     * @return void
+     */
+    private function assert_valid_csv_enclosures( $file_path ) {
+        $handle = $this->open_read_handle( $file_path );
+        if ( ! $handle ) {
+            throw $this->error( 'eim_csv_unreadable', 'Could not open the uploaded CSV file.' );
+        }
+
+        $quote_count    = 0;
+        $backslash_run  = 0;
+
+        while ( ! feof( $handle ) ) {
+            $chunk = $this->read_file_chunk( $handle, 8192 );
+            if ( false === $chunk ) {
+                $this->close_file_handle( $handle );
+                throw $this->error( 'eim_csv_unreadable', 'Could not read the uploaded CSV file.' );
+            }
+
+            $length = strlen( $chunk );
+            for ( $index = 0; $index < $length; $index++ ) {
+                $character = $chunk[ $index ];
+
+                if ( '\\' === $character ) {
+                    $backslash_run++;
+                    continue;
+                }
+
+                if ( '"' === $character && 0 === ( $backslash_run % 2 ) ) {
+                    $quote_count++;
+                }
+
+                $backslash_run = 0;
+            }
+        }
+
+        $this->close_file_handle( $handle );
+
+        if ( 0 !== ( $quote_count % 2 ) ) {
+            throw $this->error( 'eim_csv_malformed_quotes', 'Invalid CSV. Check for an unclosed quoted field and upload the corrected file.' );
+        }
     }
 
     private function detect_incompatible_import_file( $file_path ) {
@@ -540,6 +586,7 @@ class EIM_Csv_Reader {
     }
 
     private function read_file_chunk( $handle, $length ) {
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread -- CSV signatures and validation are read from an already-open stream.
         return fread( $handle, $length );
     }
 
@@ -574,6 +621,7 @@ class EIM_Csv_Reader {
 
     private function capture_native_warning( $callback, &$warning ) {
         $warning = '';
+        // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Capture native filesystem warnings and convert them into controlled plugin errors.
         set_error_handler(
             function( $severity, $message ) use ( &$warning ) {
                 $warning = (string) $message;

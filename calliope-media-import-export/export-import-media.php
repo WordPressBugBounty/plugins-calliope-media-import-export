@@ -1,8 +1,8 @@
 <?php
 /*
-Plugin Name: Export/Import Media
+Plugin Name: Export/Import Media - CSV Media Library Import & Export
 Description: CSV export/import for your media library with preview, batch processing, duplicate prevention, and core metadata columns.
-Version: 1.8.2
+Version: 1.8.3
 Requires at least: 5.6
 Requires PHP: 7.4
 Author: CalliopeWP
@@ -28,7 +28,7 @@ if ( ! defined( 'EIM_FILE' ) ) {
 }
 
 if ( ! defined( 'EIM_VERSION' ) ) {
-    define( 'EIM_VERSION', '1.8.2' );
+    define( 'EIM_VERSION', '1.8.3' );
 }
 
 if ( ! defined( 'EIM_PUBLIC_SLUG' ) ) {
@@ -70,6 +70,7 @@ if ( ! function_exists( 'eim_load_textdomain' ) ) {
      * @return void
      */
     function eim_load_textdomain() {
+        // phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- Bundled translations are retained for installs that are not using WordPress.org language packs.
         load_plugin_textdomain( EIM_TEXT_DOMAIN, false, dirname( EIM_BASENAME ) . '/languages' );
     }
 }

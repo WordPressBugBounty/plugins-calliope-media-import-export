@@ -98,7 +98,8 @@ class EIM_Admin {
             'i18n'     => $this->get_import_script_i18n(),
             'fallback_i18n' => $this->get_import_script_i18n_defaults(),
             'config'   => [
-                'default_batch' => eim_get_setting( 'import.default_batch_size', '25' ),
+                'default_batch'           => eim_get_setting( 'import.default_batch_size', '25' ),
+                'pro_url_skipped_results' => ( function_exists( 'eim_is_pro_active' ) && eim_is_pro_active() ) ? '' : $this->get_pro_tracking_url( (string) eim_get_setting( 'urls.pro', '' ), 'skipped_results' ),
             ],
         ];
 
@@ -113,7 +114,40 @@ class EIM_Admin {
     public function add_settings_link( $links ) {
         $settings_link = '<a href="' . esc_url( $this->get_admin_page_url( EIM_ADMIN_PAGE_SLUG ) ) . '">' . esc_html__( 'Export/Import Media', 'calliope-media-import-export' ) . '</a>';
         array_unshift( $links, $settings_link );
+
+        $is_pro_active = function_exists( 'eim_is_pro_active' ) ? eim_is_pro_active() : false;
+        $pro_url       = (string) eim_get_setting( 'urls.pro', '' );
+
+        if ( ! $is_pro_active && '' !== $pro_url ) {
+            $upgrade_link = '<a href="' . esc_url( $this->get_pro_tracking_url( $pro_url, 'plugin_row' ) ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Upgrade to Pro', 'calliope-media-import-export' ) . '</a>';
+            $links[] = $upgrade_link;
+        }
+
         return $links;
+    }
+
+    private function get_tracking_url( $url, $campaign, $content = '' ) {
+        $url = (string) $url;
+
+        if ( '' === $url ) {
+            return '';
+        }
+
+        $args = [
+            'utm_source'   => 'wordpress_plugin',
+            'utm_medium'   => 'referral',
+            'utm_campaign' => sanitize_key( (string) $campaign ),
+        ];
+
+        if ( '' !== (string) $content ) {
+            $args['utm_content'] = sanitize_key( (string) $content );
+        }
+
+        return add_query_arg( $args, $url );
+    }
+
+    private function get_pro_tracking_url( $pro_url, $content = '' ) {
+        return $this->get_tracking_url( $pro_url, 'eim_free_to_pro', $content );
     }
 
     public function ensure_installed_at_option() {
@@ -383,7 +417,7 @@ class EIM_Admin {
                 <h2><?php echo esc_html( $page_title ); ?></h2>
                 <p><?php esc_html_e( 'This premium workspace is available in Export/Import Media Pro.', 'calliope-media-import-export' ); ?></p>
                 <p><?php esc_html_e( 'The free plugin stays focused on straightforward CSV export/import with preview and duplicate prevention. Pro adds reusable profiles, background workflows, and controlled rules for matching and updating existing media.', 'calliope-media-import-export' ); ?></p>
-                <a href="<?php echo esc_url( $context['pro_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="button button-primary">
+                <a href="<?php echo esc_url( $this->get_pro_tracking_url( $context['pro_url'], 'locked_page' ) ); ?>" target="_blank" rel="noopener noreferrer" class="button button-primary">
                     <?php esc_html_e( 'Buy Pro Version', 'calliope-media-import-export' ); ?>
                 </a>
             </div>
@@ -453,6 +487,11 @@ class EIM_Admin {
             'summary_imported'            => esc_html__( 'Imported', 'calliope-media-import-export' ),
             'summary_skipped'             => esc_html__( 'Skipped', 'calliope-media-import-export' ),
             'summary_errors'              => esc_html__( 'Errors', 'calliope-media-import-export' ),
+            'skipped_upgrade_single'      => esc_html__( '1 existing media item was skipped by Free.', 'calliope-media-import-export' ),
+            /* translators: %d: number of existing media items skipped by the Free version. */
+            'skipped_upgrade_plural'      => esc_html__( '%d existing media items were skipped by Free.', 'calliope-media-import-export' ),
+            'skipped_upgrade_description' => esc_html__( 'Need to update those items instead? Pro can update selected metadata or replace existing files while keeping the attachment record intact.', 'calliope-media-import-export' ),
+            'skipped_upgrade_cta'         => esc_html__( 'See how Pro handles existing media', 'calliope-media-import-export' ),
         ];
     }
 
@@ -524,6 +563,10 @@ class EIM_Admin {
             'summary_imported'            => 'Imported',
             'summary_skipped'             => 'Skipped',
             'summary_errors'              => 'Errors',
+            'skipped_upgrade_single'      => '1 existing media item was skipped by Free.',
+            'skipped_upgrade_plural'      => '%d existing media items were skipped by Free.',
+            'skipped_upgrade_description' => 'Need to update those items instead? Pro can update selected metadata or replace existing files while keeping the attachment record intact.',
+            'skipped_upgrade_cta'         => 'See how Pro handles existing media',
         ];
     }
 
@@ -541,13 +584,16 @@ class EIM_Admin {
                     <?php endif; ?>
                     <div class="eim-banner-actions">
                         <?php if ( ! empty( $context['documentation_url'] ) ) : ?>
-                            <a href="<?php echo esc_url( $context['documentation_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="eim-banner-link"><?php esc_html_e( 'Documentation', 'calliope-media-import-export' ); ?></a>
+                            <a href="<?php echo esc_url( $this->get_tracking_url( $context['documentation_url'], 'eim_free_navigation', 'documentation' ) ); ?>" target="_blank" rel="noopener noreferrer" class="eim-banner-link"><?php esc_html_e( 'Documentation', 'calliope-media-import-export' ); ?></a>
                         <?php endif; ?>
                         <?php if ( ! empty( $context['support_url'] ) ) : ?>
                             <a href="<?php echo esc_url( $context['support_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="eim-banner-link"><?php esc_html_e( 'Support', 'calliope-media-import-export' ); ?></a>
                         <?php endif; ?>
                         <?php if ( ! empty( $context['suggestions_url'] ) ) : ?>
                             <a href="<?php echo esc_url( $context['suggestions_url'] ); ?>" class="eim-banner-link"><?php esc_html_e( 'Suggestions', 'calliope-media-import-export' ); ?></a>
+                        <?php endif; ?>
+                        <?php if ( empty( $context['is_pro_active'] ) && ! empty( $context['pro_url'] ) ) : ?>
+                            <a href="<?php echo esc_url( $this->get_pro_tracking_url( $context['pro_url'], 'header' ) ); ?>" target="_blank" rel="noopener noreferrer" class="eim-banner-link eim-banner-link-pro"><?php esc_html_e( 'Explore Pro', 'calliope-media-import-export' ); ?></a>
                         <?php endif; ?>
                         <?php do_action( 'eim_admin_banner_actions', $context ); ?>
                     </div>
@@ -629,6 +675,15 @@ class EIM_Admin {
                         <?php esc_html_e( 'Download sample CSV', 'calliope-media-import-export' ); ?>
                     </a>
                 </p>
+                <?php if ( empty( $context['is_pro_active'] ) && ! empty( $context['pro_url'] ) ) : ?>
+                    <div class="eim-upgrade-note">
+                        <div class="eim-upgrade-note-copy">
+                            <strong><?php esc_html_e( 'Need to update media already in your library?', 'calliope-media-import-export' ); ?></strong>
+                            <span><?php esc_html_e( 'Free safely skips existing matches to avoid duplicates. Pro can match existing attachments and update alt text, titles, captions, and descriptions without creating duplicate media.', 'calliope-media-import-export' ); ?></span>
+                        </div>
+                        <a href="<?php echo esc_url( $this->get_pro_tracking_url( $context['pro_url'], 'existing_media' ) ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Update existing media with Pro', 'calliope-media-import-export' ); ?> &rarr;</a>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <form id="eim-import-form" method="post" enctype="multipart/form-data">
@@ -685,7 +740,7 @@ class EIM_Admin {
                     <h3><?php esc_html_e( 'Advanced Export Workflows', 'calliope-media-import-export' ); ?></h3>
                     <p><?php esc_html_e( 'Free covers quick CSV exports. Pro adds saved export profiles, richer packages, and optional background runs for repeatable migrations and larger media libraries.', 'calliope-media-import-export' ); ?></p>
                 </div>
-                <a href="<?php echo esc_url( $context['pro_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="button button-primary">
+                <a href="<?php echo esc_url( $this->get_pro_tracking_url( $context['pro_url'], 'locked_export' ) ); ?>" target="_blank" rel="noopener noreferrer" class="button button-primary">
                     <?php esc_html_e( 'Buy Pro Version', 'calliope-media-import-export' ); ?>
                 </a>
             </div>
@@ -752,7 +807,7 @@ class EIM_Admin {
                     <h3><?php esc_html_e( 'Advanced Import Workflows', 'calliope-media-import-export' ); ?></h3>
                     <p><?php esc_html_e( 'Free handles one-off CSV imports with preview and duplicate prevention. Pro adds saved workflows for matching existing attachments, refreshing trusted metadata, replacing files, and reusing advanced rules later.', 'calliope-media-import-export' ); ?></p>
                 </div>
-                <a href="<?php echo esc_url( $context['pro_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="button button-primary">
+                <a href="<?php echo esc_url( $this->get_pro_tracking_url( $context['pro_url'], 'locked_import' ) ); ?>" target="_blank" rel="noopener noreferrer" class="button button-primary">
                     <?php esc_html_e( 'Buy Pro Version', 'calliope-media-import-export' ); ?>
                 </a>
             </div>
@@ -798,7 +853,7 @@ class EIM_Admin {
                 <p><?php esc_html_e( 'The free plugin stays intentionally focused on clean one-off CSV import and export. Pro adds controlled matching against existing attachments, rollback restore points before imports, image conversion to WebP or AVIF where supported, safer replace-file workflows, and reusable setups for larger libraries.', 'calliope-media-import-export' ); ?></p>
             </div>
             <div class="eim-pro-spotlight-actions">
-                <a href="<?php echo esc_url( $context['pro_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="button button-primary"><?php esc_html_e( 'Explore Pro', 'calliope-media-import-export' ); ?></a>
+                <a href="<?php echo esc_url( $this->get_pro_tracking_url( $context['pro_url'], 'spotlight' ) ); ?>" target="_blank" rel="noopener noreferrer" class="button button-primary"><?php esc_html_e( 'Explore Pro', 'calliope-media-import-export' ); ?></a>
             </div>
         </div>
         <?php
@@ -811,39 +866,27 @@ class EIM_Admin {
 
         $features = [
             [
-                'title'       => __( 'Update existing media metadata', 'calliope-media-import-export' ),
-                'description' => __( 'Match existing attachments and refresh trusted fields like alt text, title, caption, and description.', 'calliope-media-import-export' ),
+                'title'       => __( 'Update existing media', 'calliope-media-import-export' ),
+                'description' => __( 'Bulk-update alt text, titles, captions, and descriptions on existing attachments without creating duplicate media.', 'calliope-media-import-export' ),
             ],
             [
-                'title'       => __( 'Saved profiles', 'calliope-media-import-export' ),
-                'description' => __( 'Reuse export and import setups without rebuilding the same workflow every time.', 'calliope-media-import-export' ),
+                'title'       => __( 'Make bigger changes safely', 'calliope-media-import-export' ),
+                'description' => __( 'Replace files, convert supported images, and use restore points so heavier media-library changes are easier to review and recover.', 'calliope-media-import-export' ),
             ],
             [
-                'title'       => __( 'Remote or server-side CSV sources', 'calliope-media-import-export' ),
-                'description' => __( 'Run workflows from trusted CSV sources without manually uploading a file every time.', 'calliope-media-import-export' ),
-            ],
-            [
-                'title'       => __( 'Replace files safely and review history', 'calliope-media-import-export' ),
-                'description' => __( 'Replace outdated media more carefully and keep a record of what happened during heavier runs.', 'calliope-media-import-export' ),
-            ],
-            [
-                'title'       => __( 'Rollback restore points', 'calliope-media-import-export' ),
-                'description' => __( 'Create restore points before imports so mistaken metadata updates, new imports, and replace-file runs can be rolled back from Pro history.', 'calliope-media-import-export' ),
-            ],
-            [
-                'title'       => __( 'Convert images to WebP or AVIF', 'calliope-media-import-export' ),
-                'description' => __( 'Convert supported JPG and PNG imports to WebP or AVIF when your WordPress image editor supports the selected format.', 'calliope-media-import-export' ),
+                'title'       => __( 'Automate repeat work', 'calliope-media-import-export' ),
+                'description' => __( 'Save reusable profiles and run larger or repeatable export/import workflows without rebuilding the same setup every time.', 'calliope-media-import-export' ),
             ],
         ];
         ?>
         <div class="eim-card eim-pro-showcase-card">
             <div class="eim-pro-showcase-heading">
                 <div>
-                    <span class="eim-pro-eyebrow"><?php esc_html_e( 'Also available in Pro', 'calliope-media-import-export' ); ?></span>
-                    <h3><?php esc_html_e( 'Advanced workflows for teams managing larger or messier media libraries', 'calliope-media-import-export' ); ?></h3>
-                    <p><?php esc_html_e( 'The free version stays clean on purpose. Pro adds a few stronger tools when you need controlled updates, repeatable workflows, and more operational confidence.', 'calliope-media-import-export' ); ?></p>
+                    <span class="eim-pro-eyebrow"><?php esc_html_e( 'When Free is not enough', 'calliope-media-import-export' ); ?></span>
+                    <h3><?php esc_html_e( 'Go further when your media library needs more than a one-off import', 'calliope-media-import-export' ); ?></h3>
+                    <p><?php esc_html_e( 'Keep the simple Free workflow for everyday CSV moves, then use Pro when you need to update existing media, make safer file changes, or repeat the same workflow at scale.', 'calliope-media-import-export' ); ?></p>
                 </div>
-                <a href="<?php echo esc_url( $context['pro_url'] ); ?>" target="_blank" rel="noopener noreferrer" class="button"><?php esc_html_e( 'See Pro details', 'calliope-media-import-export' ); ?></a>
+                <a href="<?php echo esc_url( $this->get_pro_tracking_url( $context['pro_url'], 'pro_showcase' ) ); ?>" target="_blank" rel="noopener noreferrer" class="button"><?php esc_html_e( 'See everything included in Pro', 'calliope-media-import-export' ); ?></a>
             </div>
 
             <div class="eim-pro-teaser-grid">

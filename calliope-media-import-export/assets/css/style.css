@@ -1,6 +1,6 @@
 /*
  * Plugin Name: Export/Import Media - Custom Styles
- * Version: 1.8.2
+ * Version: 1.8.3
  */
 
 :root {
@@ -282,6 +282,18 @@ input[type="date"] {
     background: rgba(255,255,255,0.14);
 }
 
+.eim-banner-link-pro {
+    background: #fff;
+    border-color: #fff;
+    color: var(--eim-primary-strong);
+    font-weight: 700;
+}
+
+.eim-banner-link-pro:hover {
+    background: rgba(255,255,255,0.92);
+    color: var(--eim-primary-strong);
+}
+
 .eim-banner-side-note {
     margin: 0;
     padding: 16px 18px;
@@ -360,12 +372,19 @@ input[type="date"] {
     color: #4f5b72;
 }
 
+.eim-upgrade-note-copy {
+    display: grid;
+    gap: 4px;
+    flex: 1 1 360px;
+}
+
 .eim-upgrade-note strong {
     color: #374151;
 }
 
 .eim-upgrade-note span {
     color: var(--eim-muted);
+    line-height: 1.5;
 }
 
 .eim-upgrade-note a {
@@ -645,6 +664,47 @@ input[type="date"] {
     background: #fff0f0;
     border-color: #f3c2c2;
     color: #b42318;
+}
+
+
+.eim-summary-upgrade {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-top: 16px;
+    padding: 16px 18px;
+    border: 1px solid #d8e0ef;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #f8faff 0%, #f1f5ff 100%);
+}
+
+.eim-summary-upgrade-copy {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+}
+
+.eim-summary-upgrade-copy strong {
+    color: var(--eim-title);
+    font-size: 14px;
+}
+
+.eim-summary-upgrade-copy span {
+    color: var(--eim-muted);
+    line-height: 1.5;
+}
+
+.eim-summary-upgrade .button.button-primary {
+    flex-shrink: 0;
+    background: var(--eim-logo-gradient) !important;
+    border: 1px solid var(--eim-banner-button) !important;
+    color: #fff !important;
+}
+
+.eim-summary-upgrade .button.button-primary:hover {
+    background: var(--eim-logo-gradient-hover) !important;
+    border-color: var(--eim-banner-button-strong) !important;
 }
 
 .eim-preview-empty {
@@ -1049,6 +1109,12 @@ input[type="date"] {
 @media (max-width: 1180px) {
     .eim-banner-actions {
         justify-content: flex-start;
+    }
+
+
+    .eim-summary-upgrade {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
 

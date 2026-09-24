@@ -501,6 +501,33 @@ jQuery(document).ready(function($) {
         chips.append(createSummaryChip(t('summary_errors'), importSummary.errors, 'errors'));
 
         wrapper.append(chips);
+
+        const skippedCount = parseInt(importSummary.skipped || 0, 10) || 0;
+        const skippedProUrl = String(config.pro_url_skipped_results || '');
+
+        if (skippedCount > 0 && skippedProUrl) {
+            const upgrade = $('<div>').addClass('eim-summary-upgrade');
+            const upgradeCopy = $('<div>').addClass('eim-summary-upgrade-copy');
+            const upgradeTitle = skippedCount === 1
+                ? t('skipped_upgrade_single')
+                : t('skipped_upgrade_plural').replace('%d', String(skippedCount));
+
+            upgradeCopy.append($('<strong>').text(upgradeTitle));
+            upgradeCopy.append($('<span>').text(t('skipped_upgrade_description')));
+
+            const upgradeLink = $('<a>')
+                .attr({
+                    href: skippedProUrl,
+                    target: '_blank',
+                    rel: 'noopener noreferrer'
+                })
+                .addClass('button button-primary')
+                .text(t('skipped_upgrade_cta'));
+
+            upgrade.append(upgradeCopy, upgradeLink);
+            wrapper.append(upgrade);
+        }
+
         resultSummaryContainer.empty().append(wrapper).show();
     }
 

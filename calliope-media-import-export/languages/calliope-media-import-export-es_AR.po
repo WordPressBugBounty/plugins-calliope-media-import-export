@@ -2,7 +2,19 @@
 # Copyright (C) 2026 Maira Foresto
 # This file is distributed under the same license as the Export/Import Media package.
 msgid ""
-msgstr "Project-Id-Version: calliope-media-import-export 1.8.2\nReport-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\nPOT-Creation-Date: 2026-09-15 22:30+0000\nPO-Revision-Date: 2026-09-15 22:30+0000\nLast-Translator: Maira Foresto\nLanguage: es_ES\nLanguage-Team: Calliope\nPlural-Forms: nplurals=2; plural=(n != 1);\nMIME-Version: 1.0\nContent-Type: text/plain; charset=utf-8\nContent-Transfer-Encoding: 8bit\nGenerated-By: Babel 2.18.0\n"
+msgstr ""
+"Project-Id-Version: calliope-media-import-export 1.8.3\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/calliope-media-import-export/\n"
+"POT-Creation-Date: 2026-09-15 22:30+0000\n"
+"PO-Revision-Date: 2026-09-15 22:30+0000\n"
+"Last-Translator: Maira Foresto\n"
+"Language: es_ES\n"
+"Language-Team: Calliope\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
 
 #: includes/class-importer.php:2248
 #, python-format
@@ -336,8 +348,12 @@ msgid "File ready. Total media rows:"
 msgstr "Archivo listo. Total de filas de medios:"
 
 #: includes/class-importer.php:472
-msgid "Filename matching is ambiguous because multiple existing media items share this filename. Add Relative Path or Attachment ID to target a single attachment."
-msgstr "La coincidencia de nombres de archivos es ambigua porque varios elementos multimedia existentes comparten este nombre de archivo. Agregue ruta relativa o ID de archivo adjunto para apuntar a un único archivo adjunto."
+msgid ""
+"Filename matching is ambiguous because multiple existing media items share this filename. Add Relative Path or "
+"Attachment ID to target a single attachment."
+msgstr ""
+"La coincidencia de nombres de archivos es ambigua porque varios elementos multimedia existentes comparten este nombre"
+" de archivo. Agregue ruta relativa o ID de archivo adjunto para apuntar a un único archivo adjunto."
 
 #: admin/class-admin.php:484
 msgid "Filter by Attachment:"
@@ -348,20 +364,33 @@ msgid "Filter by date, media type, or attachment context before exporting."
 msgstr "Filtra por fecha, tipo de medio o contexto del adjunto antes de exportar."
 
 #: admin/class-admin.php:663
-msgid "Find existing attachments by Attachment ID, Source URL, Relative Path, or Filename before deciding whether to skip, update, or replace them."
-msgstr "Encuentra adjuntos existentes por ID del adjunto, URL de origen, ruta relativa o nombre de archivo antes de decidir si omitirlos, actualizarlos o reemplazarlos."
+msgid ""
+"Find existing attachments by Attachment ID, Source URL, Relative Path, or Filename before deciding whether to skip, "
+"update, or replace them."
+msgstr ""
+"Encuentra adjuntos existentes por ID del adjunto, URL de origen, ruta relativa o nombre de archivo antes de decidir "
+"si omitirlos, actualizarlos o reemplazarlos."
 
 #: admin/class-admin.php:611
 msgid "Format"
 msgstr "Formato"
 
 #: admin/class-admin.php:580
-msgid "Free covers quick CSV exports. Pro adds saved export profiles, richer packages, and optional background runs for repeatable migrations and larger media libraries."
-msgstr "La versión free cubre exportaciones CSV rápidas. Pro añade perfiles de exportación guardados, paquetes más completos y ejecuciones opcionales en segundo plano para migraciones repetibles y bibliotecas de medios más grandes."
+msgid ""
+"Free covers quick CSV exports. Pro adds saved export profiles, richer packages, and optional background runs for "
+"repeatable migrations and larger media libraries."
+msgstr ""
+"La versión free cubre exportaciones CSV rápidas. Pro añade perfiles de exportación guardados, paquetes más completos "
+"y ejecuciones opcionales en segundo plano para migraciones repetibles y bibliotecas de medios más grandes."
 
 #: admin/class-admin.php:647
-msgid "Free handles one-off CSV imports with preview and duplicate prevention. Pro adds saved workflows for matching existing attachments, refreshing trusted metadata, replacing files, and reusing advanced rules later."
-msgstr "La versión free resuelve importaciones CSV puntuales con previsualización y prevención de duplicados. Pro añade flujos guardados para encontrar adjuntos existentes, actualizar metadatos confiables, reemplazar archivos y reutilizar reglas avanzadas más adelante."
+msgid ""
+"Free handles one-off CSV imports with preview and duplicate prevention. Pro adds saved workflows for matching "
+"existing attachments, refreshing trusted metadata, replacing files, and reusing advanced rules later."
+msgstr ""
+"La versión free resuelve importaciones CSV puntuales con previsualización y prevención de duplicados. Pro añade "
+"flujos guardados para encontrar adjuntos existentes, actualizar metadatos confiables, reemplazar archivos y "
+"reutilizar reglas avanzadas más adelante."
 
 #: admin/class-admin.php:419
 msgid "Free plugin"
@@ -373,7 +402,9 @@ msgstr "Puntos destacados del plugin gratuito"
 
 #: admin/class-admin.php:458
 msgid "Generate a clean CSV with media URLs, relative paths, and core fields like alt text, title, caption, and description."
-msgstr "Genera un CSV limpio con URLs de medios, rutas relativas y campos principales como texto alternativo, título, leyenda y descripción."
+msgstr ""
+"Genera un CSV limpio con URLs de medios, rutas relativas y campos principales como texto alternativo, título, leyenda"
+" y descripción."
 
 #: admin/class-admin.php:243
 msgid "History"
@@ -457,8 +488,12 @@ msgid "Invalid temporary file name."
 msgstr "Nombre de archivo temporal no válido."
 
 #: includes/class-config.php:40
-msgid "Keep the folder structure from \"Relative Path\" when importing, and reuse files already present in uploads when the same path exists."
-msgstr "Mantén la estructura de carpetas de \"Relative Path\" al importar y reutiliza archivos ya presentes en uploads cuando exista la misma ruta."
+msgid ""
+"Keep the folder structure from \"Relative Path\" when importing, and reuse files already present in uploads when the "
+"same path exists."
+msgstr ""
+"Mantén la estructura de carpetas de \"Relative Path\" al importar y reutiliza archivos ya presentes en uploads cuando"
+" exista la misma ruta."
 
 #: admin/class-admin.php:792
 msgid "Keep this tab open while the current import is running."
@@ -551,7 +586,9 @@ msgstr "Error de red. Reintentando..."
 
 #: includes/class-importer.php:540
 msgid "No existing media matched the selected criteria, and the row does not include source data for a new import."
-msgstr "Ningún medio existente coincidió con los criterios seleccionados y la fila no incluye datos de origen para una nueva importación."
+msgstr ""
+"Ningún medio existente coincidió con los criterios seleccionados y la fila no incluye datos de origen para una nueva "
+"importación."
 
 #: includes/class-importer.php:32
 msgid "No file uploaded."
@@ -620,7 +657,9 @@ msgstr "Columnas reconocidas"
 
 #: admin/class-admin.php:668
 msgid "Refresh only the fields you trust, or replace an outdated file while keeping the attachment record intact."
-msgstr "Actualiza solo los campos en los que confías o reemplaza un archivo desactualizado manteniendo intacto el registro del adjunto."
+msgstr ""
+"Actualiza solo los campos en los que confías o reemplaza un archivo desactualizado manteniendo intacto el registro "
+"del adjunto."
 
 #: admin/class-admin.php:176 admin/class-admin.php:345 includes/class-exporter.php:25 includes/class-importer.php:2193
 msgid "Relative Path"
@@ -644,7 +683,9 @@ msgstr "Reemplazar archivos de forma segura y revisar el historial"
 
 #: admin/class-admin.php:721
 msgid "Replace outdated media more carefully and keep a record of what happened during heavier runs."
-msgstr "Reemplaza medios desactualizados con más cuidado y conserva un registro de lo que ocurrió durante ejecuciones más pesadas."
+msgstr ""
+"Reemplaza medios desactualizados con más cuidado y conserva un registro de lo que ocurrió durante ejecuciones más "
+"pesadas."
 
 #: includes/class-importer.php:1234
 #, python-format
@@ -669,7 +710,9 @@ msgstr "Fila"
 
 #: includes/class-importer.php:448
 msgid "Row is missing Absolute URL and Relative Path, and it does not provide a usable Attachment ID or Filename match."
-msgstr "A la fila le faltan la URL absoluta y la ruta relativa, y no proporciona una ID de archivo adjunto utilizable ni una coincidencia de nombre de archivo."
+msgstr ""
+"A la fila le faltan la URL absoluta y la ruta relativa, y no proporciona una ID de archivo adjunto utilizable ni una "
+"coincidencia de nombre de archivo."
 
 #: admin/class-admin.php:337
 msgid "Rows missing source"
@@ -713,7 +756,9 @@ msgstr "Guardar la configuración actual de exportación como perfil"
 
 #: admin/class-admin.php:658
 msgid "Save repeatable remote CSV, server-file, mapping, and background import settings for future runs."
-msgstr "Guarda configuraciones repetibles de CSV remoto, archivo del servidor, mapeo e importación en segundo plano para futuras ejecuciones."
+msgstr ""
+"Guarda configuraciones repetibles de CSV remoto, archivo del servidor, mapeo e importación en segundo plano para "
+"futuras ejecuciones."
 
 #: admin/class-admin.php:590
 msgid "Saved export profile"
@@ -781,7 +826,7 @@ msgstr "Paso 2"
 
 #: admin/class-admin.php:564
 msgid "Stop Process"
-msgstr "Detener Process"
+msgstr "Detener proceso"
 
 #: admin/class-admin.php:309
 msgid "Stopping the process..."
@@ -840,16 +885,31 @@ msgid "The current attachment file could not be found."
 msgstr "No se pudo encontrar el archivo adjunto actual."
 
 #: admin/class-admin.php:287
-msgid "The free plugin stays focused on straightforward CSV export/import with preview and duplicate prevention. Pro adds reusable profiles, background workflows, and controlled rules for matching and updating existing media."
-msgstr "El plugin gratuito se mantiene enfocado en la exportación/importación CSV simple con previsualización y prevención de duplicados. Pro añade perfiles reutilizables, flujos en segundo plano y reglas controladas para encontrar y actualizar medios existentes."
+msgid ""
+"The free plugin stays focused on straightforward CSV export/import with preview and duplicate prevention. Pro adds "
+"reusable profiles, background workflows, and controlled rules for matching and updating existing media."
+msgstr ""
+"El plugin gratuito se mantiene enfocado en la exportación/importación CSV simple con previsualización y prevención de"
+" duplicados. Pro añade perfiles reutilizables, flujos en segundo plano y reglas controladas para encontrar y "
+"actualizar medios existentes."
 
 #: admin/class-admin.php:692
-msgid "The free plugin stays intentionally focused on clean one-off CSV import and export. Pro adds controlled matching against existing attachments, selective metadata refreshes, safer replace-file workflows, and reusable setups for larger libraries."
-msgstr "El plugin gratuito se mantiene intencionalmente enfocado en la importación y exportación CSV puntuales y limpias. Pro añade coincidencia controlada con adjuntos existentes, actualizaciones selectivas de metadatos, flujos más seguros para reemplazar archivos y configuraciones reutilizables para bibliotecas más grandes."
+msgid ""
+"The free plugin stays intentionally focused on clean one-off CSV import and export. Pro adds controlled matching "
+"against existing attachments, selective metadata refreshes, safer replace-file workflows, and reusable setups for "
+"larger libraries."
+msgstr ""
+"El plugin gratuito se mantiene intencionalmente enfocado en la importación y exportación CSV puntuales y limpias. Pro"
+" añade coincidencia controlada con adjuntos existentes, actualizaciones selectivas de metadatos, flujos más seguros "
+"para reemplazar archivos y configuraciones reutilizables para bibliotecas más grandes."
 
 #: admin/class-admin.php:730
-msgid "The free version stays clean on purpose. Pro adds a few stronger tools when you need controlled updates, repeatable workflows, and more operational confidence."
-msgstr "La versión free se mantiene limpia a propósito. Pro añade unas pocas herramientas más potentes cuando necesitás actualizaciones controladas, flujos repetibles y más confianza operativa."
+msgid ""
+"The free version stays clean on purpose. Pro adds a few stronger tools when you need controlled updates, repeatable "
+"workflows, and more operational confidence."
+msgstr ""
+"La versión free se mantiene limpia a propósito. Pro añade unas pocas herramientas más potentes cuando necesitás "
+"actualizaciones controladas, flujos repetibles y más confianza operativa."
 
 #: includes/class-importer.php:1356
 msgid "The replacement file could not be copied into uploads."
@@ -861,7 +921,9 @@ msgstr "Falta el archivo fuente de reemplazo."
 
 #: includes/class-importer.php:1979
 msgid "The selected file is a ZIP archive. The simple import tool expects a plain CSV file, not a ZIP or export bundle."
-msgstr "El archivo seleccionado es un ZIP. La herramienta de importación simple espera un CSV plano, no un ZIP ni un paquete de exportación."
+msgstr ""
+"El archivo seleccionado es un ZIP. La herramienta de importación simple espera un CSV plano, no un ZIP ni un paquete "
+"de exportación."
 
 #: includes/class-importer.php:1341
 msgid "The target uploads directory is not valid."
@@ -873,11 +935,15 @@ msgstr "No se puede escribir en la carpeta de importación temporal."
 
 #: includes/class-importer.php:2242
 msgid "This CSV relies on Relative Path. Use Local Import Mode or make sure the referenced files already exist in uploads."
-msgstr "Este CSV se basa en Relative Path. Utilice el modo de importación local o asegúrese de que los archivos a los que se hace referencia ya existan en las cargas."
+msgstr ""
+"Este CSV se basa en Relative Path. Utilice el modo de importación local o asegúrese de que los archivos a los que se "
+"hace referencia ya existan en las cargas."
 
 #: includes/class-importer.php:539
 msgid "This import action requires Absolute URL or Relative Path when no existing media match is found."
-msgstr "Esta acción de importación requiere una URL absoluta o una ruta relativa cuando no se encuentra ninguna coincidencia de medios existente."
+msgstr ""
+"Esta acción de importación requiere una URL absoluta o una ruta relativa cuando no se encuentra ninguna coincidencia "
+"de medios existente."
 
 #: admin/class-admin.php:286
 msgid "This premium workspace is available in Export/Import Media Pro."
@@ -918,12 +984,20 @@ msgid "Upgrade when you need to work with existing media, not just import new ro
 msgstr "Actualiza a Pro cuando necesites trabajar con medios existentes, no solo importar filas nuevas."
 
 #: admin/class-admin.php:504
-msgid "Upload a CSV, validate it first, review the preview, and import media in batches while the free workflow skips existing matches it detects."
-msgstr "Sube un CSV, valídalo primero, revisa la previsualización e importa medios por lotes mientras el flujo free omite las coincidencias existentes que detecta."
+msgid ""
+"Upload a CSV, validate it first, review the preview, and import media in batches while the free workflow skips "
+"existing matches it detects."
+msgstr ""
+"Sube un CSV, valídalo primero, revisa la previsualización e importa medios por lotes mientras el flujo free omite las"
+" coincidencias existentes que detecta."
 
 #: includes/class-config.php:33
-msgid "Use the \"Relative Path\" column to locate files that already exist in this site's uploads folder. No remote download is attempted."
-msgstr "Usa la columna \"Relative Path\" para localizar archivos que ya existen en la carpeta uploads de este sitio. No se intentará ninguna descarga remota."
+msgid ""
+"Use the \"Relative Path\" column to locate files that already exist in this site's uploads folder. No remote download"
+" is attempted."
+msgstr ""
+"Usa la columna \"Relative Path\" para localizar archivos que ya existen en la carpeta uploads de este sitio. No se "
+"intentará ninguna descarga remota."
 
 #: admin/class-admin.php:462
 msgid "Useful for migrations, audits, and content cleanup."
@@ -1015,16 +1089,29 @@ msgid "Convert images to WebP or AVIF"
 msgstr "Convertir imágenes a WebP o AVIF"
 
 msgid "Convert supported JPG and PNG imports to WebP or AVIF when your WordPress image editor supports the selected format."
-msgstr "Convierte importaciones JPG y PNG compatibles a WebP o AVIF cuando el editor de imágenes de WordPress admite el formato seleccionado."
+msgstr ""
+"Convierte importaciones JPG y PNG compatibles a WebP o AVIF cuando el editor de imágenes de WordPress admite el "
+"formato seleccionado."
 
-msgid "Create restore points before imports so mistaken metadata updates, new imports, and replace-file runs can be rolled back from Pro history."
-msgstr "Crea puntos de restauración antes de importar para que las actualizaciones de metadatos por error, las nuevas importaciones y los reemplazos de archivo puedan revertirse desde el historial Pro."
+msgid ""
+"Create restore points before imports so mistaken metadata updates, new imports, and replace-file runs can be rolled "
+"back from Pro history."
+msgstr ""
+"Crea puntos de restauración antes de importar para que las actualizaciones de metadatos por error, las nuevas "
+"importaciones y los reemplazos de archivo puedan revertirse desde el historial Pro."
 
 msgid "Rollback restore points"
 msgstr "Puntos de restauración rollback"
 
-msgid "The free plugin stays intentionally focused on clean one-off CSV import and export. Pro adds controlled matching against existing attachments, rollback restore points before imports, image conversion to WebP or AVIF where supported, safer replace-file workflows, and reusable setups for larger libraries."
-msgstr "El plugin gratuito se mantiene intencionalmente enfocado en importaciones y exportaciones CSV puntuales y limpias. Pro añade coincidencia controlada con adjuntos existentes, puntos de restauración antes de importar, conversión de imágenes a WebP o AVIF cuando el servidor lo permite, flujos más seguros para reemplazar archivos y configuraciones reutilizables para bibliotecas grandes."
+msgid ""
+"The free plugin stays intentionally focused on clean one-off CSV import and export. Pro adds controlled matching "
+"against existing attachments, rollback restore points before imports, image conversion to WebP or AVIF where "
+"supported, safer replace-file workflows, and reusable setups for larger libraries."
+msgstr ""
+"El plugin gratuito se mantiene intencionalmente enfocado en importaciones y exportaciones CSV puntuales y limpias. "
+"Pro añade coincidencia controlada con adjuntos existentes, puntos de restauración antes de importar, conversión de "
+"imágenes a WebP o AVIF cuando el servidor lo permite, flujos más seguros para reemplazar archivos y configuraciones "
+"reutilizables para bibliotecas grandes."
 
 msgid "The server temporary upload folder is missing."
 msgstr "Falta la carpeta temporal de subidas del servidor."
@@ -1042,17 +1129,29 @@ msgid "The uploaded file was only partially uploaded."
 msgstr "El archivo se subió solo parcialmente."
 
 msgid "The CSV has headers but no data rows to import. Export or upload a CSV with at least one media row below the header."
-msgstr "El CSV tiene encabezados, pero no contiene filas de datos para importar. Exporta o sube un CSV con al menos una fila de medio debajo del encabezado."
+msgstr ""
+"El CSV tiene encabezados, pero no contiene filas de datos para importar. Exporta o sube un CSV con al menos una fila "
+"de medio debajo del encabezado."
 
-msgid "No importable media rows were found. The CSV may only contain headers, or your export filters may have matched no media items."
-msgstr "No se encontraron filas de medios para importar. El CSV puede contener solo encabezados o los filtros de exportación pueden no haber encontrado ningún medio."
+msgid ""
+"No importable media rows were found. The CSV may only contain headers, or your export filters may have matched no "
+"media items."
+msgstr ""
+"No se encontraron filas de medios para importar. El CSV puede contener solo encabezados o los filtros de exportación "
+"pueden no haber encontrado ningún medio."
 
 msgid "No media matched the selected export filters. Try exporting All Media or clearing date/attachment filters."
-msgstr "Ningún medio coincide con los filtros de exportación seleccionados. Probá exportar Todos los medios o limpiar los filtros de fecha/adjunto."
+msgstr ""
+"Ningún medio coincide con los filtros de exportación seleccionados. Probá exportar Todos los medios o limpiar los "
+"filtros de fecha/adjunto."
 
 #: admin/class-admin.php
-msgid "If Export/Import Media helped you move your WordPress media library with CSV, a quick rating on WordPress.org would really help the plugin grow."
-msgstr "Si Export/Import Media te ayudó a mover tu biblioteca de medios con CSV, una calificación en WordPress.org ayudaría mucho a que el plugin crezca."
+msgid ""
+"If Export/Import Media helped you move your WordPress media library with CSV, a quick rating on WordPress.org would "
+"really help the plugin grow."
+msgstr ""
+"Si Export/Import Media te ayudó a mover tu biblioteca de medios con CSV, una calificación en WordPress.org ayudaría "
+"mucho a que el plugin crezca."
 
 #: admin/class-admin.php
 msgid "Click anywhere to leave a review"
@@ -1083,11 +1182,11 @@ msgstr "No se pudo descargar el archivo remoto."
 msgid "Downloaded content does not match the expected .%1$s file type (detected: %2$s)."
 msgstr "El contenido descargado no coincide con el tipo de archivo .%1$s esperado (detectado: %2$s)."
 
-#, php-format
+#, php-format, python-format
 msgid "Matched the same attachment ID from the CSV/source (ID %d). File content was not downloaded again."
 msgstr "Se encontró el mismo ID de adjunto del CSV/origen (ID %d). No se volvió a descargar el contenido del archivo."
 
-#, php-format
+#, php-format, python-format
 msgid "Duplicate content verified by file fingerprint (ID %d)."
 msgstr "Contenido duplicado verificado mediante la huella del archivo (ID %d)."
 
@@ -1096,10 +1195,95 @@ msgid "Allow sanitized SVG imports"
 msgstr "Permitir importaciones SVG sanitizadas"
 
 #: includes/class-config.php:52
-msgid "SVG files can contain active content. Leave this off unless you need SVGs. When enabled, every SVG is sanitized before import, and files that cannot be safely sanitized are rejected."
-msgstr "Los archivos SVG pueden contener contenido activo. Deje esta opción desactivada salvo que necesite SVG. Al activarla, cada SVG se sanitiza antes de importarse y se rechazan los archivos que no se pueden sanitizar de forma segura."
+msgid ""
+"SVG files can contain active content. Leave this off unless you need SVGs. When enabled, every SVG is sanitized "
+"before import, and files that cannot be safely sanitized are rejected."
+msgstr ""
+"Los archivos SVG pueden contener contenido activo. Deje esta opción desactivada salvo que necesite SVG. Al activarla,"
+" cada SVG se sanitiza antes de importarse y se rechazan los archivos que no se pueden sanitizar de forma segura."
 
 #: includes/class-svg-import-validator.php:70
 msgid "SVG imports are disabled. Enable \"Allow sanitized SVG imports\" to import SVG files."
-msgstr "Las importaciones SVG están desactivadas. Active \"Permitir importaciones SVG sanitizadas\" para importar archivos SVG."
+msgstr ""
+"Las importaciones SVG están desactivadas. Active \"Permitir importaciones SVG sanitizadas\" para importar archivos "
+"SVG."
 
+msgid "Upgrade to Pro"
+msgstr "Actualizar a Pro"
+
+msgid "1 existing media item was skipped by Free."
+msgstr "Free omitió 1 elemento multimedia existente."
+
+#, python-format
+msgid "%d existing media items were skipped by Free."
+msgstr "Free omitió %d elementos multimedia existentes."
+
+msgid ""
+"Need to update those items instead? Pro can update selected metadata or replace existing files while keeping the "
+"attachment record intact."
+msgstr ""
+"¿Necesitas actualizar esos elementos? Pro puede actualizar metadatos seleccionados o reemplazar archivos existentes "
+"manteniendo intacto el registro del adjunto."
+
+msgid "See how Pro handles existing media"
+msgstr "Ver cómo Pro gestiona medios existentes"
+
+msgid "Need to update media already in your library?"
+msgstr "¿Necesitas actualizar medios que ya están en tu biblioteca?"
+
+msgid ""
+"Free safely skips existing matches to avoid duplicates. Pro can match existing attachments and update alt text, "
+"titles, captions, and descriptions without creating duplicate media."
+msgstr ""
+"Free omite de forma segura las coincidencias existentes para evitar duplicados. Pro puede detectar adjuntos "
+"existentes y actualizar texto ALT, títulos, leyendas y descripciones sin crear medios duplicados."
+
+msgid "Update existing media with Pro"
+msgstr "Actualizar medios existentes con Pro"
+
+msgid "Update existing media"
+msgstr "Actualizar medios existentes"
+
+msgid "Bulk-update alt text, titles, captions, and descriptions on existing attachments without creating duplicate media."
+msgstr "Actualiza en lote texto ALT, títulos, leyendas y descripciones de adjuntos existentes sin crear medios duplicados."
+
+msgid "Make bigger changes safely"
+msgstr "Haz cambios más importantes con seguridad"
+
+msgid ""
+"Replace files, convert supported images, and use restore points so heavier media-library changes are easier to review"
+" and recover."
+msgstr ""
+"Reemplaza archivos, convierte imágenes compatibles y usa puntos de restauración para revisar y recuperar con mayor "
+"seguridad los cambios importantes en la biblioteca."
+
+msgid "Automate repeat work"
+msgstr "Automatiza tareas repetitivas"
+
+msgid ""
+"Save reusable profiles and run larger or repeatable export/import workflows without rebuilding the same setup every "
+"time."
+msgstr ""
+"Guarda perfiles reutilizables y ejecuta flujos de exportación/importación más grandes o repetibles sin volver a "
+"configurar todo cada vez."
+
+msgid "When Free is not enough"
+msgstr "Cuando Free no alcanza"
+
+msgid "Go further when your media library needs more than a one-off import"
+msgstr "Ve más allá cuando tu biblioteca necesita más que una importación puntual"
+
+msgid ""
+"Keep the simple Free workflow for everyday CSV moves, then use Pro when you need to update existing media, make safer"
+" file changes, or repeat the same workflow at scale."
+msgstr ""
+"Mantén el flujo simple de Free para tareas CSV cotidianas y usa Pro cuando necesites actualizar medios existentes, "
+"hacer cambios de archivos con mayor seguridad o repetir el mismo flujo a escala."
+
+msgid "See everything included in Pro"
+msgstr "Ver todo lo incluido en Pro"
+
+
+
+msgid "Invalid CSV. Check for an unclosed quoted field and upload the corrected file."
+msgstr "CSV no válido. Comprobá si hay un campo entre comillas sin cerrar y subí el archivo corregido."

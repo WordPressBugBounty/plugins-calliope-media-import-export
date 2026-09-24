@@ -67,6 +67,7 @@ class EIM_Filesystem {
             $contents = (string) $contents;
             $written  = $this->capture_native_warning(
                 function() use ( $handle, $contents ) {
+                    // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Direct mode uses a locked append stream to avoid rewriting large progress logs.
                     return fwrite( $handle, $contents );
                 },
                 $warning
@@ -198,6 +199,20 @@ class EIM_Filesystem {
         return ! is_wp_error( $filesystem ) && $filesystem->is_writable( $path );
     }
 
+    public function chmod( $path, $mode = false, $event = 'filesystem_chmod_failed' ) {
+        $filesystem = $this->get_filesystem( dirname( (string) $path ) );
+        if ( is_wp_error( $filesystem ) ) {
+            return $filesystem;
+        }
+
+        $mode = false === $mode ? ( defined( 'FS_CHMOD_FILE' ) ? FS_CHMOD_FILE : 0644 ) : (int) $mode;
+        if ( ! $filesystem->chmod( $path, $mode, false ) ) {
+            return $this->failure( $event, 'eim_filesystem_chmod_failed', __( 'The file permissions could not be updated.', 'calliope-media-import-export' ), 'chmod', $path );
+        }
+
+        return true;
+    }
+
     public function dirlist( $path, $event = 'filesystem_dirlist_failed' ) {
         $filesystem = $this->get_filesystem( $path );
         if ( is_wp_error( $filesystem ) ) {
@@ -289,6 +304,7 @@ class EIM_Filesystem {
         $warning = '';
         $handle  = $this->capture_native_warning(
             function() use ( $path, $mode ) {
+                // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Streaming is intentionally limited to the direct WordPress filesystem method for large media operations.
                 return fopen( $path, $mode );
             },
             $warning
@@ -309,6 +325,7 @@ class EIM_Filesystem {
         $warning = '';
         $closed  = $this->capture_native_warning(
             function() use ( $handle ) {
+                // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closes a stream opened only after confirming the direct WordPress filesystem method.
                 return fclose( $handle );
             },
             $warning
@@ -341,6 +358,7 @@ class EIM_Filesystem {
         $warning = '';
         $contents = $this->capture_native_warning(
             function() use ( $handle, $length ) {
+                // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread -- Reads from a controlled direct-method stream to avoid loading large media files into memory.
                 return fread( $handle, $length );
             },
             $warning
@@ -406,7 +424,6 @@ class EIM_Filesystem {
                 'warning'           => (string) $warning,
                 'filesystem_errors' => $this->get_filesystem_errors(),
                 'parent_exists'     => is_dir( dirname( (string) $path ) ),
-                'parent_writable'   => is_writable( dirname( (string) $path ) ),
             ],
             is_array( $extra ) ? $extra : []
         );
@@ -419,11 +436,6 @@ class EIM_Filesystem {
         }
 
         do_action( 'eim_filesystem_error', $event, $details, $error );
-
-        if ( empty( $this->error_listeners ) ) {
-            $encoded = wp_json_encode( $details, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
-            error_log( '[EIM_FILESYSTEM] ' . sanitize_key( (string) $event ) . ' | ' . ( false === $encoded ? '{}' : $encoded ) );
-        }
 
         return $error;
     }
@@ -446,6 +458,7 @@ class EIM_Filesystem {
 
     private function capture_native_warning( $callback, &$warning ) {
         $warning = '';
+        // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Convert low-level filesystem warnings into structured WP_Error details.
         set_error_handler(
             function( $severity, $message ) use ( &$warning ) {
                 $warning = (string) $message;

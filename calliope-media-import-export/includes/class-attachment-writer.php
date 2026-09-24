@@ -269,10 +269,13 @@ class EIM_Attachment_Writer {
             $update_reason = 'update_selected_fields' === $strategy ? 'updated_selected_fields_only' : 'updated_metadata_only';
             $dry_reason    = 'update_selected_fields' === $strategy ? 'dry_run_update_selected_fields' : 'dry_run_update_metadata';
             if ( $dry_run ) {
-                /* translators: %d: attachment ID. */
-                $dry_run_message = 'update_selected_fields' === $strategy
-                    ? __( 'Dry run: existing media (ID %d) would have its selected fields updated.', 'calliope-media-import-export' )
-                    : __( 'Dry run: existing media (ID %d) would have its metadata updated.', 'calliope-media-import-export' );
+                if ( 'update_selected_fields' === $strategy ) {
+                    /* translators: %d: attachment ID. */
+                    $dry_run_message = __( 'Dry run: existing media (ID %d) would have its selected fields updated.', 'calliope-media-import-export' );
+                } else {
+                    /* translators: %d: attachment ID. */
+                    $dry_run_message = __( 'Dry run: existing media (ID %d) would have its metadata updated.', 'calliope-media-import-export' );
+                }
 
                 return $this->build_item_result(
                     'READY',
@@ -305,10 +308,13 @@ class EIM_Attachment_Writer {
                 $request_context
             );
 
-            /* translators: %d: attachment ID. */
-            $updated_message = 'update_selected_fields' === $strategy
-                ? __( 'Updated selected fields for existing media (ID %d)', 'calliope-media-import-export' )
-                : __( 'Updated metadata for existing media (ID %d)', 'calliope-media-import-export' );
+            if ( 'update_selected_fields' === $strategy ) {
+                /* translators: %d: attachment ID. */
+                $updated_message = __( 'Updated selected fields for existing media (ID %d)', 'calliope-media-import-export' );
+            } else {
+                /* translators: %d: attachment ID. */
+                $updated_message = __( 'Updated metadata for existing media (ID %d)', 'calliope-media-import-export' );
+            }
 
             return $this->build_item_result(
                 'IMPORTED',
@@ -1135,7 +1141,8 @@ class EIM_Attachment_Writer {
 
         $stat  = stat( dirname( $target_path ) );
         $perms = $stat ? $stat['mode'] & 0000666 : 0644;
-        chmod( $target_path, $perms );
+        // Best-effort permission normalization; import remains valid if the host manages permissions itself.
+        $this->filesystem->chmod( $target_path, $perms, 'svg_permission_update_failed' );
 
         $attachment = [
             'guid'           => trailingslashit( $target_url ) . wp_basename( $target_path ),
