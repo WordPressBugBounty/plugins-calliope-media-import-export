@@ -103,6 +103,8 @@ class EIM_Importer {
         );
 
         add_action( 'wp_ajax_eim_validate_csv', [ $this, 'validate_csv' ] );
+        add_action( 'wp_ajax_eim_apply_column_mapping', [ $this, 'apply_column_mapping' ] );
+        add_action( 'wp_ajax_eim_preview_diagnostics', [ $this, 'preview_diagnostics' ] );
         add_action( 'wp_ajax_eim_process_batch', [ $this, 'process_batch' ] );
         add_action( 'wp_ajax_eim_get_import_progress', [ $this, 'get_import_progress' ] );
         add_action( 'eim_daily_cleanup_event', [ $this->temp_file_manager, 'cleanup_temp_files' ] );
@@ -143,7 +145,8 @@ class EIM_Importer {
             wp_send_json_error( [ 'message' => __( 'Error uploading file.', 'calliope-media-import-export' ) ], 400 );
         }
 
-        $inspection = $this->inspect_csv_path( $tmp_name );
+        // Unrecognized headings are accepted for mapping, never for importing.
+        $inspection = $this->inspect_csv_file( $tmp_name, null, true );
         if ( is_wp_error( $inspection ) ) {
             wp_send_json_error( [ 'message' => $inspection->get_error_message() ], 400 );
         }
@@ -160,6 +163,213 @@ class EIM_Importer {
                 'preview'    => $this->build_validation_preview( $inspection ),
             ]
         );
+    }
+
+    /**
+     * Save a manual mapping after validating every column on the server.
+     * The mapping is immutable for processing batches unless the user
+     * explicitly applies a new one before importing any rows.
+     */
+    public function apply_column_mapping() {
+        $this->ensure_ajax_permissions();
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Checked in ensure_ajax_permissions().
+        $file_name = isset( $_POST['file'] ) ? sanitize_file_name( wp_unslash( $_POST['file'] ) ) : '';
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Checked in ensure_ajax_permissions().
+        $mapping = isset( $_POST['mapping'] ) && is_array( $_POST['mapping'] ) ? map_deep( wp_unslash( $_POST['mapping'] ), 'sanitize_text_field' ) : [];
+        $paths = $this->get_temp_file_paths( $file_name );
+        if ( is_wp_error( $paths ) || ! file_exists( $paths['csv'] ) ) {
+            wp_send_json_error( [ 'message' => __( 'Temporary file not found. Please upload the CSV again.', 'calliope-media-import-export' ) ], 400 );
+        }
+        $lock_key = $this->get_temp_lock_key( $file_name );
+        if ( ! $this->acquire_temp_lock( $lock_key ) ) {
+            wp_send_json_error( [ 'message' => __( 'Another import request is already processing this file. Please wait a moment and try again.', 'calliope-media-import-export' ) ], 409 );
+        }
+
+        $error = null;
+        $inspection = null;
+        try {
+            $meta = $this->read_temp_file_meta( $file_name );
+            if ( is_wp_error( $meta ) ) {
+                throw new RuntimeException( $meta->get_error_message() );
+            }
+            if ( ! isset( $meta['created_by'] ) || (int) $meta['created_by'] !== get_current_user_id() ) {
+                throw new RuntimeException( __( 'You do not have permission to run this import.', 'calliope-media-import-export' ) );
+            }
+            if ( ! empty( $meta['resume_row'] ) ) {
+                throw new RuntimeException( __( 'This import has already started. Upload the CSV again to change its column mapping.', 'calliope-media-import-export' ) );
+            }
+            $handle = $this->open_read_handle( $paths['csv'] );
+            if ( ! $handle ) {
+                throw new RuntimeException( __( 'Could not open the temporary CSV file.', 'calliope-media-import-export' ) );
+            }
+            try {
+                $headers = $this->read_csv_row( $handle, isset( $meta['delimiter'] ) ? (string) $meta['delimiter'] : ',', true );
+            } finally {
+                $this->close_file_handle( $handle );
+            }
+            if ( ! is_array( $headers ) ) {
+                throw new RuntimeException( __( 'Could not read the CSV headers.', 'calliope-media-import-export' ) );
+            }
+            $mapping = $this->csv_reader->validate_column_mapping( $headers, $mapping );
+            $inspection = $this->inspect_csv_file( $paths['csv'], $mapping );
+            if ( is_wp_error( $inspection ) ) {
+                throw new RuntimeException( $inspection->get_error_message() );
+            }
+            $meta['total_rows'] = absint( $inspection['total_rows'] );
+            $stored = $this->temp_file_manager->save_import_mapping( $file_name, $meta, $mapping, $headers );
+            if ( is_wp_error( $stored ) ) {
+                throw new RuntimeException( $stored->get_error_message() );
+            }
+        } catch ( Exception $exception ) {
+            $error = $exception->getMessage();
+        } finally {
+            $this->release_temp_lock( $lock_key );
+        }
+
+        if ( null !== $error ) {
+            wp_send_json_error( [ 'message' => $error ], 400 );
+        }
+        wp_send_json_success( [
+            'file' => $file_name,
+            'total_rows' => (int) $inspection['total_rows'],
+            'preview' => $this->build_validation_preview( $inspection ),
+        ] );
+    }
+
+    /**
+     * Read-only, bounded preview. This is a sample, NOT an import dry run.
+     * No remote downloads, fingerprint calculations or writes are performed.
+     * Source matches are only POSSIBLE duplicates until normal import verification.
+     */
+    public function preview_diagnostics() {
+        $this->ensure_ajax_permissions();
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Verified by ensure_ajax_permissions().
+        $file_name = isset( $_POST['file'] ) ? sanitize_file_name( wp_unslash( $_POST['file'] ) ) : '';
+        $local_import = $this->get_request_bool( 'local_import' );
+        $paths = $this->get_temp_file_paths( $file_name );
+        if ( is_wp_error( $paths ) || ! is_file( $paths['csv'] ) || ! is_file( $paths['meta'] ) ) {
+            wp_send_json_error( [ 'message' => __( 'Temporary file not found. Please upload the CSV again.', 'calliope-media-import-export' ) ], 400 );
+        }
+        $meta = $this->read_temp_file_meta( $file_name );
+        if ( is_wp_error( $meta ) || ! isset( $meta['created_by'] ) || (int) $meta['created_by'] !== get_current_user_id() ) {
+            wp_send_json_error( [ 'message' => __( 'You do not have permission to run this import.', 'calliope-media-import-export' ) ], 403 );
+        }
+        if ( ! empty( $meta['resume_row'] ) ) {
+            wp_send_json_error( [ 'message' => __( 'This import has already started. Upload the CSV again to preview it.', 'calliope-media-import-export' ) ], 400 );
+        }
+
+        $handle = $this->open_read_handle( $paths['csv'] );
+        if ( ! $handle ) {
+            wp_send_json_error( [ 'message' => __( 'Could not open the temporary CSV file.', 'calliope-media-import-export' ) ], 400 );
+        }
+        try {
+            $delimiter = isset( $meta['delimiter'] ) ? (string) $meta['delimiter'] : ',';
+            $headers = $this->read_csv_row( $handle, $delimiter, true );
+            if ( ! is_array( $headers ) ) {
+                throw new RuntimeException( __( 'Could not read the CSV headers.', 'calliope-media-import-export' ) );
+            }
+            if ( isset( $meta['column_mapping'] ) ) {
+                $headers_hash = hash( 'sha256', wp_json_encode( array_values( $headers ) ) );
+                if ( empty( $meta['mapping_header_hash'] ) || ! hash_equals( (string) $meta['mapping_header_hash'], $headers_hash ) ) {
+                    throw new RuntimeException( __( 'CSV headers changed after column mapping. Upload the file again.', 'calliope-media-import-export' ) );
+                }
+                $header_map = $this->csv_reader->validate_column_mapping( $headers, $meta['column_mapping'] );
+            } else {
+                $header_map = $this->map_headers( $headers );
+            }
+            if ( ! isset( $header_map['url'] ) && ! isset( $header_map['rel_path'] ) ) {
+                throw new RuntimeException( __( 'Select an Absolute URL or Relative Path column before importing.', 'calliope-media-import-export' ) );
+            }
+
+            $max_rows = 100;
+            $summary = [ 'checked' => 0, 'possible_duplicates' => 0, 'attention' => 0, 'potentially_ready' => 0 ];
+            $details = [];
+            $seen = [];
+            while ( $summary['checked'] < $max_rows && false !== ( $row_data = $this->read_csv_row( $handle, $delimiter ) ) ) {
+                if ( $this->is_csv_row_empty( $row_data ) ) {
+                    continue;
+                }
+                $summary['checked']++;
+                $row = $this->build_row_from_csv( $row_data, $header_map );
+                $url = isset( $row['url'] ) ? trim( (string) $row['url'] ) : '';
+                $raw_rel_path = isset( $row['rel_path'] ) ? trim( (string) $row['rel_path'] ) : '';
+                $rel_path = $this->sanitize_relative_path( $raw_rel_path );
+                $destination_url = EIM_Attachment_Writer::normalize_destination_url( isset( $row['destination_url'] ) ? $row['destination_url'] : '' );
+                $status = 'potentially_ready';
+                $reason = '';
+
+                if ( is_wp_error( $destination_url ) ) {
+                    $status = 'attention';
+                    $reason = $destination_url->get_error_message();
+                } elseif ( '' === $url && '' === $rel_path ) {
+                    $status = 'attention';
+                    $reason = __( 'Missing usable Absolute URL or Relative Path.', 'calliope-media-import-export' );
+                } elseif ( '' !== $raw_rel_path && '' === $rel_path ) {
+                    $status = 'attention';
+                    $reason = __( 'Relative Path is invalid.', 'calliope-media-import-export' );
+                } else {
+                    $source_key = '' !== $url ? 'url:' . $url : 'path:' . $rel_path;
+                    if ( isset( $seen[ $source_key ] ) ) {
+                        $status = 'possible_duplicates';
+                        $reason = __( 'Source repeated within the CSV sample.', 'calliope-media-import-export' );
+                    } else {
+                        $seen[ $source_key ] = true;
+                        // A source lookup cannot establish identity without binary verification.
+                        $candidate = $this->attachment_matcher->find_existing_attachment_id( $url, $rel_path );
+                        if ( $candidate > 0 ) {
+                            $status = 'possible_duplicates';
+                            $reason = __( 'Possible match in the media library; content is not verified.', 'calliope-media-import-export' );
+                        } elseif ( $local_import ) {
+                            if ( '' === $this->resolve_uploads_file_from_source( $url, $rel_path ) ) {
+                                $status = 'attention';
+                                $reason = __( 'Local file not found in uploads.', 'calliope-media-import-export' );
+                            }
+                        } elseif ( '' === $url ) {
+                            $status = 'attention';
+                            $reason = __( 'Absolute URL missing: enable Local Import Mode if files are in uploads.', 'calliope-media-import-export' );
+                        } else {
+                            // Syntax-only check: no DNS, HTTP or remote file checks during preview.
+                            $url_parts = wp_parse_url( $url );
+                            if ( ! is_array( $url_parts ) || ! isset( $url_parts['scheme'], $url_parts['host'] ) ||
+                                ! in_array( strtolower( (string) $url_parts['scheme'] ), [ 'http', 'https' ], true ) ||
+                                '' === (string) $url_parts['host'] || isset( $url_parts['user'] ) ) {
+                                $status = 'attention';
+                                $reason = __( 'Absolute URL must be a valid HTTP(S) address.', 'calliope-media-import-export' );
+                            } elseif ( $this->looks_like_local_upload_url( $url ) && '' === $this->resolve_uploads_file_from_source( $url, $rel_path ) ) {
+                                $status = 'attention';
+                                $reason = __( 'URL points to uploads, but the local file is missing.', 'calliope-media-import-export' );
+                            }
+                        }
+                    }
+                }
+
+                $summary[ $status ]++;
+                if ( 'potentially_ready' !== $status && count( $details ) < 12 ) {
+                    $details[] = [
+                        'row' => $summary['checked'],
+                        'status' => $status,
+                        'reason' => $reason,
+                    ];
+                }
+            }
+            $total = isset( $meta['total_rows'] ) ? absint( $meta['total_rows'] ) : $summary['checked'];
+            $result = [
+                'summary' => $summary,
+                'total_rows' => $total,
+                'sample_limited' => $total > $summary['checked'],
+                'details' => $details,
+            ];
+        } catch ( Exception $exception ) {
+            $error = $exception->getMessage();
+        } finally {
+            $this->close_file_handle( $handle );
+        }
+        if ( isset( $error ) ) {
+            wp_send_json_error( [ 'message' => $error ], 400 );
+        }
+        wp_send_json_success( $result );
     }
 
     public function get_import_progress() {
@@ -322,13 +532,6 @@ class EIM_Importer {
             $this->send_batch_error( $paths->get_error_message(), 400 );
         }
 
-        if ( 0 === $start_row ) {
-            $progress_reset = $this->reset_import_progress_log( $file_name );
-            if ( is_wp_error( $progress_reset ) ) {
-                $this->send_batch_error( $progress_reset->get_error_message(), 500 );
-            }
-        }
-
         if ( ! file_exists( $paths['csv'] ) ) {
             $this->send_batch_error( __( 'Temporary file not found. Please upload the CSV again.', 'calliope-media-import-export' ), 404 );
         }
@@ -338,6 +541,13 @@ class EIM_Importer {
         }
 
         try {
+            if ( 0 === $start_row ) {
+                $progress_reset = $this->reset_import_progress_log( $file_name );
+                if ( is_wp_error( $progress_reset ) ) {
+                    throw new RuntimeException( $progress_reset->get_error_message() );
+                }
+            }
+
             $meta = $this->read_temp_file_meta( $file_name );
             if ( is_wp_error( $meta ) ) {
                 throw new RuntimeException( $meta->get_error_message() );
@@ -364,12 +574,38 @@ class EIM_Importer {
                     throw new RuntimeException( __( 'Could not read the CSV headers.', 'calliope-media-import-export' ) );
                 }
 
-                $header_map = $this->map_headers( $headers );
+                if ( isset( $meta['column_mapping'] ) ) {
+                    $expected_hash = hash( 'sha256', wp_json_encode( array_values( $headers ) ) );
+                    if ( empty( $meta['mapping_header_hash'] ) || ! hash_equals( $expected_hash, (string) $meta['mapping_header_hash'] ) ) {
+                        throw new RuntimeException( __( 'CSV headers changed after column mapping. Upload the file again.', 'calliope-media-import-export' ) );
+                    }
+                    $header_map = $this->csv_reader->validate_column_mapping( $headers, $meta['column_mapping'] );
+                } else {
+                    $header_map = $this->map_headers( $headers );
+                }
                 if ( ! isset( $header_map['url'] ) && ! isset( $header_map['rel_path'] ) ) {
                     throw new RuntimeException( __( 'Invalid CSV. Missing "Absolute URL" or "Relative Path" column.', 'calliope-media-import-export' ) );
                 }
 
-                $skipped_rows = 0;
+                // Sequential AJAX batches can resume directly at the last committed CSV byte offset.
+                // Retried or out-of-order requests still use the original row-counting fallback.
+                $skipped_rows     = 0;
+                $header_end       = ftell( $handle );
+                $checkpoint_row   = isset( $meta['resume_row'] ) ? absint( $meta['resume_row'] ) : 0;
+                $checkpoint_byte  = isset( $meta['resume_offset'] ) ? absint( $meta['resume_offset'] ) : 0;
+                $csv_size         = filesize( $paths['csv'] );
+                if (
+                    $start_row > 0 &&
+                    $checkpoint_row === $start_row &&
+                    false !== $header_end &&
+                    $checkpoint_byte >= $header_end &&
+                    false !== $csv_size &&
+                    $checkpoint_byte <= $csv_size &&
+                    0 === fseek( $handle, $checkpoint_byte, SEEK_SET )
+                ) {
+                    $skipped_rows = $start_row;
+                }
+
                 while ( $skipped_rows < $start_row ) {
                     $row_data = $this->read_csv_row( $handle, $delimiter );
                     if ( false === $row_data ) {
@@ -431,6 +667,19 @@ class EIM_Importer {
 
                 if ( $is_finished ) {
                     $this->cleanup_temp_import_file( $file_name );
+                } elseif ( $processed_batch > 0 ) {
+                    $resume_offset = ftell( $handle );
+                    if ( false !== $resume_offset ) {
+                        // A checkpoint is only a performance hint: a write failure must not fail an import.
+                        $saved = $this->temp_file_manager->save_import_checkpoint( $file_name, $meta, $next_row, $resume_offset );
+                        if ( is_wp_error( $saved ) ) {
+                            $this->log_import_event( 'import_checkpoint_write_failed', [
+                                'file' => $file_name,
+                                'row'  => $next_row,
+                                'error' => $saved->get_error_message(),
+                            ] );
+                        }
+                    }
                 }
             }
         } catch ( Exception $exception ) {
@@ -669,9 +918,23 @@ class EIM_Importer {
 
         $title       = isset( $row['title'] ) ? sanitize_text_field( (string) $row['title'] ) : '';
         $alt         = isset( $row['alt'] ) ? sanitize_text_field( (string) $row['alt'] ) : '';
-        $caption     = isset( $row['caption'] ) ? sanitize_text_field( (string) $row['caption'] ) : '';
+        $caption     = isset( $row['caption'] ) ? sanitize_textarea_field( (string) $row['caption'] ) : '';
         $description = isset( $row['description'] ) ? wp_kses_post( (string) $row['description'] ) : '';
         $custom_meta = $this->decode_custom_meta_json( isset( $row['custom_meta_json'] ) ? $row['custom_meta_json'] : '' );
+        // A destination is separate from the URL used to download the media.
+        // Validate before any media is created, including local imports.
+        $destination_url = EIM_Attachment_Writer::normalize_destination_url(
+            isset( $row['destination_url'] ) ? $row['destination_url'] : ''
+        );
+        if ( is_wp_error( $destination_url ) ) {
+            return $this->build_item_result(
+                'ERROR',
+                $title ? $title : $url,
+                $destination_url->get_error_message(),
+                [ 'reason' => 'invalid_destination_url' ]
+            );
+        }
+        $row['destination_url'] = $destination_url;
 
         $filename        = isset( $row['file'] ) ? (string) $row['file'] : '';
         $filename        = $filename ? $filename : $this->derive_filename( $url, $rel_path );
@@ -974,6 +1237,15 @@ class EIM_Importer {
                 );
             }
 
+            // A Pro file-replacement action must replace the matched attachment,
+            // not register this uploads file as a separate media item.
+            if ( $deferred_duplicate_id && 'replace_file' === $duplicate_strategy ) {
+                return $this->replace_existing_from_local_source(
+                    $deferred_duplicate_id, $source_file, $filename, $title, $alt,
+                    $caption, $description, $url, $rel_path, $custom_meta, $row, $request_context
+                );
+            }
+
             return $this->attach_existing_media_file(
                 $source_file,
                 $filename,
@@ -997,7 +1269,14 @@ class EIM_Importer {
             );
         }
 
-        if ( ! wp_http_validate_url( $url ) ) {
+        $existing_file = $this->resolve_uploads_file_from_source( $url, $honor_relative_path ? $rel_path : '' );
+        // A verified local uploads path is read directly for Pro replacement;
+        // it does not require a publicly reachable URL or DNS/HTTP loopback.
+        $can_replace_local = $deferred_duplicate_id
+            && 'replace_file' === $duplicate_strategy
+            && '' !== $existing_file
+            && $this->looks_like_local_upload_url( $url );
+        if ( ! $can_replace_local && ! wp_http_validate_url( $url ) ) {
             return $this->build_item_result(
                 'ERROR',
                 $filename,
@@ -1005,13 +1284,18 @@ class EIM_Importer {
                 [ 'reason' => 'invalid_url' ]
             );
         }
-
-        $existing_file = $this->resolve_uploads_file_from_source( $url, $honor_relative_path ? $rel_path : '' );
         $remote_replace_requires_download = $deferred_duplicate_id
             && 'replace_file' === $duplicate_strategy
             && ! $this->looks_like_local_upload_url( $url );
 
         if ( '' !== $existing_file && ! $remote_replace_requires_download ) {
+            if ( $can_replace_local && ! $dry_run ) {
+                return $this->replace_existing_from_local_source(
+                    $deferred_duplicate_id, $existing_file, $filename, $title, $alt,
+                    $caption, $description, $url, $rel_path, $custom_meta, $row, $request_context
+                );
+            }
+
             $this->log_import_event(
                 'existing_upload_file_found',
                 [
@@ -1342,6 +1626,7 @@ class EIM_Importer {
 
         $this->apply_custom_meta( $id, $custom_meta );
         $this->store_source_meta( $id, $url, $rel_path );
+        $this->attachment_writer->store_destination_url( $id, $destination_url );
         if ( $fingerprint ) {
             $this->store_fingerprint_meta( $id, $fingerprint );
         }
@@ -1457,6 +1742,70 @@ class EIM_Importer {
 
     private function write_sanitized_svg_file( $file_path, $contents, $error_code, $error_message ) {
         return call_user_func_array( [ $this->svg_validator, 'write_sanitized_svg_file' ], func_get_args() );
+    }
+
+    /**
+     * Pro 0.5.4+ uses this capability check before running replace-file imports.
+     * This also prevents mismatched packages silently creating duplicate media.
+     */
+    public function supports_local_replacement_copy() {
+        return true;
+    }
+
+    /**
+     * Replace an existing attachment from a readable file in uploads, without
+     * publishing a temporary URL or requiring an HTTP loopback to this site.
+     * The temporary copy avoids overwriting the source (including self-replace)
+     * before the writer has validated it and prepared any restore point.
+     */
+    private function replace_existing_from_local_source( $attachment_id, $source_file, $filename, $title, $alt, $caption, $description, $url, $rel_path, $custom_meta, $row, $request_context ) {
+        $validated = $this->validate_existing_media_file( $source_file, false );
+        if ( is_wp_error( $validated ) ) {
+            return $this->build_item_result( 'ERROR', $filename, $validated->get_error_message(), [ 'reason' => 'local_replacement_invalid_file' ] );
+        }
+
+        $tmp_file = wp_tempnam( $filename );
+        if ( ! $tmp_file || ! @copy( $source_file, $tmp_file ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+            if ( $tmp_file && file_exists( $tmp_file ) ) {
+                wp_delete_file( $tmp_file );
+            }
+            return $this->build_item_result( 'ERROR', $filename, __( 'The local replacement file could not be prepared.', 'calliope-media-import-export' ), [ 'reason' => 'local_replacement_temp_failed' ] );
+        }
+
+        try {
+            $type = $this->validate_downloaded_file_type( $tmp_file, $filename );
+            if ( is_wp_error( $type ) ) {
+                return $this->build_item_result( 'ERROR', $filename, $type->get_error_message(), [ 'reason' => 'local_replacement_invalid_type' ] );
+            }
+
+            $svg = $this->maybe_validate_svg_import_file( $tmp_file, $filename );
+            if ( is_wp_error( $svg ) ) {
+                return $this->build_item_result( 'ERROR', $filename, $svg->get_error_message(), [ 'reason' => 'svg_validation_failed' ] );
+            }
+            if ( is_string( $svg ) ) {
+                $write = $this->write_sanitized_svg_file(
+                    $tmp_file, $svg, 'eim_svg_temp_write_failed',
+                    __( 'The uploaded file could not be written to disk.', 'calliope-media-import-export' )
+                );
+                if ( is_wp_error( $write ) ) {
+                    return $this->build_item_result( 'ERROR', $filename, $write->get_error_message(), [ 'reason' => 'svg_sanitization_failed' ] );
+                }
+            }
+
+            $result = $this->resolve_duplicate_result(
+                absint( $attachment_id ), 'replace_file', false, $filename, $title,
+                $alt, $caption, $description, $url, $rel_path,
+                $this->get_file_fingerprint( $tmp_file ), $tmp_file, $custom_meta,
+                $row, 'local_file_replace', $request_context
+            );
+            return null !== $result
+                ? $result
+                : $this->build_item_result( 'ERROR', $filename, __( 'The local replacement file could not be prepared.', 'calliope-media-import-export' ), [ 'reason' => 'local_replacement_not_completed' ] );
+        } finally {
+            if ( file_exists( $tmp_file ) ) {
+                wp_delete_file( $tmp_file );
+            }
+        }
     }
 
     private function media_handle_sideload_with_subdir( $file_array, $subdir = '' ) {
@@ -2103,9 +2452,9 @@ class EIM_Importer {
         return apply_filters( 'eim_import_batch_response', $response, $results, $summary, $meta );
     }
 
-    private function inspect_csv_file( $file_path ) {
+    private function inspect_csv_file( $file_path, $mapping = null, $allow_unmapped = false ) {
         try {
-            return $this->csv_reader->inspect_file( $file_path );
+            return $this->csv_reader->inspect_file( $file_path, $mapping, $allow_unmapped );
         } catch ( EIM_Csv_Reader_Exception $exception ) {
             return new WP_Error( $exception->get_error_code(), $exception->getMessage() );
         }

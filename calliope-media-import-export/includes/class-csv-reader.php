@@ -35,7 +35,7 @@ class EIM_Csv_Reader {
         $this->error_reporter      = isset( $options['error_reporter'] ) && is_callable( $options['error_reporter'] ) ? $options['error_reporter'] : null;
     }
 
-    public function inspect_file( $file_path ) {
+    public function inspect_file( $file_path, $column_mapping = null, $allow_unmapped = false ) {
         if ( ! is_string( $file_path ) || '' === $file_path || ! file_exists( $file_path ) ) {
             throw $this->error( 'eim_csv_missing', 'Could not read the uploaded CSV file.' );
         }
@@ -55,8 +55,8 @@ class EIM_Csv_Reader {
             throw $this->error( 'eim_csv_empty', 'The CSV is empty.' );
         }
 
-        $header_map = $this->map_headers( $headers );
-        if ( ! isset( $header_map['url'] ) && ! isset( $header_map['rel_path'] ) ) {
+        $header_map = null === $column_mapping ? $this->map_headers( $headers ) : $this->validate_column_mapping( $headers, $column_mapping );
+        if ( ! $allow_unmapped && ! isset( $header_map['url'] ) && ! isset( $header_map['rel_path'] ) ) {
             $this->close_file_handle( $handle );
             throw $this->error( 'eim_csv_invalid', 'Invalid CSV. Missing "Absolute URL" or "Relative Path" column.' );
         }
@@ -88,7 +88,7 @@ class EIM_Csv_Reader {
 
         if ( $row_count <= 0 ) {
             try {
-                $fallback = $this->inspect_file_with_normalized_line_endings( $file_path, $delimiter );
+                $fallback = $this->inspect_file_with_normalized_line_endings( $file_path, $delimiter, $column_mapping, $allow_unmapped );
                 if ( ! empty( $fallback['total_rows'] ) ) {
                     return $fallback;
                 }
@@ -107,7 +107,8 @@ class EIM_Csv_Reader {
             $header_map,
             $summary,
             $preview_rows,
-            $this->build_csv_warnings( $summary, $header_map, $missing_row_index )
+            ( isset( $header_map['url'] ) || isset( $header_map['rel_path'] ) )
+                ? $this->build_csv_warnings( $summary, $header_map, $missing_row_index ) : []
         );
     }
 
@@ -123,7 +124,59 @@ class EIM_Csv_Reader {
             'summary'            => isset( $inspection['summary'] ) && is_array( $inspection['summary'] ) ? $inspection['summary'] : [],
             'sample_rows'        => isset( $inspection['preview_rows'] ) ? (array) $inspection['preview_rows'] : [],
             'warnings'           => isset( $inspection['warnings'] ) ? array_values( array_filter( (array) $inspection['warnings'] ) ) : [],
+            'raw_headers'        => isset( $inspection['headers'] ) ? array_values( (array) $inspection['headers'] ) : [],
+            'header_map'         => isset( $inspection['header_map'] ) ? (array) $inspection['header_map'] : [],
+            'mapping_required'   => ! empty( $inspection['mapping_required'] ),
+            'mapping_fields'     => $this->get_column_mapping_fields(),
         ];
+    }
+
+    /**
+     * The manual mapper is intentionally limited to core attachment
+     * fields plus the optional destination link. Pro/custom-meta fields are not exposed by the Free mapper.
+     */
+    public function get_column_mapping_fields() {
+        $definitions = $this->get_import_header_definitions();
+        $fields = [];
+        foreach ( [ 'id', 'url', 'rel_path', 'title', 'alt', 'caption', 'description', 'destination_url' ] as $key ) {
+            $fields[] = [
+                'key'   => $key,
+                'label' => isset( $definitions[ $key ]['label'] ) ? (string) $definitions[ $key ]['label'] : $key,
+            ];
+        }
+        return $fields;
+    }
+
+    /**
+     * Accept an explicit key => zero-based CSV column index mapping.
+     * Reject unknown fields, reused columns and sources without URL/path.
+     */
+    public function validate_column_mapping( $headers, $mapping ) {
+        if ( ! is_array( $headers ) || ! is_array( $mapping ) || empty( $mapping ) ) {
+            throw $this->error( 'eim_mapping_invalid', 'Select at least one source column (Absolute URL or Relative Path).' );
+        }
+
+        $allowed = [ 'id', 'url', 'rel_path', 'title', 'alt', 'caption', 'description', 'destination_url' ];
+        $validated = [];
+        $used_indices = [];
+        foreach ( $mapping as $key => $index ) {
+            if ( ! is_string( $key ) || ! in_array( $key, $allowed, true ) ||
+                 ( ! is_int( $index ) && ( ! is_string( $index ) || ! ctype_digit( $index ) ) ) ) {
+                throw $this->error( 'eim_mapping_invalid', 'Invalid CSV column mapping.' );
+            }
+            $index = (int) $index;
+            if ( $index < 0 || $index >= count( $headers ) || isset( $used_indices[ $index ] ) ) {
+                throw $this->error( 'eim_mapping_invalid', 'CSV column mapping contains an invalid or duplicated column.' );
+            }
+            $used_indices[ $index ] = true;
+            $validated[ $key ] = $index;
+        }
+
+        if ( ! isset( $validated['url'] ) && ! isset( $validated['rel_path'] ) ) {
+            throw $this->error( 'eim_mapping_source_missing', 'Select at least one source column (Absolute URL or Relative Path).' );
+        }
+
+        return $validated;
     }
 
     public function detect_csv_delimiter( $file_path ) {
@@ -317,7 +370,7 @@ class EIM_Csv_Reader {
         }
     }
 
-    private function inspect_file_with_normalized_line_endings( $file_path, $delimiter ) {
+    private function inspect_file_with_normalized_line_endings( $file_path, $delimiter, $column_mapping = null, $allow_unmapped = false ) {
         $warning  = '';
         $contents = $this->capture_native_warning(
             function() use ( $file_path ) {
@@ -363,8 +416,8 @@ class EIM_Csv_Reader {
             throw $this->error( 'eim_csv_empty', 'The CSV is empty.' );
         }
 
-        $header_map = $this->map_headers( $headers );
-        if ( ! isset( $header_map['url'] ) && ! isset( $header_map['rel_path'] ) ) {
+        $header_map = null === $column_mapping ? $this->map_headers( $headers ) : $this->validate_column_mapping( $headers, $column_mapping );
+        if ( ! $allow_unmapped && ! isset( $header_map['url'] ) && ! isset( $header_map['rel_path'] ) ) {
             throw $this->error( 'eim_csv_invalid', 'Invalid CSV. Missing "Absolute URL" or "Relative Path" column.' );
         }
 
@@ -403,7 +456,8 @@ class EIM_Csv_Reader {
             $header_map,
             $summary,
             $preview_rows,
-            $this->build_csv_warnings( $summary, $header_map, $missing_row_index )
+            ( isset( $header_map['url'] ) || isset( $header_map['rel_path'] ) )
+                ? $this->build_csv_warnings( $summary, $header_map, $missing_row_index ) : []
         );
     }
 
@@ -496,6 +550,7 @@ class EIM_Csv_Reader {
             'relative_path' => isset( $row['rel_path'] ) ? trim( (string) $row['rel_path'] ) : '',
             'title'         => isset( $row['title'] ) ? trim( (string) $row['title'] ) : '',
             'alt'           => isset( $row['alt'] ) ? trim( (string) $row['alt'] ) : '',
+            'destination_url' => isset( $row['destination_url'] ) ? trim( (string) $row['destination_url'] ) : '',
         ];
     }
 
@@ -525,6 +580,7 @@ class EIM_Csv_Reader {
             'delimiter'          => $delimiter,
             'headers'            => $headers,
             'header_map'         => $header_map,
+            'mapping_required'   => ! isset( $header_map['url'] ) && ! isset( $header_map['rel_path'] ),
             'recognized_columns' => $this->get_recognized_columns_for_preview( $header_map ),
             'total_rows'         => (int) $summary['total_rows'],
             'summary'            => $summary,
@@ -552,6 +608,7 @@ class EIM_Csv_Reader {
             'alt' => [ 'aliases' => [ 'alt text', 'alt', 'alternative text', 'texto alternativo', 'texto alt', 'texte alternatif', 'testo alternativo', '替代文本' ], 'label' => $this->translate( 'Alt Text' ) ],
             'caption' => [ 'aliases' => [ 'caption', 'post_excerpt', 'subtítulo', 'subtitulo', 'legenda', 'légende', 'didascalia' ], 'label' => $this->translate( 'Caption' ) ],
             'description' => [ 'aliases' => [ 'description', 'post_content', 'descripción', 'descripcion', 'descrição', 'descricao', 'descrizione', '描述' ], 'label' => $this->translate( 'Description' ) ],
+            'destination_url' => [ 'aliases' => [ 'destination url', 'destination_url', 'link url', 'link_url', 'click url', 'target url', 'target_url', 'enlace de destino', 'url de destino', 'url del enlace', 'url de destination', 'url di destinazione', '目标 url', '目标网址' ], 'label' => $this->translate( 'Destination URL' ) ],
         ];
 
         return $this->definitions_filter ? call_user_func( $this->definitions_filter, $definitions ) : $definitions;

@@ -3,17 +3,17 @@ Contributors: mairaforesto
 Tags: csv import, csv export, media library, media import, media export
 Requires at least: 5.6
 Tested up to: 7.1
-Stable tag: 1.8.3
+Stable tag: 1.9.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Import and export your WordPress media library from CSV with preview, batch processing, metadata support, and duplicate prevention.
+Import and export WordPress media from CSV with column mapping, pre-import checks, flexible exports, and duplicate prevention.
 
 == Description ==
 
 Need to move or rebuild a media library without manually re-uploading every file? **Export/Import Media** helps you import WordPress media from CSV, export media data to CSV, and keep core attachment metadata organized during the process.
 
-The free plugin focuses on the essential CSV workflow: export your current media library, prepare or upload a CSV, validate the file, preview rows before import, and process media in batches from the WordPress admin. Supported CSV columns include the media URL, relative path, title, alt text, caption, and description.
+The free plugin focuses on the essential CSV workflow: export your current media library, prepare or upload a CSV, validate the file, preview rows before import, and process media in batches from the WordPress admin. Supported CSV columns include the media URL, relative path, title, alt text, caption, and description. Unfamiliar source headers can be mapped to supported WordPress fields before importing.
 
 During standard free imports, detected duplicates are skipped to help prevent duplicate attachments in the media library. Metadata is preserved for newly imported media rows. Updating existing attachments, controlled matching rules, rollback restore points, saved workflows, background processing, image conversion options, and replace-file workflows are handled by the separate **Export/Import Media Pro** add-on.
 
@@ -22,7 +22,7 @@ During standard free imports, detected duplicates are skipped to help prevent du
 https://youtu.be/YIZX2yUxoZM
 
 **Why use this plugin?**
-* **CSV-first workflow:** Export, validate, preview, and import media library data using a readable CSV file.
+* **CSV-first workflow:** Export, validate, map columns, preview, and import media data using a readable CSV file.
 * **Batch processing:** Import media rows in smaller AJAX batches to reduce timeout risk.
 * **Metadata support:** Preserve title, alt text, caption, and description for imported attachments.
 * **Duplicate prevention:** Skip existing matches in the standard free workflow.
@@ -31,10 +31,10 @@ https://youtu.be/YIZX2yUxoZM
 
 == Features ==
 
-* **CSV export:** Export media library data to CSV with filters for date range, media type, and attachment context.
-* **CSV validation and preview:** Upload a CSV, validate required columns, and preview rows before import.
+* **CSV export:** Export media library data to CSV with filters for date range, media type, and attachment context. Keep the original eight-column output or optionally choose fields such as MIME type, file size (bytes), width, height, and Destination URL.
+* **CSV validation and preview:** Upload a CSV, match unfamiliar headers with a visual column mapper, validate required columns, and preview rows before import. A sample-based pre-import check (first 100 rows maximum) flags possible duplicates and invalid or missing sources without downloading remote media.
 * **Batch import:** Process media rows in batches from the WordPress admin.
-* **Metadata support:** Import and export title, alt text, caption, and description columns.
+* **Metadata support:** Import and export title, alt text, caption, and description columns. Optional Destination URL stores an HTTP(S) click-through link in `_eim_destination_url` for newly imported attachments; it does not automatically change how galleries link images.
 * **Duplicate prevention:** Detect existing matches and skip duplicate rows in the standard free workflow.
 * **Local Import Mode:** Import files that already exist in `/uploads/` without downloading them again.
 * **Honor Relative Path:** Reuse or preserve relative upload paths from the CSV when available.
@@ -58,7 +58,7 @@ Yes, when you run a remote import. The plugin downloads the file from the URL in
 Yes. Prepare a CSV with an absolute URL or relative path for each file, upload it in the plugin screen, validate it, preview the rows, and start the batch import.
 
 = What metadata can I import? =
-The free plugin supports common media metadata columns including title, alt text, caption, and description. It also reads media location columns such as absolute URL and relative path.
+The free plugin supports title, alt text, caption, description, and an optional Destination URL (stored as attachment metadata). It also reads absolute URLs and relative paths. Custom CSV column headers can be mapped before importing. A Destination URL does not automatically make Divi or other galleries link to that URL.
 
 = What happens if a file already exists? =
 The free plugin checks for existing matches using stored source data, relative paths, attachment paths, and file fingerprints. If it finds a duplicate, it skips that row instead of creating another attachment.
@@ -76,7 +76,7 @@ The free plugin provides preview and downloadable logs, but it does not include 
 Export/Import Media Pro adds rollback restore points before imports, saved workflows, background processing, controlled matching, selective metadata updates, replace-file workflows, history, and image conversion options where the server and source file handling support them.
 
 = Can I filter which media items to export? =
-Yes. You can filter exports by date range, media type, and attachment context, including unattached files and media attached to posts or pages.
+Yes. You can filter exports by date range, media type, and attachment context, including unattached files and media attached to posts or pages. The default CSV retains the original eight columns; Destination URL and custom export columns are optional. Dimensions may be empty for non-image files and file sizes may be empty when the local file is unavailable.
 
 = Does it work with WooCommerce product images? =
 Export filters can include product attachment context when WooCommerce is active and product attachments are available. The standard free CSV import creates media attachments; assigning imported images to products is outside the free import workflow.
@@ -93,6 +93,16 @@ Yes. Enable Local Import Mode and provide relative paths for files that already 
 5. Review imported media with title, alt text, caption, and description preserved.
 
 == Changelog ==
+
+= 1.9.0 =
+* Compatibility: Safe local replacement of matched uploads files through temporary copies, preserving attachment IDs without a public staging URL.
+* Import: Added visual CSV column mapping for unfamiliar headers, with server-side mapping checks and preserved mapping across batches/retries.
+* Import: Added a sample-based pre-import assessment (up to 100 rows) for possible duplicates, missing local files, and invalid sources; the assessment is an estimate and does not download remote media.
+* Import: Added optional Destination URL metadata (`_eim_destination_url`) for new attachments, validated as HTTP(S). Existing duplicate attachments are still skipped, not updated. Gallery click behavior is not changed.
+* Export: Added optional Destination URL export and customizable CSV fields, including MIME type, file size in bytes, width, and height. The eight-column default remains unchanged.
+* Reliability: Stabilized CSV progress checkpoints, guarded temporary progress/log files, and kept import options consistent between batches and retries.
+* Metadata: Preserved line breaks in imported captions, matching the existing handling of multiline descriptions.
+* Languages: Updated bundled translation catalogs for the new interfaces and diagnostic messages.
 
 = 1.8.3 =
 * Conversion UX: Added contextual Pro upgrade links in the plugin header, import workflow, import results, and Plugins screen without interrupting the core Export → Import flow.

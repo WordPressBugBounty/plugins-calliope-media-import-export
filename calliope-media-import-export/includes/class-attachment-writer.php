@@ -201,6 +201,7 @@ class EIM_Attachment_Writer {
 
         $this->apply_custom_meta( $id, $custom_meta );
         $this->store_source_meta( $id, $url, $rel_path );
+        $this->store_destination_url( $id, isset( $row['destination_url'] ) ? $row['destination_url'] : '' );
         if ( $fingerprint ) {
             $this->store_fingerprint_meta( $id, $fingerprint );
         }
@@ -497,6 +498,12 @@ class EIM_Attachment_Writer {
             $this->apply_custom_meta( $attachment_id, $custom_meta );
         }
 
+        // An empty destination leaves the current link unchanged. Selected-field
+        // updates only touch it when the user explicitly chose Destination URL.
+        if ( $update_all || in_array( 'destination_url', $selected_fields, true ) ) {
+            $this->store_destination_url( $attachment_id, isset( $row['destination_url'] ) ? $row['destination_url'] : '' );
+        }
+
         $this->backfill_source_meta( $attachment_id, $url, $rel_path );
         if ( $fingerprint ) {
             $this->backfill_fingerprint_meta( $attachment_id, $fingerprint );
@@ -711,6 +718,38 @@ class EIM_Attachment_Writer {
         $decoded = json_decode( (string) $value, true );
 
         return is_array( $decoded ) ? $decoded : [];
+    }
+
+    /**
+     * Only HTTP(S) destination links are accepted. This URL is metadata;
+     * it is never fetched by the import pipeline.
+     *
+     * @return string|WP_Error Validated URL, empty string, or validation error.
+     */
+    public static function normalize_destination_url( $value ) {
+        $url = is_scalar( $value ) ? trim( (string) $value ) : '';
+        if ( '' === $url ) {
+            return '';
+        }
+        if ( strlen( $url ) > 2048 || preg_match( '/[\x00-\x1F\x7F]/', $url ) ) {
+            return new WP_Error( 'eim_invalid_destination_url', __( 'Destination URL must be a valid HTTP(S) address.', 'calliope-media-import-export' ) );
+        }
+        $parts = wp_parse_url( $url );
+        if ( ! is_array( $parts ) || empty( $parts['host'] ) || ! isset( $parts['scheme'] ) ||
+            ! in_array( strtolower( (string) $parts['scheme'] ), [ 'http', 'https' ], true ) ||
+            isset( $parts['user'] ) || isset( $parts['pass'] ) ) {
+            return new WP_Error( 'eim_invalid_destination_url', __( 'Destination URL must be a valid HTTP(S) address.', 'calliope-media-import-export' ) );
+        }
+        $sanitized = esc_url_raw( $url, [ 'http', 'https' ] );
+        return '' !== $sanitized ? $sanitized : new WP_Error( 'eim_invalid_destination_url', __( 'Destination URL must be a valid HTTP(S) address.', 'calliope-media-import-export' ) );
+    }
+
+    /** Store a nonempty validated destination link for new media or permitted Pro updates. */
+    public function store_destination_url( $attachment_id, $value ) {
+        $url = self::normalize_destination_url( $value );
+        if ( ! is_wp_error( $url ) && '' !== $url && absint( $attachment_id ) > 0 ) {
+            update_post_meta( absint( $attachment_id ), '_eim_destination_url', $url );
+        }
     }
 
     public function store_source_meta( $attachment_id, $url, $rel_path ) {
@@ -1212,7 +1251,7 @@ class EIM_Attachment_Writer {
     }
 
     public function normalize_selected_update_fields( $fields ) {
-        $allowed = [ 'title', 'alt', 'caption', 'description', 'custom_meta' ];
+        $allowed = [ 'title', 'alt', 'caption', 'description', 'custom_meta', 'destination_url' ];
         $fields  = is_array( $fields ) ? $fields : explode( ',', (string) $fields );
         $fields  = array_values( array_unique( array_filter( array_map( 'sanitize_key', $fields ) ) ) );
 

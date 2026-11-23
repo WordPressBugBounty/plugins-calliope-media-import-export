@@ -1,6 +1,6 @@
 /*
  * Plugin Name: Export/Import Media - Custom Styles
- * Version: 1.8.3
+ * Version: 1.9.0
  */
 
 :root {
@@ -557,6 +557,24 @@ input[type="date"] {
 .eim-preview-stat-value {
     color: var(--eim-title);
     font-size: 16px;
+}
+
+/* Pre-import diagnostics are informational and never block the import. */
+.eim-preflight-section {
+    border: 1px solid var(--eim-border-soft);
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+.eim-preflight-note {
+    margin: 12px 0 0;
+    color: var(--eim-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+.eim-preflight-details {
+    margin-top: 10px;
+    padding-left: 20px;
 }
 
 .eim-preview-section h4 {
@@ -1166,4 +1184,54 @@ input[type="date"] {
     .eim-upgrade-note a {
         margin-left: 0;
     }
+}
+
+/* Optional Free CSV column mapper; hidden unless headers need attention or user opts in. */
+.eim-mapping-panel[hidden],
+#eim-change-mapping[hidden] { display: none !important; }
+.eim-mapping-panel {
+    border: 1px solid #d7e0ef;
+    background: #f8faff;
+    border-radius: 14px;
+    padding: 18px;
+    margin: 18px 0;
+}
+.eim-mapping-panel h3 { margin-top: 0; }
+.eim-mapping-fields { display: grid; gap: 10px; margin: 14px 0; }
+.eim-mapping-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: center; }
+.eim-mapping-source { overflow-wrap: anywhere; font-weight: 600; }
+.eim-mapping-select { width: 100%; max-width: 100%; }
+.eim-mapping-status { min-height: 1.2em; color: #5c4666; }
+#eim-change-mapping { margin-right: 8px; }
+#eim-cancel-mapping { margin-left: 6px; }
+@media (max-width: 650px) {
+    .eim-mapping-row { grid-template-columns: 1fr; gap: 4px; }
+}
+
+/* Optional CSV export column selector, preserving standard export controls. */
+.eim-export-column-options {
+    margin: 14px 0 18px;
+    padding: 12px 14px;
+    border: 1px solid var(--eim-border);
+    border-radius: 10px;
+    background: var(--eim-card);
+}
+.eim-export-column-options summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+.eim-export-column-options summary:focus-visible {
+    outline: 2px solid var(--eim-logo-blue);
+    outline-offset: 3px;
+}
+.eim-export-column-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    gap: 10px 14px;
+    margin-top: 12px;
+}
+.eim-export-column-grid label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
 }

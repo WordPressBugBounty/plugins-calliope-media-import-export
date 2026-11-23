@@ -205,6 +205,15 @@ class EIM_Admin {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only admin feedback after redirected export attempts.
         $notice = isset( $_GET['eim_notice'] ) ? sanitize_key( wp_unslash( $_GET['eim_notice'] ) ) : '';
 
+        if ( 'empty_columns' === $notice ) {
+            ?>
+            <div class="notice notice-error eim-admin-notice">
+                <p><?php esc_html_e( 'Choose at least one CSV column to export.', 'calliope-media-import-export' ); ?></p>
+            </div>
+            <?php
+            return;
+        }
+
         if ( 'empty_export' !== $notice ) {
             return;
         }
@@ -458,6 +467,24 @@ class EIM_Admin {
             'log_status_skipped'          => esc_html__( 'Skipped', 'calliope-media-import-export' ),
             'log_status_imported'         => esc_html__( 'Imported', 'calliope-media-import-export' ),
             'log_status_finished'         => esc_html__( 'Done', 'calliope-media-import-export' ),
+            'mapping_ignore'              => esc_html__( 'Do not import', 'calliope-media-import-export' ),
+            'mapping_select_source'       => esc_html__( 'Select an Absolute URL or Relative Path column before importing.', 'calliope-media-import-export' ),
+            'mapping_duplicate_field'     => esc_html__( 'Each WordPress field can only be assigned once.', 'calliope-media-import-export' ),
+            'mapping_required'            => esc_html__( 'These CSV headers are not recognized automatically. Assign a source column to continue.', 'calliope-media-import-export' ),
+            'mapping_saving'              => esc_html__( 'Validating column mapping...', 'calliope-media-import-export' ),
+            'mapping_saved'               => esc_html__( 'Column mapping saved and CSV validated.', 'calliope-media-import-export' ),
+            'preflight_title' => esc_html__( 'Pre-import check (sample)', 'calliope-media-import-export' ),
+            'preflight_loading' => esc_html__( 'Checking CSV sample without downloading media...', 'calliope-media-import-export' ),
+            'preflight_count' => esc_html__( 'Rows checked', 'calliope-media-import-export' ),
+            'preflight_duplicates' => esc_html__( 'Possible duplicates', 'calliope-media-import-export' ),
+            'preflight_attention' => esc_html__( 'Needs attention', 'calliope-media-import-export' ),
+            'preflight_ready' => esc_html__( 'Potentially ready', 'calliope-media-import-export' ),
+            /* translators: 1: number of rows checked, 2: total rows in the CSV. */
+            'preflight_limit' => esc_html__( 'Only the first %1$s of %2$s rows were checked. Counts are not totals for the whole CSV.', 'calliope-media-import-export' ),
+            'preflight_note' => esc_html__( 'Estimate only: remote files and contents are not downloaded. Possible duplicates are not confirmed; importing may produce different results.', 'calliope-media-import-export' ),
+            'preflight_failed' => esc_html__( 'Pre-import check was unavailable. CSV validation and importing are unaffected.', 'calliope-media-import-export' ),
+            /* translators: %s: CSV row number. */
+            'preflight_row' => esc_html__( 'Row %s', 'calliope-media-import-export' ),
             'preview_title'               => esc_html__( 'CSV Preview', 'calliope-media-import-export' ),
             'preview_description'         => esc_html__( 'Review the file before starting the import.', 'calliope-media-import-export' ),
             'preview_not_available'       => esc_html__( 'Preview data is not available for this file.', 'calliope-media-import-export' ),
@@ -481,6 +508,7 @@ class EIM_Admin {
             'preview_column_relative'     => esc_html__( 'Relative Path', 'calliope-media-import-export' ),
             'preview_column_title'        => esc_html__( 'Title', 'calliope-media-import-export' ),
             'preview_column_alt'          => esc_html__( 'Alt Text', 'calliope-media-import-export' ),
+            'preview_column_destination' => esc_html__( 'Destination URL', 'calliope-media-import-export' ),
             'preview_empty_value'         => esc_html__( 'Not provided', 'calliope-media-import-export' ),
             'summary_title'               => esc_html__( 'Import Summary', 'calliope-media-import-export' ),
             'summary_processed'           => esc_html__( 'Processed', 'calliope-media-import-export' ),
@@ -534,6 +562,16 @@ class EIM_Admin {
             'log_status_skipped'          => 'Skipped',
             'log_status_imported'         => 'Imported',
             'log_status_finished'         => 'Done',
+            'preflight_title' => 'Pre-import check (sample)',
+            'preflight_loading' => 'Checking CSV sample without downloading media...',
+            'preflight_count' => 'Rows checked',
+            'preflight_duplicates' => 'Possible duplicates',
+            'preflight_attention' => 'Needs attention',
+            'preflight_ready' => 'Potentially ready',
+            'preflight_limit' => 'Only the first %1$s of %2$s rows were checked. Counts are not totals for the whole CSV.',
+            'preflight_note' => 'Estimate only: remote files and contents are not downloaded. Possible duplicates are not confirmed; importing may produce different results.',
+            'preflight_failed' => 'Pre-import check was unavailable. CSV validation and importing are unaffected.',
+            'preflight_row' => 'Row %s',
             'preview_title'               => 'CSV Preview',
             'preview_description'         => 'Review the file before starting the import.',
             'preview_not_available'       => 'Preview data is not available for this file.',
@@ -557,6 +595,7 @@ class EIM_Admin {
             'preview_column_relative'     => 'Relative Path',
             'preview_column_title'        => 'Title',
             'preview_column_alt'          => 'Alt Text',
+            'preview_column_destination' => 'Destination URL',
             'preview_empty_value'         => 'Not provided',
             'summary_title'               => 'Import Summary',
             'summary_processed'           => 'Processed',
@@ -647,6 +686,50 @@ class EIM_Admin {
                         </select>
                     </p>
 
+                <p class="eim-option-row">
+                    <label for="eim_include_destination_url">
+                        <input type="checkbox" name="eim_include_destination_url" id="eim_include_destination_url" value="1" />
+                        <?php esc_html_e( 'Include Destination URL column (optional)', 'calliope-media-import-export' ); ?>
+                    </label><br />
+                    <small><?php esc_html_e( 'Quick option for the standard CSV export. Custom column selection below takes precedence when enabled.', 'calliope-media-import-export' ); ?></small>
+                </p>
+
+                <details class="eim-export-column-options">
+                    <summary><?php esc_html_e( 'Customize CSV columns (optional)', 'calliope-media-import-export' ); ?></summary>
+                    <p>
+                        <label for="eim_use_custom_columns">
+                            <input type="checkbox" name="eim_use_custom_columns" id="eim_use_custom_columns" value="1" />
+                            <strong><?php esc_html_e( 'Use my selected columns', 'calliope-media-import-export' ); ?></strong>
+                        </label>
+                    </p>
+                    <p class="description"><?php esc_html_e( 'Select the columns to include, then enable “Use my selected columns”. Leave it off for the original eight-column CSV. File size is in bytes; dimensions may be blank for non-image files.', 'calliope-media-import-export' ); ?></p>
+                    <?php
+                    $export_columns = [
+                        'id'              => __( 'ID', 'calliope-media-import-export' ),
+                        'url'             => __( 'Absolute URL', 'calliope-media-import-export' ),
+                        'rel_path'        => __( 'Relative Path', 'calliope-media-import-export' ),
+                        'file'            => __( 'File', 'calliope-media-import-export' ),
+                        'alt'             => __( 'Alt Text', 'calliope-media-import-export' ),
+                        'caption'         => __( 'Caption', 'calliope-media-import-export' ),
+                        'description'     => __( 'Description', 'calliope-media-import-export' ),
+                        'title'           => __( 'Title', 'calliope-media-import-export' ),
+                        'destination_url' => __( 'Destination URL', 'calliope-media-import-export' ),
+                        'mime_type'       => __( 'MIME Type', 'calliope-media-import-export' ),
+                        'file_size'       => __( 'File Size (Bytes)', 'calliope-media-import-export' ),
+                        'width'           => __( 'Width (px)', 'calliope-media-import-export' ),
+                        'height'          => __( 'Height (px)', 'calliope-media-import-export' ),
+                    ];
+                    ?>
+                    <div class="eim-export-column-grid">
+                        <?php foreach ( $export_columns as $column_key => $column_label ) : ?>
+                            <label>
+                                <input type="checkbox" name="eim_custom_export_columns[]" value="<?php echo esc_attr( $column_key ); ?>" <?php checked( in_array( $column_key, [ 'id', 'url', 'rel_path', 'file', 'alt', 'caption', 'description', 'title' ], true ) ); ?> />
+                                <?php echo esc_html( $column_label ); ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </details>
+
                 <?php do_action( 'eim_export_form_fields_after', $context ); ?>
 
                 <?php submit_button( esc_html__( 'Export to CSV', 'calliope-media-import-export' ), 'secondary', 'eim_export_csv', true, [ 'id' => 'eim_export_csv' ] ); ?>
@@ -667,6 +750,7 @@ class EIM_Admin {
             <div class="eim-inline-hints">
                 <span><?php esc_html_e( 'Best for standard one-off imports into the media library.', 'calliope-media-import-export' ); ?></span>
                 <span><?php esc_html_e( 'Existing matches are skipped in free instead of being updated in place.', 'calliope-media-import-export' ); ?></span>
+                <span><?php esc_html_e( 'Optional Destination URL stores a click-through link for new media; galleries need separate support to use it.', 'calliope-media-import-export' ); ?></span>
             </div>
 
             <div class="eim-import-tools">
@@ -721,6 +805,15 @@ class EIM_Admin {
 
                 <?php do_action( 'eim_import_form_fields_after', $context ); ?>
 
+                <div id="eim-mapping-panel" class="eim-mapping-panel" hidden>
+                    <h3><?php esc_html_e( 'Map CSV columns', 'calliope-media-import-export' ); ?></h3>
+                    <p id="eim-mapping-explanation"><?php esc_html_e( 'Match each CSV column to a WordPress media field. Ignore columns you do not need.', 'calliope-media-import-export' ); ?></p>
+                    <div id="eim-mapping-fields" class="eim-mapping-fields"></div>
+                    <p id="eim-mapping-status" class="eim-mapping-status" role="status" aria-live="polite"></p>
+                    <button type="button" class="button button-primary" id="eim-apply-mapping"><?php esc_html_e( 'Apply column mapping', 'calliope-media-import-export' ); ?></button>
+                    <button type="button" class="button" id="eim-cancel-mapping"><?php esc_html_e( 'Cancel', 'calliope-media-import-export' ); ?></button>
+                </div>
+                <button type="button" class="button" id="eim-change-mapping" hidden><?php esc_html_e( 'Adjust CSV column mapping', 'calliope-media-import-export' ); ?></button>
                 <button type="button" class="button button-primary" id="eim-start-button" disabled><?php esc_html_e( 'Start Import', 'calliope-media-import-export' ); ?></button>
                 <button type="button" class="button" id="eim-stop-button"><?php esc_html_e( 'Stop Process', 'calliope-media-import-export' ); ?></button>
             </form>

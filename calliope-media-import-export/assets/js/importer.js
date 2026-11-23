@@ -14,6 +14,12 @@ jQuery(document).ready(function($) {
     const downloadLogBtn = $('#eim-download-log');
     const previewPanel = $('#eim-preview-panel');
     const previewContent = $('#eim-preview-content');
+    const mappingPanel = $('#eim-mapping-panel');
+    const mappingFields = $('#eim-mapping-fields');
+    const mappingStatus = $('#eim-mapping-status');
+    const applyMappingButton = $('#eim-apply-mapping');
+    const cancelMappingButton = $('#eim-cancel-mapping');
+    const changeMappingButton = $('#eim-change-mapping');
     const resultSummaryContainer = $('#eim-import-result-summary');
 
     const ajaxUrl = (window.eim_ajax && eim_ajax.ajax_url) ? eim_ajax.ajax_url : (typeof ajaxurl !== 'undefined' ? ajaxurl : '');
@@ -37,6 +43,9 @@ jQuery(document).ready(function($) {
     let progressPollInFlight = false;
     let progressCursor = 0;
     let displayedResultKeys = {};
+    let activeImportOptions = null;
+    let currentMappingPreview = null;
+    let mappingRequired = false;
 
     const maxBatchRetries = 5;
     const maxLockRetries = 12;
@@ -198,7 +207,158 @@ jQuery(document).ready(function($) {
         dropZone.addClass('is-selected');
     }
 
+    function clearColumnMapping() {
+        currentMappingPreview = null;
+        mappingRequired = false;
+        mappingFields.empty();
+        mappingStatus.text('');
+        mappingPanel.prop('hidden', true);
+        changeMappingButton.prop('hidden', true);
+        cancelMappingButton.prop('hidden', false);
+        applyMappingButton.prop('disabled', false);
+    }
+
+    function renderColumnMapping(preview, required) {
+        currentMappingPreview = preview || null;
+        mappingRequired = !!required;
+        mappingFields.empty();
+        mappingStatus.text('');
+
+        const headers = Array.isArray(preview && preview.raw_headers) ? preview.raw_headers : [];
+        const fields = Array.isArray(preview && preview.mapping_fields) ? preview.mapping_fields : [];
+        const recognized = (preview && preview.header_map) || {};
+
+        headers.forEach(function(header, index) {
+            const line = $('<div>').addClass('eim-mapping-row');
+            const label = $('<label>').addClass('eim-mapping-source')
+                .attr('for', `eim-map-${index}`)
+                .text(String(header || '(empty)'));
+            const select = $('<select>').attr('id', `eim-map-${index}`)
+                .addClass('eim-mapping-select').data('column-index', index);
+            select.append($('<option>').val('').text(t('mapping_ignore') || 'Do not import'));
+            fields.forEach(function(field) {
+                select.append($('<option>').val(field.key).text(field.label));
+            });
+            Object.keys(recognized).forEach(function(key) {
+                if (parseInt(recognized[key], 10) === index) {
+                    select.val(key);
+                }
+            });
+            line.append(label, select);
+            mappingFields.append(line);
+        });
+
+        if (mappingRequired) {
+            mappingPanel.prop('hidden', false);
+            changeMappingButton.prop('hidden', true);
+            cancelMappingButton.prop('hidden', true);
+            mappingStatus.text(t('mapping_required'));
+            startButton.prop('disabled', true);
+        } else {
+            mappingPanel.prop('hidden', true);
+            changeMappingButton.prop('hidden', false);
+            cancelMappingButton.prop('hidden', false);
+        }
+    }
+
+    function collectedColumnMapping() {
+        const mapping = {};
+        let duplicate = false;
+        mappingFields.find('select').each(function() {
+            const field = String($(this).val() || '');
+            if (!field) {
+                return;
+            }
+            if (Object.prototype.hasOwnProperty.call(mapping, field)) {
+                duplicate = true;
+                return;
+            }
+            mapping[field] = String($(this).data('column-index'));
+        });
+        if (duplicate) {
+            mappingStatus.text(t('mapping_duplicate_field'));
+            return null;
+        }
+        if (!Object.prototype.hasOwnProperty.call(mapping, 'url') &&
+            !Object.prototype.hasOwnProperty.call(mapping, 'rel_path')) {
+            mappingStatus.text(t('mapping_select_source'));
+            return null;
+        }
+        return mapping;
+    }
+
+    changeMappingButton.on('click', function() {
+        if (!currentFile || isValidating || stopButton.is(':visible')) {
+            return;
+        }
+        preflightGeneration++;
+        $('#eim-preflight-summary').empty();
+        mappingPanel.prop('hidden', false);
+        changeMappingButton.prop('hidden', true);
+        startButton.prop('disabled', true);
+    });
+
+    cancelMappingButton.on('click', function() {
+        if (mappingRequired || isValidating) {
+            return;
+        }
+        mappingPanel.prop('hidden', true);
+        changeMappingButton.prop('hidden', false);
+        renderColumnMapping(currentMappingPreview, false);
+        startButton.prop('disabled', !currentFile || totalRows <= 0);
+        requestPreflight();
+    });
+
+    applyMappingButton.on('click', function() {
+        if (!currentFile || isValidating || stopButton.is(':visible')) {
+            return;
+        }
+        const mapping = collectedColumnMapping();
+        if (!mapping) {
+            return;
+        }
+        isValidating = true;
+        mappingStatus.text(t('mapping_saving'));
+        applyMappingButton.prop('disabled', true);
+        startButton.prop('disabled', true);
+        $.ajax({
+            url: ajaxUrl,
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                action: 'eim_apply_column_mapping',
+                nonce: nonce,
+                file: currentFile,
+                mapping: mapping
+            }
+        }).done(function(response) {
+            if (!(response && response.success && response.data)) {
+                mappingStatus.text(extractAjaxError(response, t('validation_failed')));
+                return;
+            }
+            totalRows = parseInt(response.data.total_rows, 10) || 0;
+            renderPreview(response.data.preview || null);
+            renderColumnMapping(response.data.preview || {}, false);
+            mappingRequired = false;
+            startButton.prop('disabled', totalRows <= 0);
+            if (totalRows > 0) { requestPreflight(); }
+            logMessage(t('mapping_saved'), 'INFO');
+            $(document).trigger('eim:validationSuccess', [{
+                file: currentFile,
+                totalRows: totalRows,
+                preview: response.data.preview || null
+            }]);
+        }).fail(function(xhr, status, error) {
+            mappingStatus.text(extractAjaxError(xhr || null, error || status || t('server_error')));
+        }).always(function() {
+            isValidating = false;
+            applyMappingButton.prop('disabled', false);
+        });
+    });
+
     function resetPreviewUI() {
+        preflightGeneration++;
+        clearColumnMapping();
         previewContent.empty();
         previewPanel.hide();
     }
@@ -235,6 +395,7 @@ jQuery(document).ready(function($) {
         isImportStopped = false;
         isValidating = false;
         autoStartAfterValidation = false;
+        activeImportOptions = null;
 
         resetProgressTracking();
         startButton.prop('disabled', true).show();
@@ -531,12 +692,85 @@ jQuery(document).ready(function($) {
         resultSummaryContainer.empty().append(wrapper).show();
     }
 
+    // The pre-import check is read-only and limited to the first 100 CSV rows.
+    // Each request is tied to a file/mode generation to discard stale responses.
+    let preflightGeneration = 0;
+
+    function renderPreflight(data) {
+        const target = $('#eim-preflight-summary');
+        if (!target.length || !data || !data.summary) {
+            return;
+        }
+        target.empty();
+        const summary = data.summary;
+        const grid = $('<div>').addClass('eim-preview-grid');
+        grid.append(createPreviewStat(t('preflight_count'), summary.checked || 0));
+        grid.append(createPreviewStat(t('preflight_duplicates'), summary.possible_duplicates || 0));
+        grid.append(createPreviewStat(t('preflight_attention'), summary.attention || 0));
+        grid.append(createPreviewStat(t('preflight_ready'), summary.potentially_ready || 0));
+        target.append(grid);
+        if (data.sample_limited) {
+            target.append($('<p>').addClass('eim-preflight-note').text(
+                t('preflight_limit').replace('%1$s', String(summary.checked || 0)).replace('%2$s', String(data.total_rows || 0))
+            ));
+        }
+        target.append($('<p>').addClass('eim-preflight-note').text(t('preflight_note')));
+        if (Array.isArray(data.details) && data.details.length) {
+            const list = $('<ul>').addClass('eim-preview-warning-list eim-preflight-details');
+            data.details.forEach(function(item) {
+                const prefix = t('preflight_row').replace('%s', String(item.row || ''));
+                list.append($('<li>').text(prefix + ': ' + String(item.reason || '')));
+            });
+            target.append(list);
+        }
+    }
+
+    function requestPreflight() {
+        const generation = ++preflightGeneration;
+        const file = currentFile;
+        const localImport = $('#eim_local_import').is(':checked');
+        const target = $('#eim-preflight-summary');
+        if (!target.length || !file || mappingRequired || !mappingPanel.prop('hidden') || stopButton.is(':visible')) {
+            target.empty();
+            return;
+        }
+        target.empty().append($('<p>').addClass('eim-preflight-note').text(t('preflight_loading')));
+        $.ajax({
+            url: ajaxUrl,
+            method: 'POST',
+            dataType: 'json',
+            data: {action: 'eim_preview_diagnostics', nonce: nonce, file: file, local_import: localImport ? 1 : 0}
+        }).done(function(response) {
+            if (generation !== preflightGeneration || file !== currentFile ||
+                localImport !== $('#eim_local_import').is(':checked')) {
+                return;
+            }
+            if (response && response.success && response.data) {
+                renderPreflight(response.data);
+            } else {
+                target.empty().append($('<p>').addClass('eim-preflight-note').text(t('preflight_failed')));
+            }
+        }).fail(function() {
+            if (generation === preflightGeneration && file === currentFile) {
+                target.empty().append($('<p>').addClass('eim-preflight-note').text(t('preflight_failed')));
+            }
+        });
+    }
+
     function renderPreview(preview) {
         previewContent.empty();
 
         if (!preview || typeof preview !== 'object') {
             previewContent.append(
                 $('<p>').addClass('eim-preview-empty').text(t('preview_not_available'))
+            );
+            previewPanel.show();
+            return;
+        }
+
+        if (preview.mapping_required) {
+            previewContent.append(
+                $('<p>').addClass('eim-preview-warning-box').text(t('mapping_required'))
             );
             previewPanel.show();
             return;
@@ -553,6 +787,10 @@ jQuery(document).ready(function($) {
         summaryGrid.append(createPreviewStat(t('preview_rows_missing_source'), summary.rows_missing_source || 0));
         summaryGrid.append(createPreviewStat(t('preview_recommended_mode'), getModeLabel(summary.recommended_mode)));
         previewContent.append(summaryGrid);
+        const preflightSection = $('<section>').addClass('eim-preview-section eim-preflight-section');
+        preflightSection.append($('<h4>').text(t('preflight_title')));
+        preflightSection.append($('<div>').attr('id', 'eim-preflight-summary'));
+        previewContent.append(preflightSection);
 
         if (preview.recognized_columns && preview.recognized_columns.length) {
             const recognized = $('<div>').addClass('eim-preview-section');
@@ -590,6 +828,8 @@ jQuery(document).ready(function($) {
             headRow.append($('<th>').text(t('preview_column_relative')));
             headRow.append($('<th>').text(t('preview_column_title')));
             headRow.append($('<th>').text(t('preview_column_alt')));
+            const showDestination = !!(preview.header_map && Object.prototype.hasOwnProperty.call(preview.header_map, 'destination_url'));
+            if (showDestination) { headRow.append($('<th>').text(t('preview_column_destination') || 'Destination URL')); }
             thead.append(headRow);
             table.append(thead);
 
@@ -601,6 +841,7 @@ jQuery(document).ready(function($) {
                 bodyRow.append($('<td>').text(String(row.relative_path || t('preview_empty_value'))));
                 bodyRow.append($('<td>').text(String(row.title || t('preview_empty_value'))));
                 bodyRow.append($('<td>').text(String(row.alt || t('preview_empty_value'))));
+                if (showDestination) { bodyRow.append($('<td>').text(String(row.destination_url || t('preview_empty_value')))); }
                 tbody.append(bodyRow);
             });
             table.append(tbody);
@@ -710,22 +951,28 @@ jQuery(document).ready(function($) {
                 }
 
                 renderPreview(response.data.preview || null);
+                renderColumnMapping(response.data.preview || {}, !!(response.data.preview && response.data.preview.mapping_required));
+                if (!mappingRequired) { requestPreflight(); }
                 logMessage(
                     t('validation_success'),
                     'INFO',
                     `${t('file_ready')} ${totalRows}`
                 );
 
-                $(document).trigger('eim:validationSuccess', [{
-                    file: currentFile,
-                    totalRows: totalRows,
-                    preview: response.data.preview || null
-                }]);
+                if (!mappingRequired) {
+                    $(document).trigger('eim:validationSuccess', [{
+                        file: currentFile,
+                        totalRows: totalRows,
+                        preview: response.data.preview || null
+                    }]);
+                } else {
+                    $(document).trigger('eim:mappingRequired', [{ file: currentFile }]);
+                }
 
                 isValidating = false;
-                startButton.prop('disabled', false);
+                startButton.prop('disabled', mappingRequired);
 
-                if (autoStartAfterValidation) {
+                if (autoStartAfterValidation && !mappingRequired) {
                     autoStartAfterValidation = false;
                     startBatchProcess();
                 }
@@ -749,7 +996,32 @@ jQuery(document).ready(function($) {
             });
     }
 
+    function captureImportOptions() {
+        return {
+            local_import: $('#eim_local_import').is(':checked'),
+            skip_thumbnails: $('#eim_skip_thumbnails').is(':checked'),
+            honor_relative_path: $('#eim_honor_relative_path').is(':checked'),
+            allow_svg_imports: $('#eim_allow_svg_imports').is(':checked'),
+            dry_run: $('#eim_dry_run').is(':checked'),
+            duplicate_strategy: $('#eim_duplicate_strategy').length ? $('#eim_duplicate_strategy').val() : 'skip',
+            match_strategy: $('#eim_match_strategy').length ? $('#eim_match_strategy').val() : 'auto',
+            selected_update_fields: $('input[name="selected_update_fields[]"]:checked').map(function() {
+                return String($(this).val() || '');
+            }).get(),
+            pro_history_id: $('#eim_pro_history_id').length ? $('#eim_pro_history_id').val() : 0,
+            pro_job_id: $('#eim_pro_job_id').length ? $('#eim_pro_job_id').val() : 0,
+            convert_images_format: $('#eim_pro_convert_images_format').length ? $('#eim_pro_convert_images_format').val() : 'keep',
+            conversion_quality: $('#eim_pro_conversion_quality').length ? $('#eim_pro_conversion_quality').val() : 82,
+            conversion_failure_behavior: $('#eim_pro_conversion_failure_behavior').length ? $('#eim_pro_conversion_failure_behavior').val() : 'keep_original'
+        };
+    }
+
     function startBatchProcess() {
+        if (mappingRequired || mappingPanel.prop('hidden') === false) {
+            return;
+        }
+        preflightGeneration++;
+        activeImportOptions = null;
         isImportStopped = false;
         currentRow = 0;
         batchRetryCount = 0;
@@ -812,31 +1084,22 @@ jQuery(document).ready(function($) {
             rowPosition
         );
 
+        // Capture just before the first batch, after any Pro deferred setup has completed.
+        // Subsequent batches and retries must use the same options even if the form changes.
+        if (!activeImportOptions) {
+            activeImportOptions = captureImportOptions();
+        }
+
         $.ajax({
             url: ajaxUrl,
             type: 'POST',
-            data: {
+            data: $.extend({}, activeImportOptions, {
                 action: 'eim_process_batch',
                 nonce: nonce,
                 file: currentFile,
                 start_row: currentRow,
-                batch_size: batchSize,
-                local_import: $('#eim_local_import').is(':checked'),
-                skip_thumbnails: $('#eim_skip_thumbnails').is(':checked'),
-                honor_relative_path: $('#eim_honor_relative_path').is(':checked'),
-                allow_svg_imports: $('#eim_allow_svg_imports').is(':checked'),
-                dry_run: $('#eim_dry_run').is(':checked'),
-                duplicate_strategy: $('#eim_duplicate_strategy').length ? $('#eim_duplicate_strategy').val() : 'skip',
-                match_strategy: $('#eim_match_strategy').length ? $('#eim_match_strategy').val() : 'auto',
-                selected_update_fields: $('input[name="selected_update_fields[]"]:checked').map(function() {
-                    return String($(this).val() || '');
-                }).get(),
-                pro_history_id: $('#eim_pro_history_id').length ? $('#eim_pro_history_id').val() : 0,
-                pro_job_id: $('#eim_pro_job_id').length ? $('#eim_pro_job_id').val() : 0,
-                convert_images_format: $('#eim_pro_convert_images_format').length ? $('#eim_pro_convert_images_format').val() : 'keep',
-                conversion_quality: $('#eim_pro_conversion_quality').length ? $('#eim_pro_conversion_quality').val() : 82,
-                conversion_failure_behavior: $('#eim_pro_conversion_failure_behavior').length ? $('#eim_pro_conversion_failure_behavior').val() : 'keep_original'
-            },
+                batch_size: batchSize
+            }),
             dataType: 'json'
         })
             .done(function(response) {
@@ -1008,6 +1271,7 @@ jQuery(document).ready(function($) {
         currentFile = '';
         isValidating = false;
         autoStartAfterValidation = false;
+        activeImportOptions = null;
         batchRetryCount = 0;
     }
 
@@ -1084,6 +1348,10 @@ jQuery(document).ready(function($) {
         }
 
         resetFileUI();
+    });
+
+    $('#eim_local_import').on('change', function() {
+        if (!isValidating && currentFile && !mappingRequired) { requestPreflight(); }
     });
 
     downloadLogBtn.on('click', function(e) {

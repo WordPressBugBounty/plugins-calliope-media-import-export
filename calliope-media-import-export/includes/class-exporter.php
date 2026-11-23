@@ -48,6 +48,26 @@ class EIM_Exporter {
                 'label'    => __( 'Title', 'calliope-media-import-export' ),
                 'resolver' => [ __CLASS__, 'resolve_title_column' ],
             ],
+            'destination_url' => [
+                'label'    => __( 'Destination URL', 'calliope-media-import-export' ),
+                'resolver' => [ __CLASS__, 'resolve_destination_url_column' ],
+            ],
+            'mime_type' => [
+                'label'    => __( 'MIME Type', 'calliope-media-import-export' ),
+                'resolver' => [ __CLASS__, 'resolve_mime_type_column' ],
+            ],
+            'file_size' => [
+                'label'    => __( 'File Size (Bytes)', 'calliope-media-import-export' ),
+                'resolver' => [ __CLASS__, 'resolve_file_size_column' ],
+            ],
+            'width' => [
+                'label'    => __( 'Width (px)', 'calliope-media-import-export' ),
+                'resolver' => [ __CLASS__, 'resolve_width_column' ],
+            ],
+            'height' => [
+                'label'    => __( 'Height (px)', 'calliope-media-import-export' ),
+                'resolver' => [ __CLASS__, 'resolve_height_column' ],
+            ],
         ];
 
         return apply_filters( 'eim_export_column_definitions', $definitions );
@@ -126,6 +146,25 @@ class EIM_Exporter {
 
         $context     = $this->normalize_export_context( $_POST );
         $column_keys = isset( $context['column_keys'] ) ? $context['column_keys'] : null;
+
+        // An explicit custom export must contain at least one recognized column.
+        // Never silently fall back to exporting every field when all checkboxes were cleared.
+        if ( ! empty( $_POST['eim_use_custom_columns'] ) ) {
+            $defined_keys = array_keys( $this->get_column_definitions( $context ) );
+            if ( empty( $column_keys ) || ! array_intersect( $defined_keys, (array) $column_keys ) ) {
+                wp_safe_redirect(
+                    add_query_arg(
+                        [
+                            'page'       => defined( 'EIM_ADMIN_PAGE_SLUG' ) ? EIM_ADMIN_PAGE_SLUG : 'export-import-media',
+                            'eim_notice' => 'empty_columns',
+                        ],
+                        admin_url( 'admin.php' )
+                    )
+                );
+                exit;
+            }
+        }
+
         $filename    = $this->get_export_filename( $context );
 
         if ( ! $this->export_has_matching_rows( $context ) ) {
@@ -183,7 +222,10 @@ class EIM_Exporter {
             'orderby'           => $this->get_context_string( $request, 'eim_orderby', 'orderby', 'date' ),
             'order'             => strtoupper( $this->get_context_string( $request, 'eim_order', 'order', 'DESC' ) ),
             'delta_since'       => $this->get_context_string( $request, 'eim_delta_since', 'delta_since' ),
-            'column_keys'       => $this->normalize_column_keys_from_request( $request ),
+            'column_keys'       => ! empty( $request['eim_use_custom_columns'] )
+                ? ( isset( $request['eim_custom_export_columns'] ) ? $this->normalize_column_keys_value( wp_unslash( $request['eim_custom_export_columns'] ) ) : [] )
+                : $this->normalize_column_keys_from_request( $request ),
+            'include_destination_url' => ! empty( $request['eim_include_destination_url'] ) || ! empty( $request['include_destination_url'] ),
             'author_id'         => $this->get_context_absint( $request, 'eim_author_id', 'author_id' ),
             'parent_post_type'  => $this->get_context_string( $request, 'eim_parent_post_type', 'parent_post_type' ),
             'mime_subtype'      => $this->get_context_string( $request, 'eim_mime_subtype', 'mime_subtype' ),
@@ -384,7 +426,13 @@ class EIM_Exporter {
         $available   = array_keys( $definitions );
 
         if ( null === $column_keys ) {
-            $resolved = $available;
+            // Keep the historical eight-column export and any third-party columns.
+            // New technical columns (and Destination URL) are always opt-in.
+            $opt_in_keys = [ 'destination_url', 'mime_type', 'file_size', 'width', 'height' ];
+            $resolved = array_values( array_diff( $available, $opt_in_keys ) );
+            if ( ! empty( $context['include_destination_url'] ) && isset( $definitions['destination_url'] ) ) {
+                $resolved[] = 'destination_url';
+            }
         } else {
             $resolved = [];
             foreach ( (array) $column_keys as $column_key ) {
@@ -779,6 +827,39 @@ class EIM_Exporter {
 
     public static function resolve_title_column( $attachment ) {
         return (string) $attachment->post_title;
+    }
+
+    public static function resolve_destination_url_column( $attachment ) {
+        return (string) get_post_meta( $attachment->ID, '_eim_destination_url', true );
+    }
+
+    public static function resolve_mime_type_column( $attachment ) {
+        return (string) get_post_mime_type( $attachment->ID );
+    }
+
+    public static function resolve_file_size_column( $attachment ) {
+        $file = get_attached_file( $attachment->ID );
+        if ( ! is_string( $file ) || '' === $file || ! is_file( $file ) || ! is_readable( $file ) ) {
+            return '';
+        }
+
+        // The size of an original media file, not the size of its generated thumbnails.
+        $size = filesize( $file );
+        return false === $size ? '' : (string) $size;
+    }
+
+    public static function resolve_width_column( $attachment ) {
+        $metadata = wp_get_attachment_metadata( $attachment->ID );
+        return is_array( $metadata ) && isset( $metadata['width'] ) && is_numeric( $metadata['width'] )
+            ? (string) absint( $metadata['width'] )
+            : '';
+    }
+
+    public static function resolve_height_column( $attachment ) {
+        $metadata = wp_get_attachment_metadata( $attachment->ID );
+        return is_array( $metadata ) && isset( $metadata['height'] ) && is_numeric( $metadata['height'] )
+            ? (string) absint( $metadata['height'] )
+            : '';
     }
 
     public function join_parent_post_type( $join ) {

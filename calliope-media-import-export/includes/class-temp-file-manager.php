@@ -164,6 +164,54 @@ class EIM_Temp_File_Manager {
         return $meta;
     }
 
+    /**
+     * Persist an already validated user mapping before any import rows run.
+     * This is kept in the same guarded metadata file as the checkpoint.
+     */
+    public function save_import_mapping( $file_name, $meta, $mapping, $headers ) {
+        $paths = $this->get_temp_file_paths( $file_name );
+        if ( is_wp_error( $paths ) ) {
+            return $paths;
+        }
+        if ( ! is_array( $meta ) || ! is_array( $mapping ) || ! is_array( $headers ) ||
+             ! $this->filesystem->exists( $paths['csv'] ) || ! $this->filesystem->exists( $paths['meta'] ) ) {
+            return new WP_Error( 'eim_mapping_storage_invalid', 'Temporary import mapping could not be saved.' );
+        }
+
+        $meta['column_mapping'] = $mapping;
+        $meta['mapping_header_hash'] = hash( 'sha256', wp_json_encode( array_values( $headers ) ) );
+        unset( $meta['resume_row'], $meta['resume_offset'] );
+        $json = wp_json_encode( $meta );
+        if ( false === $json ) {
+            return new WP_Error( 'eim_mapping_storage_invalid', 'Temporary import mapping could not be encoded.' );
+        }
+        return $this->filesystem->put_contents( $paths['meta'], $json, 'temp_mapping_write_failed' );
+    }
+
+    /**
+     * Store a best-effort resume point after a successful AJAX batch.
+     * Missing or obsolete checkpoints are ignored by the importer.
+     */
+    public function save_import_checkpoint( $file_name, $meta, $next_row, $byte_offset ) {
+        $paths = $this->get_temp_file_paths( $file_name );
+        if ( is_wp_error( $paths ) ) {
+            return $paths;
+        }
+
+        if ( ! is_array( $meta ) || ! $this->filesystem->exists( $paths['csv'] ) ) {
+            return new WP_Error( 'eim_resume_invalid', 'Invalid CSV checkpoint.' );
+        }
+
+        $meta['resume_row']    = max( 0, absint( $next_row ) );
+        $meta['resume_offset'] = max( 0, absint( $byte_offset ) );
+        $encoded_meta         = wp_json_encode( $meta );
+        if ( false === $encoded_meta ) {
+            return new WP_Error( 'eim_resume_encode_failed', 'Could not encode CSV checkpoint.' );
+        }
+
+        return $this->filesystem->put_contents( $paths['meta'], $encoded_meta, 'temp_checkpoint_write_failed' );
+    }
+
     private function rebuild_temp_file_meta( $csv_path, $meta_path ) {
         if ( ! $this->filesystem->exists( $csv_path ) ) {
             return new WP_Error( 'eim_temp_meta_invalid', __( 'Temporary import metadata is invalid. Please upload the CSV again.', 'calliope-media-import-export' ) );
